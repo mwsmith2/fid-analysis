@@ -28,7 +28,7 @@ int main(int argc, char** argv)
   std::ofstream out;
   out.precision(10);
   out.setf(std::ios::fixed, std:: ios::floatfield);
-  out.open("ideal_freq_sweep_data.csv");
+  out.open("ideal_s2n_sweep_data.csv");
 
   // set precision
   cout.precision(10);
@@ -38,11 +38,16 @@ int main(int argc, char** argv)
   int fid_length = 10000;
   int nfids = 100;
   double ti = -1.0;
-  double dt = 0.01;
+  double dt = 0.001;
 
   double fi = 23.0;
   double ff = 23.2;
-  double df = 0.001;
+  double df = 0.01;
+
+  double phi = 0.0;
+  double s2n_i = 50.0;
+  double s2n_f = 200.0;
+  double d_s2n = 10.0;
 
   vector<double> wf;
   vector<double> tm;
@@ -57,30 +62,27 @@ int main(int argc, char** argv)
 
     cout << "Running for frequency " << f << ".\n";
 
-    for (int i = 0; i < nfids; i++){
+    for (double s2n = s2n_i; s2n <= s2n_f; s2n += d_s2n){
 
-      fid::getIdealFID(wf, tm, f);
+      for (int i = 0; i < nfids; i++){
 
-      fid::FID my_fid(wf, tm);
+          fid::getIdealFID(wf, tm, f, phi, s2n);
 
-      out << f << ", ";
-      out << my_fid.CalcZeroCountFreq() << ", ";
-      out << my_fid.CalcCentroidFreq() << ", ";
-      out << my_fid.CalcAnalyticalFreq() << ", ";
-      out << my_fid.chi2() << ", ";
-      out << my_fid.CalcLorentzianFreq() << ", ";
-      out << my_fid.chi2() << ", ";
-      out << my_fid.CalcSoftLorentzianFreq() << ", ";
-      out << my_fid.chi2() << ", ";
-      out << my_fid.CalcExponentialFreq() << ", ";
-      out << my_fid.chi2() << ", ";
-      out << my_fid.CalcPhaseFreq() << ", ";
-      out << my_fid.chi2() << ", ";
-      out << my_fid.CalcSinusoidFreq() << endl;
-      out << my_fid.chi2() << ", ";
+          fid::FID my_fid(wf, tm);
 
-    }
-  }
+          out << f << ", ";
+          out << s2n << ", ";
+          out << my_fid.CalcZeroCountFreq() << ", ";
+          out << my_fid.CalcCentroidFreq() << ", ";
+          out << my_fid.CalcAnalyticalFreq() << ", ";
+          out << my_fid.CalcLorentzianFreq() << ", ";
+          out << my_fid.CalcSoftLorentzianFreq() << ", ";
+          out << my_fid.CalcExponentialFreq() << ", ";
+          out << my_fid.CalcPhaseFreq() << ", ";
+          out << my_fid.CalcSinusoidFreq() << endl;
+      } // nfids
+    } // phi
+  } // tm
 
   out.close();
   return 0;

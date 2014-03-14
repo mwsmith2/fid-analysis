@@ -11,6 +11,7 @@ Detail: This is a new test program for my FID libraries
 
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
+#include <fstream>
 #include <vector>
 using std::vector;
 using std::cout;
@@ -38,6 +39,9 @@ int main(int argc, char** argv)
   vector<double> tm;
   wf.reserve(fid_length);
   tm.reserve(fid_length);
+
+  std::ofstream out;
+  cout << out.precision() << endl;
 
   for (int i = 0; i < fid_length; i++){
     tm.push_back(i * dt + ti);

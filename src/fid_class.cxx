@@ -222,9 +222,11 @@ namespace fid{
   void FID::FreqFit(TF1& func)
   {
     // Make a TGraph to fit
-    gr_peak_ = TGraph(freq_.size(), &freq_[0], &power_[0]);
+    gr_freq_series_ = TGraph(f_fft_ - i_fft_, &freq_[i_fft_], &power_[i_fft_]);
 
-    gr_peak_.Fit(&func, "QMNR", "", freq_[i_fft_], freq_[f_fft_]);
+    gr_freq_series_.Fit(&func, "QMRSEX0", "C", freq_[i_fft_], freq_[f_fft_]);
+
+    chi2_ = func.GetChisquare();
 
     return;
   }
@@ -311,89 +313,90 @@ namespace fid{
     std::string den1("((0.5 * [1])^2 + 2 * (x^2 - [0]^2) * (x^2 + [0]^2)");
     std::string den2(" + (x^2 - [0]^2)^2) + [3]");
 
-    TF1 f_fit = TF1("f_fit", (num1 + num2 + den1 + den2).c_str());
+    f_fit_ = TF1("f_fit_", (num1 + num2 + den1 + den2).c_str());
 
     // Set the parameter guesses
     for (int i = 0; i < 5; i++){
-      f_fit.SetParameter(i, guess_[i]);
+      f_fit_.SetParameter(i, guess_[i]);
     }
 
     // Limits
-    f_fit.SetParLimits(4, 0.0, kTau);
+    f_fit_.SetParLimits(4, 0.0, kTau);
 
-    FreqFit(f_fit);
-    return f_fit.GetParameter(0);
+    FreqFit(f_fit_);
+    return f_fit_.GetParameter(0);
   }
 
   
   double FID::CalcLorentzianFreq()
   {
     // Set the fit function
-    TF1 f_fit = TF1("f_fit", "[2] / (1 + ((x - [0]) / (0.5 * [1]))^2) + [3]");
+    f_fit_ = TF1("f_fit_", "[2] / (1 + ((x - [0]) / (0.5 * [1]))^2) + [3]");
 
     // Set the parameter guesses
     for (int i = 0; i < 4; i++){
-      f_fit.SetParameter(i, guess_[i]);
+      f_fit_.SetParameter(i, guess_[i]);
     }
 
-    FreqFit(f_fit);
-    return f_fit.GetParameter(0);
+    FreqFit(f_fit_);
+    return f_fit_.GetParameter(0);
   }
 
   double FID::CalcSoftLorentzianFreq()
   {
     // Set the fit function
-    TF1 f_fit = TF1("f_fit", 
+    f_fit_ = TF1("f_fit_", 
       "[2] / (1 + ((x - [0]) / (0.5 * [1]))^[4]) + [3]");
 
     // Set the parameter guesses
     for (int i = 0; i < 5; i++){
-      f_fit.SetParameter(i, guess_[i]);
+      f_fit_.SetParameter(i, guess_[i]);
     }
 
-    f_fit.SetParLimits(4, 1.0, 3.0);
+    f_fit_.SetParLimits(4, 1.0, 3.0);
 
-    FreqFit(f_fit);
-    return f_fit.GetParameter(0);
+    FreqFit(f_fit_);
+    return f_fit_.GetParameter(0);
   }
 
   double FID::CalcExponentialFreq()
   {
     // Set the fit function
-    TF1 f_fit = TF1("f_fit", "[2] * exp(-abs(x - [0]) / [1]) + [3]");
+    f_fit_ = TF1("f_fit_", "[2] * exp(-abs(x - [0]) / [1]) + [3]");
 
     // Set the parameter guesses
     for (int i = 0; i < 4; i++){
-      f_fit.SetParameter(i, guess_[i]);
+      f_fit_.SetParameter(i, guess_[i]);
     }
 
-    f_fit.SetParameter(1, 0.5 * guess_[1] / std::log(2));
+    f_fit_.SetParameter(1, 0.5 * guess_[1] / std::log(2));
 
-    FreqFit(f_fit);
-    return f_fit.GetParameter(0); 
+    FreqFit(f_fit_);
+    return f_fit_.GetParameter(0); 
   }
 
   double FID::CalcPhaseFreq(int n)
   {
     // 
-    TGraph gr_fit = TGraph(tm_.size(), &tm_[0], &phase_[0]);
+    gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &phase_[i_wf_]);
 
     // Now set up the polynomial phase fit
     char fcn[20];
     sprintf(fcn, "pol%d", n);
-    TF1 f_fit = TF1("f_fit", fcn);
+    f_fit_ = TF1("f_fit_", fcn);
 
     // Set the parameter guesses
-    f_fit.SetParameter(1, guess_[0] * kTau);
+    f_fit_.SetParameter(1, guess_[0] * kTau);
 
     // Adjust to ignore the edges
     int i = i_wf_ + kEdgeIgnore;
     int f = f_wf_ - kEdgeIgnore;
 
     // Do the fit.
-    gr_fit.Fit(&f_fit, "QMNR", "", tm_[i], tm_[f]);
+    gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
 
-    return f_fit.GetParameter(1) / kTau;
+    chi2_ = f_fit_.GetChisquare();
+    return f_fit_.GetParameter(1) / kTau;
   }
 
   double FID::CalcSinusoidFreq()
@@ -404,26 +407,27 @@ namespace fid{
     std::transform(wf_.begin(), wf_.end(), env_.begin(), temp_.begin(),
       [](double x_wf, double x_env) {return x_wf / x_env;});
 
-    TGraph gr_fit = TGraph(tm_.size(), &tm_[0], &temp_[0]);
+    gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &temp_[i_wf_]);    
 
-    TF1 f_fit = TF1("f_fit", "[1] * sin([0] * x + [2])");
+    f_fit_ = TF1("f_fit_", "[1] * sin([0] * x + [2])");
 
     // Set guess parameters
-    f_fit.SetParameter(0, 23.0 * kTau);
-    f_fit.SetParameter(1, 1.0);
-    f_fit.SetParameter(2, 0.0);
+    f_fit_.SetParameter(0, 23.0 * kTau);
+    f_fit_.SetParameter(1, 1.0);
+    f_fit_.SetParameter(2, phase_[i_wf_]);
 
-    f_fit.SetParLimits(1, 0.9, 1.1); // Should be exactly 1.0
-    f_fit.SetParLimits(2, -0.5 * kTau, 0.5 * kTau); // it's a phase
+    f_fit_.SetParLimits(1, 0.9, 1.1); // Should be exactly 1.0
+    f_fit_.SetParLimits(2, -0.5 * kTau, 0.5 * kTau); // it's a phase
 
     // Adjust to ignore the edges
     int i = i_wf_ + kEdgeIgnore;
     int f = f_wf_ - kEdgeIgnore;
 
     // Do the fit.
-    gr_fit.Fit("f_fit", "QMNR", "", tm_[i], tm_[f]);
+    gr_time_series_.Fit("f_fit_", "QMRSEX0", "C", tm_[i], tm_[f]);
 
-    return f_fit.GetParameter(0) / kTau;
+    chi2_ = f_fit_.GetChisquare();
+    return f_fit_.GetParameter(0) / kTau;
   }
 
 
