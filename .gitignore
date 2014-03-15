@@ -1,6 +1,8 @@
 build/*
+input
 data
+*.csv
 
 test
-ideal_fid_freq_sweep
-ideal_fid_test
+ideal_fid*
+sim_fid*
