@@ -77,6 +77,8 @@ namespace fid{
 
     // Plan and execute the FFT
     fftw_complex *fft = new fftw_complex[n];
+    fftw_complex *ffti = new fftw_complex[n];
+
     fftw_plan wf_to_fft;
     wf_to_fft = fftw_plan_dft_r2c_1d(N, &wf_[0], &fft[0], FFTW_ESTIMATE);
     fftw_execute(wf_to_fft);
@@ -86,11 +88,17 @@ namespace fid{
       power_[i] = std::pow(fft[i][0], 2) + std::pow(fft[i][1], 2);
     }
 
-    // Multiply fft by (-i) and normalize
+    // Apply low-pass Butterworth Filter
+    double df = (N - 1) / (N * (tm_[N - 1] - tm_[0]));
+    // convert cutoff frequency to fft index
+    double cutoff_index = kLowPassFreq / df;
+
+    // Apply low pass and get fft * (-i)
     for (int i = 0; i < n; i++){
-      temp = fft[i][0];
-      fft[i][0] = fft[i][1] / Nroot; 
-      fft[i][1] = -1 * temp / Nroot;
+      fft[i][0] *= LowPassFilter(i, cutoff_index, n) / Nroot;
+      fft[i][1] *= LowPassFilter(i, cutoff_index, n) / Nroot;
+      ffti[i][0] = fft[i][1];
+      ffti[i][1] = -1 * fft[i][0];
     }
 
     // Now get the Hilbert transform
@@ -144,7 +152,7 @@ namespace fid{
     // Set up an array of FFT frequencies
     // @bug This could be stored as first, last, step_size...
     int N = wf_.size();
-    double df = (N - 1) / (tm_[N - 1] - tm_[0]);
+    double df = (N - 1) / (N * (tm_[N - 1] - tm_[0]));
 
     if (N % 2 == 0){
 
@@ -152,7 +160,7 @@ namespace fid{
       freq_.resize(0);
       
       for (int i = 0; i < N / 2 + 1; i++){
-        freq_.push_back(i * df / N);
+        freq_.push_back(i * df);
       }
 
     } else {
@@ -161,7 +169,7 @@ namespace fid{
       freq_.resize(0);
 
       for (int i = 0; i < (N + 1) / 2 + 1; i++){
-        freq_.push_back(i * df / N);
+        freq_.push_back(i * df);
       }
     }
 
@@ -238,10 +246,10 @@ namespace fid{
     vector<int> sign (f_wf_ - i_wf_, 0);
     vector<int> diff (f_wf_ - i_wf_, 0);
 
-    // smooth the waveform, exponential moving average algorithm
-    double a = kZCAlpha;
-    std::partial_sum(wf_.begin() + i_wf_, wf_.begin() + f_wf_, temp_.begin(), 
-      [a](double sum, double x) {return sum * a + x * (1.0 - a);});
+    // // smooth the waveform, exponential moving average algorithm
+    // double a = kZCAlpha;
+    // std::partial_sum(wf_.begin() + i_wf_, wf_.begin() + f_wf_, temp_.begin(), 
+    //   [a](double sum, double x) {return sum * (1.0 - a) + x * a;});
 
     // get the sign
     std::transform(temp_.begin(), temp_.end(), sign.begin(),
@@ -345,8 +353,7 @@ namespace fid{
   double FID::CalcSoftLorentzianFreq()
   {
     // Set the fit function
-    f_fit_ = TF1("f_fit_", 
-      "[2] / (1 + ((x - [0]) / (0.5 * [1]))^[4]) + [3]");
+    f_fit_ = TF1("f_fit_", "[2] / (1 + ((x - [0]) / (0.5 * [1]))^[4]) + [3]");
 
     // Set the parameter guesses
     for (int i = 0; i < 5; i++){
@@ -424,7 +431,7 @@ namespace fid{
     int f = f_wf_ - kEdgeIgnore;
 
     // Do the fit.
-    gr_time_series_.Fit("f_fit_", "QMRSEX0", "C", tm_[i], tm_[f]);
+    gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
 
     chi2_ = f_fit_.GetChisquare();
     return f_fit_.GetParameter(0) / kTau;

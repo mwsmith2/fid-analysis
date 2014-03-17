@@ -11,6 +11,7 @@ Detail: This is a new test program for my FID libraries
 
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
+#include <fstream>
 #include <vector>
 using std::vector;
 using std::cout;
@@ -32,7 +33,8 @@ int main(int argc, char** argv)
   int fid_length = 10000;
   double ti = -1.0;
   double dt = 0.001;
-  double ftruth = 23.0;
+  double ftruth = 23.456789;
+  int nfids = 10000;
 
   vector<double> wf;
   vector<double> tm;
@@ -43,18 +45,27 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
 
-  fid::getIdealFID(wf, tm, ftruth);
+  std::ofstream out;
+  out.open("ideal_fid_test_data.csv");
+  out.precision(10);
+  out.setf(std::ios::fixed, std:: ios::floatfield);
 
-  fid::FID my_fid(wf, tm);
+  for (int i = 0; i < nfids; i++){
 
-  cout << my_fid.CalcZeroCountFreq() << endl;
-  cout << my_fid.CalcCentroidFreq() << endl;
-  cout << my_fid.CalcAnalyticalFreq() << endl;
-  cout << my_fid.CalcLorentzianFreq() << endl;
-  cout << my_fid.CalcSoftLorentzianFreq() << endl;
-  cout << my_fid.CalcExponentialFreq() << endl;
-  cout << my_fid.CalcPhaseFreq() << endl;
-  cout << my_fid.CalcSinusoidFreq() << endl;
+    fid::getIdealFID(wf, tm, ftruth);
+    fid::FID my_fid(wf, tm);
 
+    out << ftruth << ", ";
+    out << my_fid.CalcZeroCountFreq() << ", ";
+    out << my_fid.CalcCentroidFreq() << ", ";
+    out << my_fid.CalcAnalyticalFreq() << ", ";
+    out << my_fid.CalcLorentzianFreq() << ", ";
+    out << my_fid.CalcSoftLorentzianFreq() << ", ";
+    out << my_fid.CalcExponentialFreq() << ", ";
+    out << my_fid.CalcPhaseFreq() << ", ";
+    out << my_fid.CalcSinusoidFreq() << endl;
+  }
+  
+  out.close();
   return 0;
 }

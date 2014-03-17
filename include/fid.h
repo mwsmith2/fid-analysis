@@ -52,7 +52,7 @@ namespace fid
 	void getFIDPhase(vec& phase, vec& wf_re);
 	void getFIDEnvelope(vec& env, vec& wf_re);
 	void getIdealFID(vec& wf, vec& tm, double f=12.345678, double phi=0.0, 
-		double s2n=40.0, double tau=10.0, double t0=0.0);
+		double s2n=100.0, double tau=10.0, double t0=0.0);
 
 } // fid
 

@@ -39,7 +39,7 @@ namespace {
   double dt = 0.001;
   double dg = 10.0;
 
-  int npoints = 5;
+  int npoints = 21;
 
   // Get our root data
   TFile *pf = new TFile("input/sim_fids.root");

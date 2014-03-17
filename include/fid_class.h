@@ -48,6 +48,8 @@ namespace fid
 			double CalcSinusoidFreq();
 
 			// accessors
+			vec& wf() {return wf_;};
+			vec& tm() {return tm_;};
 			const vec& power() {return power_;};
 			const vec& freq() {return freq_;};
 			const vec& phase() {return phase_;}
@@ -65,7 +67,8 @@ namespace fid
 			const int kFitWidth = 20;
 			const int kEdgeIgnore = 10;
 			const double kStartThresh = 20.0;
-			const double kZCAlpha = 0.5;
+			const double kZCAlpha = 0.8;
+			const double kLowPassFreq = 100.0; // 100 kHz
 			const double kMaxPhaseJump = 0.7 * 2 * M_PI;
 			const double kCentroidThresh = 0.01;
 			const double kTau = 2 * M_PI;
@@ -100,6 +103,12 @@ namespace fid
 			void CalcFftFreq();
 			void GuessFitParams();
 			void FreqFit(TF1& func);
+
+			// Simple n-order Butterworth filter
+			inline double LowPassFilter(double f, double f0, int n){
+				double denom = 1.0 + pow(f / f0, 2 * n);
+				return sqrt(1.0 / denom);
+			}
 
 			// Questionable fnctions
 			void GetFftPower(vec& power, vec& wf);

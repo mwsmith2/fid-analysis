@@ -558,7 +558,7 @@ namespace fid
 
 		// Add some noise
 		static std::default_random_engine gen(0);
-		static std::normal_distribution<double> norm(0.0, 1.0 / s2n);
+		std::normal_distribution<double> norm(0.0, 1.0 / s2n);
 		for (auto it = wf.begin(); it != wf.end(); it++){
 			*it += norm(gen);
 		}

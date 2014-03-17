@@ -12,15 +12,18 @@ Detail: This is a new test program for my FID libraries
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <vector>
 using std::vector;
 using std::cout;
 using std::endl;
+using std::string;
 
 
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
 #include "fid_class.h"
+#include "fid_utilities.h"
 
 
 int main(int argc, char** argv)
@@ -36,13 +39,13 @@ int main(int argc, char** argv)
 
   // declare variables
   int fid_length = 10000;
-  int nfids = 100;
+  int nfids = 1000;
   double ti = -1.0;
   double dt = 0.001;
 
   double fi = 23.0;
   double ff = 23.2;
-  double df = 0.01;
+  double df = 0.002;
 
   double phi = 0.0;
   double s2n_i = 50.0;
@@ -58,6 +61,9 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
 
+  string title("FID Testing Signal-to-Noise");
+  string filestub("signal2noise_test_");
+
   for (double f = fi; f <= ff; f += df){
 
     cout << "Running for frequency " << f << ".\n";
@@ -69,6 +75,13 @@ int main(int argc, char** argv)
           fid::getIdealFID(wf, tm, f, phi, s2n);
 
           fid::FID my_fid(wf, tm);
+
+          if (0){
+            string fname(filestub);
+            fname.append(std::to_string((int)s2n));
+            fname.append(".pdf");
+            fid::DrawFID(my_fid, fname, title);
+          }
 
           out << f << ", ";
           out << s2n << ", ";

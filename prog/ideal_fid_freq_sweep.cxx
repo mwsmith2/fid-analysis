@@ -4,7 +4,7 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   11/02/14
 
-Detail: This is a new test program for my FID libraries 
+Detail: This program
 
 \*===========================================================================*/
 
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 
   // declare variables
   int fid_length = 10000;
-  int nfids = 100;
+  int nfids = 1000;
   double ti = -1.0;
   double dt = 0.01;
 
@@ -65,7 +65,9 @@ int main(int argc, char** argv)
 
       out << f << ", ";
       out << my_fid.CalcZeroCountFreq() << ", ";
+      out << 0.0 << ", ";
       out << my_fid.CalcCentroidFreq() << ", ";
+      out << 0.0 << ", ";
       out << my_fid.CalcAnalyticalFreq() << ", ";
       out << my_fid.chi2() << ", ";
       out << my_fid.CalcLorentzianFreq() << ", ";
@@ -76,8 +78,8 @@ int main(int argc, char** argv)
       out << my_fid.chi2() << ", ";
       out << my_fid.CalcPhaseFreq() << ", ";
       out << my_fid.chi2() << ", ";
-      out << my_fid.CalcSinusoidFreq() << endl;
-      out << my_fid.chi2() << ", ";
+      out << my_fid.CalcSinusoidFreq() << ", ";
+      out << my_fid.chi2() << endl;
 
     }
   }
