@@ -21,7 +21,7 @@ build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $< $(LIBS)
 
 %: prog/%.cxx $(OBJECTS)
-	$(CXX) $(FLAGS) -o $@ $+ $(LIBS)
+	$(CXX) $(FLAGS) -o build/$@ $+ $(LIBS)
 
 clean:
 	rm -f $(TARGETS) build/* 

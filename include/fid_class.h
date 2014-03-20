@@ -55,9 +55,9 @@ namespace fid
 			const vec& phase() {return phase_;}
 			const vec& env() {return env_;};
 			const double& chi2() {return chi2_;};
-			TGraph& gr_time_series() {return gr_time_series_;};
-			TGraph& gr_freq_series() {return gr_freq_series_;};
-			TF1&    f_fit() {return f_fit_;};
+			const TGraph& gr_time_series() {return gr_time_series_;};
+			const TGraph& gr_freq_series() {return gr_freq_series_;};
+			const TF1&    f_fit() {return f_fit_;};
 
 		private:
 
@@ -72,6 +72,7 @@ namespace fid
 			const double kMaxPhaseJump = 0.7 * 2 * M_PI;
 			const double kCentroidThresh = 0.01;
 			const double kTau = 2 * M_PI;
+			const double kHystThresh = 0.3;
 
 			// mutable variables
 			int i_wf_; // start and stop of relevant data

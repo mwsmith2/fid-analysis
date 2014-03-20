@@ -95,19 +95,28 @@ namespace fid{
 
     // Apply low pass and get fft * (-i)
     for (int i = 0; i < n; i++){
-      fft[i][0] *= LowPassFilter(i, cutoff_index, n) / Nroot;
-      fft[i][1] *= LowPassFilter(i, cutoff_index, n) / Nroot;
+      fft[i][0] *= 1.0 / Nroot; //LowPassFilter(i, cutoff_index, 2) / Nroot;
+      fft[i][1] *= 1.0 / Nroot; //LowPassFilter(i, cutoff_index, 2) / Nroot;
       ffti[i][0] = fft[i][1];
       ffti[i][1] = -1 * fft[i][0];
     }
 
-    // Now get the Hilbert transform
+    // Now get the denoised waveform
     fftw_plan fft_to_wf;
-    fft_to_wf = fftw_plan_dft_c2r_1d(N, &fft[0], &wf_im[0], FFTW_ESTIMATE);
+    fft_to_wf = fftw_plan_dft_c2r_1d(N, &fft[0], &wf_[0], FFTW_ESTIMATE);
     fftw_execute(fft_to_wf);
+
+    // Now get the Hilbert transform
+    fftw_plan fft_to_wf_im;
+    fft_to_wf_im = fftw_plan_dft_c2r_1d(N, &ffti[0], &wf_im[0], FFTW_ESTIMATE);
+    fftw_execute(fft_to_wf_im);
 
     // fftw is unnormalized fft, so rescale
     for (auto it = wf_im.begin(); it != wf_im.end(); it++){
+      *it /= Nroot;
+    }
+
+    for (auto it = wf_.begin(); it != wf_.end(); it++){
       *it /= Nroot;
     }
 
@@ -144,8 +153,10 @@ namespace fid{
 
     // Clean up
     delete[] fft;
+    delete[] ffti;
     fftw_destroy_plan(wf_to_fft);
     fftw_destroy_plan(fft_to_wf);
+    fftw_destroy_plan(fft_to_wf_im);
   }
 
   void FID::CalcFftFreq(){
@@ -243,35 +254,39 @@ namespace fid{
   {
     // set up vectors to hold relevant stuff about the important part
     temp_.resize(f_wf_ - i_wf_);
-    vector<int> sign (f_wf_ - i_wf_, 0);
-    vector<int> diff (f_wf_ - i_wf_, 0);
 
-    // // smooth the waveform, exponential moving average algorithm
-    // double a = kZCAlpha;
-    // std::partial_sum(wf_.begin() + i_wf_, wf_.begin() + f_wf_, temp_.begin(), 
-    //   [a](double sum, double x) {return sum * (1.0 - a) + x * a;});
+    int nzeros = 0;
+    bool pos = wf_[i_wf_] >= 0;
+    bool hyst = false;
+    double max = *std::max_element(wf_.begin(), wf_.end(), 
+      [](double largest, double x) {return largest < std::abs(x);});
+    double thresh = kHystThresh * max;
 
-    // get the sign
-    std::transform(temp_.begin(), temp_.end(), sign.begin(),
-      [](double x) {return x >= 0.0 ? 1 : -1;});
+    int i_zero = -1;
+    int f_zero = -1;
 
-    // Find out when the sign changes
-    std::adjacent_difference(sign.begin(), sign.end(), diff.begin());
+    // iterate over vector
+    for (int i = i_wf_; i < (f_wf_ - i_wf_); i++){
 
-    // Count the sign changes
-    int zeros = std::count_if(diff.begin() + 1, diff.end(), 
-      [](int x) {return x != 0;});
+      // hysteresis check
+      if (hyst){
+        hyst = std::abs(wf_[i]) > thresh;
+        continue;
+      }
+
+      // check for a sign change
+      if ((wf_[i] >= 0) != pos){
+        nzeros++;
+        f_zero = i;
+        if (i_zero == -1) i_zero = i;
+        pos = !pos;
+        hyst = true;
+      }
+    }
 
     // Use linear interpolation to find the zeros more accurately
-    auto it_i = std::find_if(diff.begin() + 1, diff.end(),
-      [](int x) {return x != 0;});
-
-    auto it_f = std::find_if(diff.rbegin(), diff.rend(),
-      [](int x) {return x != 0;});
-
-    // convert iterators to indices
-    int i = i_wf_ + std::distance(diff.begin(), it_i) - 1;
-    int f = i_wf_ + std::distance(it_f, diff.rend()) - 1;
+    int i = i_zero;
+    int f = f_zero;
 
     // do the interpolation
     double frac = std::abs(wf_[i] / (wf_[i-1] - wf_[i]));
@@ -280,7 +295,7 @@ namespace fid{
     frac = std::abs(wf_[f] / (wf_[f-1] - wf_[f]));
     double tf = frac * tm_[f-1] + (1.0 - frac) * tm_[f];
 
-    return 0.5 * (zeros - 1) / (tf - ti);
+    return 0.5 * (nzeros - 1) / (tf - ti);
   }
 
   double FID::CalcCentroidFreq()

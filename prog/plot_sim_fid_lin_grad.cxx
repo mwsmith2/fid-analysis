@@ -4,10 +4,11 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   11/02/14
 
-File:   prog/sim_fid_lin_grad.cxx
-Detail: The program tests the effects of linear gradients on frequency extraction from free induction decays.  The waveforms are simulated.
+Detail: The program should plot the unwrapped phase, the linear phase fit, and
+the residuals for each gradient strength.  It print the figures to the current
+directory.
 
-\*===========================================================================*/
+\*==========================================================================*/
 
 
 //--- std includes ----------------------------------------------------------//
@@ -25,6 +26,8 @@ using std::endl;
 //-- other includes ---------------------------------------------------------//
 #include "TFile.h"
 #include "TTree.h"
+#include "TCanvas.h"
+#include "TGraph.h"
 
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
@@ -34,15 +37,19 @@ using std::endl;
 namespace {
   // declare variables
   int fid_length = 10000;
+  int nfids = 1000;
   double ti = -1.0;
-  double dt = 0.001;
+  double dt = 0.01;
 
-  int nfids = 500;
-  int npoints = 21;
-
+  // gradient loop
   double gmin = 0.0;
   double gmax = 200.0;
-  double dg = 50.0;
+  double dg = 10.0;
+
+  int npoints = 21;
+
+  int fig_w = 1200;
+  int fig_h = 900;
 
   // Get our root data
   TFile *pf = new TFile("input/sim_fids.root");
@@ -57,7 +64,7 @@ void ConstructGradient(int npoints, vector<double> &grad);
 void ConstructFID(vector<double> &grad, vector<double> &wf);
 
 inline int GetTreeIndex(double grad_strength){
-  return (int)(std::nearbyint(grad_strength / 0.1 + 5000) + 0.5);
+  return (int)(std::nearbyint(grad_strength / (0.1) + 5000) + 0.5);
 }
 
 // Implement main function
@@ -67,16 +74,16 @@ int main(int argc, char** argv)
   cout.precision(10);
   cout.setf(std::ios::fixed, std:: ios::floatfield);
 
-  // Declare objects
-  std::ofstream out;
-  out.precision(10);
-  out.setf(std::ios::fixed, std:: ios::floatfield);
-  out.open("output/quad_grad_data.csv");
-
   vector<double> wf;
   vector<double> tm;
+  vector<double> phase;
+  vector<double> fit;
+  vector<double> res;
   wf.reserve(fid_length);
   tm.reserve(fid_length);
+  phase.reserve(fid_length);
+  fit.reserve(fid_length);
+  res.reserve(fid_length);
   
   SetTimeVector(fid_length, ti, dt, tm);
 
@@ -92,41 +99,58 @@ int main(int argc, char** argv)
   }
 
   // root stuff
-
   my_fid.resize(fid_length);
   pt->SetBranchAddress("fid", &::my_fid[0]);
   pt->GetEntry(0);
+  TCanvas c1("c1", "", fig_w, fig_h);
 
   for (auto val : grad_strengths){
 
+    // Construct the gradient
     for (int i = 0; i < grad_norm.size(); i++){
       gradient[i] = val * grad_norm[i];
     }
 
-    cout << "Running for gradient strength " << val << " ppm.\n";
+    ConstructFID(gradient, wf);
+    AddWhiteNoise(wf);
 
-    for (int i = 0; i < nfids; i++){
+    fid::FID my_fid(wf, tm);
+    my_fid.CalcPhaseFreq();
 
-        ConstructFID(gradient, wf);
-        AddWhiteNoise(wf);
+    // Get the phase
+    phase = my_fid.phase();
+    cout << phase.size() << ", " << tm.size() << endl;
+    TGraph gr_phs(phase.size(), &tm[0], &phase[0]);
 
-        fid::FID my_fid(wf, tm);
+    // Get the phase fit
+    TF1 fit_func(my_fid.f_fit());
 
-        out << val << ", ";
-        out << my_fid.CalcZeroCountFreq() << ", ";
-        out << my_fid.CalcCentroidFreq() << ", ";
-        out << my_fid.CalcAnalyticalFreq() << ", ";
-        out << my_fid.CalcLorentzianFreq() << ", ";
-        out << my_fid.CalcSoftLorentzianFreq() << ", ";
-        out << my_fid.CalcExponentialFreq() << ", ";
-        out << my_fid.CalcPhaseFreq() << ", ";
-        out << my_fid.CalcSinusoidFreq() << endl;
+    fit.resize(0);
+    for (auto t : tm){
+      fit.push_back(fit_func.Eval(t));
     }
-  }
 
-  out.close();
+    TGraph gr_fit(fit.size(), &tm[0], &fit[0]);
+
+    res.resize(phase.size());
+    std::transform(phase.begin(), phase.end(), fit.begin(), res.begin(),
+      [](double x1, double x2) {return x1 - x2;});
+
+    TGraph gr_res(res.size(), &tm[0], &res[0]);
+
+    gr_phs.Draw();
+    c1.Print("test1.pdf");
+    gr_fit.Draw();
+    c1.Print("test2.pdf");
+    gr_res.Draw();
+    c1.Print("test3.pdf");
+
+  } // grad_strengths
+
+  // clean up
   pf->Close();
   delete pf;
+
   return 0;
 }
 
@@ -165,7 +189,7 @@ void ConstructGradient(int npoints, vector<double> &grad)
 
   // first get the spacing right
   for (int i = 0; i < npoints; i++){
-    grad.push_back((double)i * i);
+    grad.push_back((double)i);
   }
 
   // subtract off the average

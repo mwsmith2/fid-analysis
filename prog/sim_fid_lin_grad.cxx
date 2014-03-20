@@ -34,12 +34,15 @@ using std::endl;
 namespace {
   // declare variables
   int fid_length = 10000;
-  int nfids = 1000;
   double ti = -1.0;
   double dt = 0.001;
-  double dg = 10.0;
 
+  int nfids = 500;
   int npoints = 21;
+
+  double gmin = 0.0;
+  double gmax = 200.0;
+  double dg = 50.0;
 
   // Get our root data
   TFile *pf = new TFile("input/sim_fids.root");
@@ -68,7 +71,7 @@ int main(int argc, char** argv)
   std::ofstream out;
   out.precision(10);
   out.setf(std::ios::fixed, std:: ios::floatfield);
-  out.open("lin_grad_data.csv");
+  out.open("output/lin_grad_data.csv");
 
   vector<double> wf;
   vector<double> tm;

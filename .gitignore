@@ -1,8 +1,10 @@
 build/*
 input
+output
 data
 *.csv
 
 test
 ideal_fid*
 sim_fid*
+plot_*
