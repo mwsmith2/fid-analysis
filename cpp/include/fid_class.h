@@ -69,7 +69,7 @@ namespace fid
 			const double kStartThresh = 20.0;
 			const double kZCAlpha = 0.8;
 			const double kLowPassFreq = 100.0; // 100 kHz
-			const double kMaxPhaseJump = 0.7 * 2 * M_PI;
+			const double kMaxPhaseJump = 0.3 * 2 * M_PI;
 			const double kCentroidThresh = 0.01;
 			const double kTau = 2 * M_PI;
 			const double kHystThresh = 0.3;
@@ -97,7 +97,7 @@ namespace fid
 			vec freq_;
 			vec temp_; // for random transformations
 
-			// utility functions
+			// internal utility functions
 			void CalcNoise();			
 			void FindFidRange();
 			void CalcPowerEnvAndPhase();

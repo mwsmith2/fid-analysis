@@ -4,6 +4,7 @@
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
 #include <vector>
+#include <random>
 using std::vector;
 using std::string;
 
@@ -23,6 +24,13 @@ namespace fid{
     const string title, const string filename);
 
   void DrawFID(fid::FID &my_fid, const string title, const string filename);
+
+  // Declare methods
+  void AddWhiteNoise(vec &wf, double s2n=100.0);
+  void ConstructTimeVector(int ntimes, double t0, double dt, vec &tm);
+  void ConstructLinearGradient(int npoints, vec &grad);
+  void ConstructQuadraticGradient(int npoints, vec &grad);
+//  void ConstructGradientFID(vec &grad, vec &wf);
 
 } // fid
 

@@ -1,8 +1,8 @@
 build/*
-input
-output
 data
+doc
 *.csv
+python/*.pyc
 
 test
 ideal_fid*
