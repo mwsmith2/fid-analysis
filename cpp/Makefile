@@ -12,16 +12,19 @@ LIBS = -lfftw3 -lm
 
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)
+ARFLAGS = rvs 
+LIBNAME = lib/libFid.a
 
 CXX = clang++
+AR = ar
 
 all:
 
 build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $< $(LIBS)
 
-%: prog/%.cxx $(OBJECTS)
-	$(CXX) $(FLAGS) -o build/$@ $+ $(LIBS)
+lib: $(OBJECTS)
+	$(AR) $(ARFLAGS) $(LIBNAME) $+
 
 clean:
 	rm -f $(TARGETS) build/* 
