@@ -2,13 +2,13 @@
 
 namespace fid {
 
-  void ConstructTimeVector(int ntimes, double t0, double dt, vec &tm)
+  void ConstructTimeVector(int num_times, double t0, double dt, vec &tm)
   {
-    if (tm.size() != ntimes){
-      tm.resize(ntimes);
+    if (tm.size() != num_times){
+      tm.resize(num_times);
     }
 
-    for (int i = 0; i < ntimes; i++){
+    for (int i = 0; i < num_times; i++){
       tm[i] = dt * i + t0;
     }
 
@@ -16,12 +16,12 @@ namespace fid {
   }
 
 
-  void ConstructQuadraticGradient(int npoints, vec &grad)
+  void ConstructQuadraticGradient(int num_points, vec &grad)
   {
     // construct a normalize linear gradient
 
     // first get the spacing right
-    for (int i = 0; i < npoints; i++){
+    for (int i = 0; i < num_points; i++){
       grad.push_back((double)i * i);
     }
 
@@ -41,12 +41,12 @@ namespace fid {
   }
 
 
-  void ConstructLinearGradient(int npoints, vec &grad)
+  void ConstructLinearGradient(int num_points, vec &grad)
   {
     // construct a normalize linear gradient
 
     // first get the spacing right
-    for (int i = 0; i < npoints; i++){
+    for (int i = 0; i < num_points; i++){
       grad.push_back((double)i * i);
     }
 
@@ -64,24 +64,6 @@ namespace fid {
 
     return;
   }
-
-
-  // void ConstructGradientFID(vec &grad, vec &wf)
-  // {
-  //   // Find the appropriate FIDs and sum them
-  //   wf.assign(params::fid_length, 0.0);
-
-  //   for (auto val : grad){
-
-  //     pt->GetEntry(GetTreeIndex(val));
-
-  //     for (int i = 0; i < wf.size(); i++){
-  //       wf[i] += my_fid[i] / grad.size();
-  //     }
-  //   }
-
-  //   return;
-  // }
 
 
   void DrawFID(const vec &wf, 

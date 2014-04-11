@@ -1,5 +1,4 @@
 # Grab the targets and sources as two batches
-TARGETS = $(patsubst prog/%.cxx,%,$(wildcard prog/*.cxx))
 SOURCES = $(wildcard src/*.cxx)
 HEADERS = $(SOURCES:.cxx=.hh)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))

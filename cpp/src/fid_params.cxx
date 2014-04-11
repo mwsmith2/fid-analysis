@@ -42,7 +42,7 @@ namespace sim {
 
   int num_points;
   int reduction;
-  int num_steps;
+  vec spin_0;
 
   double d_bfield;
   double dt_integration;
@@ -75,6 +75,7 @@ namespace params {
 void load_params(int argc, char **argv)
 {
   // using directives
+  using boost::property_tree::ptree;
   using namespace sweep;
   using namespace sim;
   using namespace params;
@@ -119,8 +120,10 @@ void load_params(int argc, char **argv)
 
   // sim parameters
   num_points = pt.get<int>("sim.num_points");
-  num_steps = pt.get<int>("sim.num_steps");
   reduction = pt.get<int>("sim.reduction");
+  BOOST_FOREACH(ptree::value_type &v, pt.get_child("sim.spin_0")){
+    spin_0.push_back(v.second.get_value<double>());
+  }
 
   d_bfield = pt.get<double>("sim.d_bfield");
   dt_integration = pt.get<double>("sim.dt_integration");
@@ -162,40 +165,56 @@ void load_params(int argc, char **argv)
   // sweep parameters
   freq_sweep = pt.get<bool>("sweep.freq_sweep", freq_sweep);
   try {
+    vec tmp;
     BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.freq_range")){
-      freq_range.push_back(v.second.get_value<double>());
+      tmp.push_back(v.second.get_value<double>());
     }
+    freq_range = tmp;
   }
   catch (boost::property_tree::ptree_bad_path){};
 
   phase_sweep = pt.get<bool>("sweep.phase_sweep");
   try {
+    vec tmp;
     BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.phase_range")){
-      phase_range.push_back(v.second.get_value<double>());
+      tmp.push_back(v.second.get_value<double>());
     }
+    phase_range = tmp;
   }
   catch (boost::property_tree::ptree_bad_path){};
 
   grad_sweep = pt.get<bool>("sweep.grad_sweep");
   try {
+    vec tmp;
     BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.grad_range")){
-      grad_range.push_back(v.second.get_value<double>());
+      tmp.push_back(v.second.get_value<double>());
     }
+    grad_range = tmp;
   }
   catch (boost::property_tree::ptree_bad_path){};
 
   snr_sweep = pt.get<bool>("sweep.snr_sweep");
   try {
+    vec tmp;
     BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.snr_range")){
-      snr_range.push_back(v.second.get_value<double>());
+      tmp.push_back(v.second.get_value<double>());
     }
+    snr_range = tmp;
   }
   catch (boost::property_tree::ptree_bad_path){};
 
   // sim parameters
   num_points = pt.get<int>("sim.num_points", num_points);
-  num_steps = pt.get<int>("sim.num_steps", num_steps);
   reduction = pt.get<int>("sim.reduction", reduction);
+
+  try {
+    vec tmp;
+    BOOST_FOREACH(ptree::value_type &v, pt.get_child("sim.spin_0")){
+      tmp.push_back(v.second.get_value<double>());
+    }
+    spin_0 = tmp;
+  }
+  catch (boost::property_tree::ptree_bad_path){};
 
   d_bfield = pt.get<double>("sim.d_bfield", d_bfield);
   dt_integration = pt.get<double>("sim.dt_integration", dt_integration);

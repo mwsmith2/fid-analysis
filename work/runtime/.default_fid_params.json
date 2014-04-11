@@ -63,7 +63,12 @@
 			"gamma_1":0.05,
 			"gamma_2":0.05,
 			"freq_larmor":997.0,
-			"freq_ref":950.0
+			"freq_ref":950.0,
+			"spin_0":[
+				0.0,
+				0.0,
+				1.0
+			]
 		},
 
 		"params":{
