@@ -1,6 +1,6 @@
 #include "fid_class.h"
 
-namespace fid{
+namespace fid {
 
   FID::FID(const vec& wf, const vec& tm)
   {
@@ -19,20 +19,15 @@ namespace fid{
     GuessFitParams();
   }
 
-  FID::~FID(){
-    // TODO
-  }
-
-    
   void FID::CalcNoise(){
     // Find the noise level
-
-    double noise = std::accumulate(wf_.begin(), wf_.begin() + kZCWidth, 0.0, 
+    int w = params::zc_width;
+    double noise = std::accumulate(wf_.begin(), wf_.begin() + w, 0.0, 
                     [](double x, double y) {return x + y * y;}); 
-    double temp = std::accumulate(wf_.rbegin(), wf_.rbegin() + kZCWidth, 0.0,
+    double temp = std::accumulate(wf_.rbegin(), wf_.rbegin() + w, 0.0,
                     [](double x, double y) {return x + y * y;});
 
-    noise = (temp < noise) ? (temp / kZCWidth) : (noise / kZCWidth);
+    noise = (temp < noise) ? (temp / w) : (noise / w);
 
     // Set the member noise
     noise_ = std::pow(noise, 0.5); // Want the RMS
@@ -42,7 +37,7 @@ namespace fid{
   void FID::FindFidRange(){
     // Find the starting and ending points
 
-    double thresh = kStartThresh * noise_;
+    double thresh = params::start_thresh * noise_;
 
     // Find the first element with magnitude larger than thresh
     auto it_i = std::find_if(wf_.begin(), wf_.end(), 
@@ -91,7 +86,7 @@ namespace fid{
     // Apply low-pass Butterworth Filter
     double df = (N - 1) / (N * (tm_[N - 1] - tm_[0]));
     // convert cutoff frequency to fft index
-    double cutoff_index = kLowPassFreq / df;
+    double cutoff_index = params::low_pass_freq / df;
 
     // Apply low pass and get fft * (-i)
     for (int i = 0; i < n; i++){
@@ -131,7 +126,7 @@ namespace fid{
       [](double re, double im) {return std::atan2(im, re);});
 
     // Now unwrap the phase
-    double thresh = kMaxPhaseJump;
+    double thresh = params::max_phase_jump;
     for (auto it = phase_.begin() + i_wf_ + 1; it != phase_.end(); it++){
       static int k;
       if (it == phase_.begin() + i_wf_ + 1) k = 0; // reset
@@ -199,10 +194,10 @@ namespace fid{
     int max_idx = std::distance(power_.begin(),
       std::max_element(power_.begin(), power_.end()));
 
-    i_fft_ = max_idx - kFitWidth;
+    i_fft_ = max_idx - params::fit_width;
     if (i_fft_ < 0) i_fft_ = 0;
 
-    f_fft_ = max_idx + kFitWidth;
+    f_fft_ = max_idx + params::fit_width;
     if (f_fft_ > power_.size()) f_fft_ = power_.size();
 
     auto it_pi = power_.begin() + i_fft_; // to shorten subsequent lines
@@ -260,7 +255,7 @@ namespace fid{
     bool hyst = false;
     double max = *std::max_element(wf_.begin(), wf_.end(), 
       [](double largest, double x) {return largest < std::abs(x);});
-    double thresh = kHystThresh * max;
+    double thresh = params::hyst_thresh * max;
 
     int i_zero = -1;
     int f_zero = -1;
@@ -302,7 +297,7 @@ namespace fid{
   {
     // Find the peak power
     double thresh = *std::max_element(power_.begin(), power_.end());
-    thresh *= kCentroidThresh;
+    thresh *= params::centroid_thresh;
 
     // Find the indices for a window around the max
     int it_i = std::distance(power_.begin(), 
@@ -411,8 +406,8 @@ namespace fid{
     f_fit_.SetParameter(1, guess_[0] * kTau);
 
     // Adjust to ignore the edges
-    int i = i_wf_ + kEdgeIgnore;
-    int f = f_wf_ - kEdgeIgnore;
+    int i = i_wf_ + params::edge_ignore;
+    int f = f_wf_ - params::edge_ignore;
 
     // Do the fit.
     gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
@@ -442,8 +437,8 @@ namespace fid{
     f_fit_.SetParLimits(2, -0.5 * kTau, 0.5 * kTau); // it's a phase
 
     // Adjust to ignore the edges
-    int i = i_wf_ + kEdgeIgnore;
-    int f = f_wf_ - kEdgeIgnore;
+    int i = i_wf_ + params::edge_ignore;
+    int f = f_wf_ - params::edge_ignore;
 
     // Do the fit.
     gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);

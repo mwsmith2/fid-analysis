@@ -1,5 +1,4 @@
 # Grab the targets and sources as two batches
-TARGETS = $(patsubst src/%.cxx,%,$(wildcard src/*.cxx))
 SOURCES = $(wildcard src/*.cxx)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
@@ -17,10 +16,10 @@ CXX = clang++
 all:
 
 build/%.o: src/%.cxx
-	$(CXX) $(FLAGS) -o $@ -c $< #$(LIBS)
+	$(CXX) $(FLAGS) -o $@ -c $< 
 
 %: build/%.o
 	$(CXX) $(FLAGS) -o build/$@ $+ $(LIBS)
 
 clean:
-	rm -f $(TARGETS) build/* 
+	rm -f build/* 

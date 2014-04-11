@@ -126,9 +126,9 @@ namespace fid {
   }
 
 
-  void AddWhiteNoise(vec &wf, double s2n){
+  void AddWhiteNoise(vec &wf, double snr){
     static std::default_random_engine gen;
-    static std::normal_distribution<double> nrm(0.0, s2n);
+    static std::normal_distribution<double> nrm(0.0, snr);
 
     double max = *std::max_element(wf.begin(), wf.end());
     double min = *std::min_element(wf.begin(), wf.end());

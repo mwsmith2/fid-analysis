@@ -1,78 +1,104 @@
-#ifndef __FID_PARAMS_H__
-#define __FID_PARAMS_H__
+#ifndef FID_ANALYSIS_INCLUDE_FID_PARAMS_H_
+#define FID_ANALYSIS_INCLUDE_FID_PARAMS_H_
 
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
-#include <iomanip>
-#include <fstream>
+#include <string>
 #include <vector>
-//#include <cmath>
-using std::cout;
-using std::vector;
-using std::endl;
+#include <cmath>
+
+//--- other includes --------------------------------------------------------//
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
 namespace fid {
 
-  // parameter namespace
-  namespace params {
+// using directives
+using std::cout;
+using std::vector;
+using std::endl;
+using std::string;
+using boost::property_tree::ptree;
 
-    // per configuration statistics
-    int n_fids = 1000;
+// typedefs
+typedef vector<double> vec;
 
-    // default parameters (s_ for single)
-    double s_freq = 23.456789;
-    double s_phi  = 0.0;
-    double s_grad = 0.0;
-    double s_s2n  = 100.0;
+// constants
+const double kTau = 2 * M_PI;
 
-    // time vector variables
-    int fid_length = 10000;
-    double i_time = -1.0;
-    double d_time = 0.001;
+// per configuration statistics
+extern int num_fids;
+extern int len_fids;
 
-    // freqeuency sweep
-    double i_freq = 23.0;
-    double f_freq = 23.2;
-    double d_freq = 0.001;
+// time vector variables
+extern double i_time;
+extern double d_time;
 
-    // phase sweep
-    int n_phi = 10;
-    double i_phi = 0.0;
-    double f_phi = 2 * M_PI;
-    double d_phi = (f_phi - i_phi) / (n_phi - 1);
+// default parameters
+extern double s_freq;
+extern double s_phase;
+extern double s_grad;
+extern double s_snr;
 
-    // gradient sweep
-    double i_grad = 0.0;
-    double f_grad = 250.0;
-    double d_grad = 10.0;
+// sweep parameters
+namespace sweep {
 
-    // signal-to-noise sweep
-    double i_s2n = 50.0;
-    double f_s2n = 300.0;
-    double d_s2n = 10.0;
+  // freqeuency sweep
+  extern bool freq_sweep;
+  extern vec  freq_range;
 
-    // data vectors
-    vector<double> wf;
-    vector<double> tm;
-    
-    // output stream
-    std::ofstream out;
+  // phase sweep
+  extern bool phase_sweep;
+  extern vec  phase_range;
 
-    // necessary initalizations
-    inline void init_params(){
+  // gradient sweep
+  extern bool grad_sweep;
+  extern vec  grad_range;
 
-      wf.reserve(fid_length);
-      tm.reserve(fid_length);
+  // signal-to-noise ratio sweep
+  extern bool snr_sweep;
+  extern vec  snr_range;
 
-      // set precision for output streams
-      cout.precision(10);
-      cout.setf(std::ios::fixed, std::ios::floatfield);
+} // ::sweep
 
-      std::ofstream out;
-      out.precision(10);
-      out.setf(std::ios::fixed, std::ios::floatfield);
-    }
-  } // ::params
+// simulation parameters
+namespace sim {
+
+  extern int num_points;
+  extern int reduction;
+  extern int num_steps;
+
+  extern double d_bfield;
+  extern double dt_integration;
+
+  extern double omega_r;
+  extern double t_pulse;
+  extern double gamma_g;
+  extern double gamma_1;
+  extern double gamma_2;
+  extern double freq_ref;
+  extern double freq_larmor;
+
+} // ::sim
+
+// general fid analysis params
+namespace params {
+
+  extern int fit_width;
+  extern int zc_width;
+  extern int edge_ignore;
+  extern double start_thresh;
+  extern double zc_alpha;
+  extern double max_phase_jump;
+  extern double low_pass_freq;
+  extern double centroid_thresh;
+  extern double hyst_thresh;
+
+} // ::params
+
+void load_params(int argc, char **argv);
+
 } // ::fid
 
 #endif
