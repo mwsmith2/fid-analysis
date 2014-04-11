@@ -277,8 +277,8 @@ namespace fid
 		int fid_f = std::distance(it_f, wf.rend());
 
 		// Adjust to ignore the edges
-		fid_i += params::ph_edge_ignore;
-		fid_f -= params::ph_edge_ignore;
+		fid_i += params::edge_ignore;
+		fid_f -= params::edge_ignore;
 
 		// Do the fit.
 		gr_fit.Fit("f_fit", "QRNM", "", tm[fid_i], tm[fid_f]);
@@ -326,8 +326,8 @@ namespace fid
 		int fid_f = std::distance(it_f, wf.rend());
 
 		// Adjust to ignore the edges
-		fid_i += params::ph_edge_ignore;
-		fid_f -= params::ph_edge_ignore;
+		fid_i += params::edge_ignore;
+		fid_f -= params::edge_ignore;
 
 		// Do the fit.
 		gr_fit.Fit("f_fit", "QRNM", "", tm[fid_i], tm[fid_f]);
@@ -469,12 +469,12 @@ namespace fid
 			*it += 2 * k * M_PI;
 
 			// Check for jumps, both positive and negative.
-			if (*(it-1) - *it > 2 * params::ph_max_jump * M_PI) {
+			if (*(it-1) - *it > 2 * params::max_phase_jump * M_PI) {
 
 				k++;
 				*it += 2 * M_PI;
 
-			} else if (*(it-1) - *it < -2 * params::ph_max_jump * M_PI){
+			} else if (*(it-1) - *it < -2 * params::max_phase_jump * M_PI){
 
 				k--;
 				*it -= 2 * M_PI;

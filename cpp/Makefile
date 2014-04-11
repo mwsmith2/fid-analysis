@@ -21,7 +21,7 @@ AR = ar
 all:
 
 build/%.o: src/%.cxx
-	$(CXX) $(FLAGS) -o $@ -c $< $(LIBS)
+	$(CXX) $(FLAGS) -o $@ -c $<
 
 lib: $(OBJECTS)
 	$(AR) $(ARFLAGS) $(LIBNAME) $+

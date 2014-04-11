@@ -1,66 +1,81 @@
 {
-"header":{
-	"author":"Matthias W Smith",
-	"email":"mwsmith2@uw.edu",
-	"date":"10/04/14",
-	"about":"The default parameters for FID analysis library"
-},
-
-"fid":{
-	"num_fids":1000,
-	"len_fids":10000,
-	"i_time":-1.0,
-	"d_time": 0.001,
-
-	"s_freq":23.45678,
-	"s_phi":0.0,
-	"s_grad":0.0,
-	"s_snr":300,
-
-	"sweep":{
-		"i_freq":23.0,
-		"f_freq":24.0,
-		"d_freq":0.1,
-
-		"num_phi":11,
-		"i_phi":0.0,
-		"f_phi":6.283185307179586,
-
-		"i_grad":0.0,
-		"f_grad":100.0,
-		"d_grad":10.0,
-
-		"i_snr":50.0,
-		"f_snr":200.0,
-		"d_snr":10.0
+	"header":{
+		"author":"Matthias W Smith",
+		"email":"mwsmith2@uw.edu",
+		"date":"10/04/14",
+		"notes":[
+			"The default parameters for FID analysis library"
+			]
 	},
 
-	"sim":{
-		"num_points":100000,
-		"num_steps":5,
-		"reduction":10,
+	"fid":{
+		"num_fids":1000,
+		"len_fids":10000,
+		"i_time":-1.0,
+		"d_time": 0.001,
 
-		"d_bfield":100e-6,
-		"dt_integration":1.0e-5,
+		"s_freq":23.45678,
+		"s_phase":0.0,
+		"s_grad":0.0,
+		"s_snr":300,
 
-		"omega_r":50.0,
-		"t_pulse":0.005,
-		"gamma_g":1.0,
-		"gamma_1":0.05,
-		"gamma_2":0.05,
-		"freq_larmor":997.0,
-		"freq_ref":950.0,
-	},
+		"sweep":{
+			"freq_sweep":true,
+			"freq_range":[
+				23.0,
+				24.0,
+				0.1
+			],
 
-	"params":{
-		"fit_width":20,
-		"zc_width":40,
-		"edge_ignore":10,
-		"start_thresh":20.0,
-		"zc_alpha":0.5,
-		"max_phase_jump":1.8,
-		"low_pass_freq":100.0,
-		"centroid_thresh":0.01,
-		"hyst_thresh":0.3
+			"phase_sweep":false,
+			"phase_range":[
+				0.0,
+				6.283185307179586,
+				0.5
+			],
+
+			"grad_sweep":false,
+			"grad_range":[
+				0.0,
+				100.0,
+				10.0
+			],
+
+			"snr_sweep":false,
+			"snr_range":[
+				50.0,
+				200.0,
+				10.0
+			]
+		},
+
+		"sim":{
+			"num_points":100000,
+			"num_steps":5,
+			"reduction":10,
+
+			"d_bfield":100e-6,
+			"dt_integration":1.0e-5,
+
+			"omega_r":50.0,
+			"t_pulse":0.005,
+			"gamma_g":1.0,
+			"gamma_1":0.05,
+			"gamma_2":0.05,
+			"freq_larmor":997.0,
+			"freq_ref":950.0
+		},
+
+		"params":{
+			"fit_width":20,
+			"zc_width":40,
+			"edge_ignore":10,
+			"start_thresh":20.0,
+			"zc_alpha":0.5,
+			"max_phase_jump":1.8,
+			"low_pass_freq":100.0,
+			"centroid_thresh":0.01,
+			"hyst_thresh":0.3
+		}
 	}
 }

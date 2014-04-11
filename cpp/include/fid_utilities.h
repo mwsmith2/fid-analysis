@@ -13,10 +13,9 @@ using std::string;
 #include "TGraph.h"
 
 //--- project includes ------------------------------------------------------//
+#include "fid_params.h"
 #include "fid_class.h"
 #include "fid.h"
-
-typedef vector<double> vec;
 
 namespace fid{
 
@@ -31,6 +30,17 @@ namespace fid{
   void ConstructLinearGradient(int npoints, vec &grad);
   void ConstructQuadraticGradient(int npoints, vec &grad);
 //  void ConstructGradientFID(vec &grad, vec &wf);
+
+  template<typename T>
+  inline vector<T> ConstructSweepRange(const vector<T>& range_vec){
+    vector<T> res;
+
+    for (T it = range_vec[0]; it <= range_vec[1]; it += range_vec[2]){
+      res.push_back(it);
+    }
+
+    return res;
+  }
 
 } // fid
 

@@ -11,35 +11,30 @@ double i_time;
 double d_time;
 
 // default parameters
-double freq;
-double phi;
-double grad;
-double snr;
+double s_freq;
+double s_phase;
+double s_grad;
+double s_snr;
 
 // sweep parameters
 namespace sweep {
 
   // freqeuency sweep
-  double i_freq;
-  double f_freq;
-  double d_freq;
+  bool freq_sweep;
+  vec  freq_range;
 
   // phase sweep
-  int num_phi;
-  double i_phi;
-  double f_phi;
-  double d_phi;
+  bool phase_sweep;
+  vec  phase_range;
 
   // gradient sweep
-  double i_grad;
-  double f_grad;
-  double d_grad;
+  bool grad_sweep;
+  vec  grad_range;
 
-  // signal-to-noise sweep
-  double i_snr;
-  double f_snr;
-  double d_snr;
-  
+  // signal-to-noise ratio sweep
+  bool snr_sweep;
+  vec  snr_range;
+
 } // ::sweep
 
 // simulation parameters
@@ -88,6 +83,7 @@ void load_params(int argc, char **argv)
   string config_file("runtime/.default_fid_params.json");
   ptree pt;
   read_json(config_file, pt);
+  pt = pt.get_child("fid");
 
   // general fid parameters
   num_fids = pt.get<int>("num_fids");
@@ -95,27 +91,31 @@ void load_params(int argc, char **argv)
   i_time = pt.get<double>("i_time");
   d_time = pt.get<double>("d_time");  
 
-  freq = pt.get<double>("freq");
-  phi  = pt.get<double>("phi");
-  snr  = pt.get<double>("snr");
-  grad = pt.get<double>("grad");
+  s_freq = pt.get<double>("s_freq");
+  s_phase  = pt.get<double>("s_phase");
+  s_snr  = pt.get<double>("s_snr");
+  s_grad = pt.get<double>("s_grad");
 
   // sweep parameters
-  i_freq = pt.get<double>("sweep.i_freq");
-  f_freq = pt.get<double>("sweep.f_freq");
-  d_freq = pt.get<double>("sweep.d_freq");
+  freq_sweep = pt.get<bool>("sweep.freq_sweep");
+  BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.freq_range")){
+    freq_range.push_back(v.second.get_value<double>());
+  }
 
-  num_phi = pt.get<int>("sweep.num_phi");
-  i_phi = pt.get<double>("sweep.i_phi");
-  f_phi = pt.get<double>("sweep.f_phi");
+  phase_sweep = pt.get<bool>("sweep.phase_sweep");
+  BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.phase_range")){
+    phase_range.push_back(v.second.get_value<double>());
+  }
 
-  i_grad = pt.get<double>("sweep.i_grad");
-  f_grad = pt.get<double>("sweep.f_grad");
-  d_grad = pt.get<double>("sweep.d_grad");
+  grad_sweep = pt.get<bool>("sweep.grad_sweep");
+  BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.grad_range")){
+    grad_range.push_back(v.second.get_value<double>());
+  }
 
-  i_snr = pt.get<double>("sweep.i_snr");
-  f_snr = pt.get<double>("sweep.f_snr");
-  d_snr = pt.get<double>("sweep.d_snr");
+  snr_sweep = pt.get<bool>("sweep.snr_sweep");
+  BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.snr_range")){
+    snr_range.push_back(v.second.get_value<double>());
+  }
 
   // sim parameters
   num_points = pt.get<int>("sim.num_points");
@@ -149,32 +149,48 @@ void load_params(int argc, char **argv)
   config_file = string(argv[1]);
 
   // general fid parameters
-  num_fids = pt.get<int>("num_fids");
-  len_fids = pt.get<int>("len_fids");
-  i_time = pt.get<double>("i_time");
-  d_time = pt.get<double>("d_time");  
+  num_fids = pt.get<int>("num_fids", num_fids);
+  len_fids = pt.get<int>("len_fids", len_fids);
+  i_time = pt.get<double>("i_time", i_time);
+  d_time = pt.get<double>("d_time", d_time);  
 
-  freq = pt.get<double>("freq");
-  phi  = pt.get<double>("phi");
-  snr  = pt.get<double>("snr");
-  grad = pt.get<double>("grad");
+  s_freq = pt.get<double>("s_freq", s_freq);
+  s_phase  = pt.get<double>("s_phase", s_phase);
+  s_snr  = pt.get<double>("s_snr", s_snr);
+  s_grad = pt.get<double>("s_grad", s_grad);
 
   // sweep parameters
-  i_freq = pt.get<double>("sweep.i_freq", i_freq);
-  f_freq = pt.get<double>("sweep.f_freq", f_freq);
-  d_freq = pt.get<double>("sweep.d_freq", d_freq);
+  freq_sweep = pt.get<bool>("sweep.freq_sweep", freq_sweep);
+  try {
+    BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.freq_range")){
+      freq_range.push_back(v.second.get_value<double>());
+    }
+  }
+  catch (boost::property_tree::ptree_bad_path){};
 
-  num_phi = pt.get<int>("sweep.num_phi", num_phi);
-  i_phi = pt.get<double>("sweep.i_phi", i_phi);
-  f_phi = pt.get<double>("sweep.f_phi", f_phi);
+  phase_sweep = pt.get<bool>("sweep.phase_sweep");
+  try {
+    BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.phase_range")){
+      phase_range.push_back(v.second.get_value<double>());
+    }
+  }
+  catch (boost::property_tree::ptree_bad_path){};
 
-  i_grad = pt.get<double>("sweep.i_grad", i_grad);
-  f_grad = pt.get<double>("sweep.f_grad", f_grad);
-  d_grad = pt.get<double>("sweep.d_grad", d_grad);
+  grad_sweep = pt.get<bool>("sweep.grad_sweep");
+  try {
+    BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.grad_range")){
+      grad_range.push_back(v.second.get_value<double>());
+    }
+  }
+  catch (boost::property_tree::ptree_bad_path){};
 
-  i_snr = pt.get<double>("sweep.i_snr", i_snr);
-  f_snr = pt.get<double>("sweep.f_snr", f_snr);
-  d_snr = pt.get<double>("sweep.d_snr", d_snr);
+  snr_sweep = pt.get<bool>("sweep.snr_sweep");
+  try {
+    BOOST_FOREACH(ptree::value_type &v, pt.get_child("sweep.snr_range")){
+      snr_range.push_back(v.second.get_value<double>());
+    }
+  }
+  catch (boost::property_tree::ptree_bad_path){};
 
   // sim parameters
   num_points = pt.get<int>("sim.num_points", num_points);

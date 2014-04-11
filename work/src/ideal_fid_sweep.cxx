@@ -17,12 +17,11 @@ Detail: This is a new test program for my FID libraries
 #include "fid_params.h"
 #include "fid_utilities.h"
 
-namespace fid {
+using namespace fid;
+using namespace fid::sweep;
 
 int main(int argc, char **argv)
 {
-  using namespace fid::sweep;
-
   // initialize the configurable parameters
   load_params(argc, argv);
 
@@ -30,76 +29,79 @@ int main(int argc, char **argv)
   vec wf;
   vec tm;
 
-  ofstream out;
-  out.precision(10);
-
   fid::ConstructTimeVector(len_fids, i_time, d_time, tm);
 
-  out.open("ideal_fid_sweep_data.csv");
+  ofstream out;
+  out.precision(10);
+  out.open("data/ideal_fid_sweep_data.csv");
 
-  bool freq_sweep = true;
-  bool phi_sweep = false;
-  bool snr_sweep = false;
+  vec freqs;
+  vec phases;
+  vec snrs;
 
-  // fix loop starts
-  i_freq = freq_sweep ? i_freq : freq;
-  i_phi  = phi_sweep ? i_phi : phi;
-  i_snr  = snr_sweep ? i_snr : snr;      
+  // Get the range to sweep over.
+  if (freq_sweep){
+    freqs = ConstructSweepRange(freq_range);
+  } else {
+    freqs.push_back(s_freq);
+  }
 
-  // fix loop maxes
-  f_freq = freq_sweep ? f_freq : freq;
-  f_phi  = phi_sweep ? f_phi : phi;
-  f_snr  = snr_sweep ? f_snr : snr;
+  if (phase_sweep){
+    phases = ConstructSweepRange(phase_range);
+  } else {
+    phases.push_back(s_phase);
+  }
+
+  if (snr_sweep){
+    snrs = ConstructSweepRange(snr_range);
+  } else {
+    snrs.push_back(s_snr);
+  }
 
   // begin sweeps
-  for (double freq = i_freq; freq <= f_freq; freq += d_freq){
+  for (auto f: freqs){
 
-    if (freq_sweep) cout << "Running for frequency " << freq;
-    out << freq << ", ";
+    for (auto p: phases){
 
-    for (double phi = i_phi; phi <= f_phi; phi += d_phi){
+      for (auto s: snrs){
 
-      if (phi_sweep) cout << ", phase " << phi;
-      out << phi << ", ";
-
-      for (double snr = i_snr; snr <= f_snr; snr += d_snr){
-
-        if (snr_sweep) cout << ", signal-to-noise " << snr;
-        out << snr << ", ";
-
-        cout  << ".\n";
+        if (freq_sweep) cout << "Running for frequency " << f;
+        if (phase_sweep) cout << ", phase " << p;
+        if (snr_sweep) cout << ", signal-to-noise " << s;
+        cout << endl;
 
         for (int i = 0; i < num_fids; i++){
 
-            fid::ideal_fid(wf, tm, freq, phi, snr);
+          if (freq_sweep) out << f << ", ";
+          if (phase_sweep) out << p << ", ";
+          if (snr_sweep) out << s << ", ";
 
-            fid::FID my_fid(wf, tm);
+          fid::ideal_fid(wf, tm, f, p, s);
+          fid::FID my_fid(wf, tm);
 
-            out << my_fid.CalcZeroCountFreq() << ", ";
-            out << my_fid.CalcCentroidFreq() << ", ";
-            out << my_fid.CalcAnalyticalFreq() << ", ";
-            out << my_fid.chi2() << ", ";
-            out << my_fid.CalcLorentzianFreq() << ", ";
-            out << my_fid.chi2() << ", ";
-            out << my_fid.CalcSoftLorentzianFreq() << ", ";
-            out << my_fid.chi2() << ", ";
-            out << my_fid.CalcExponentialFreq() << ", ";
-            out << my_fid.chi2() << ", ";
-            out << my_fid.CalcPhaseFreq() << ", ";
-            out << my_fid.chi2() << ", ";
-            out << my_fid.CalcSinusoidFreq() << endl;
-            out << my_fid.chi2() << ", ";
+          out << my_fid.CalcZeroCountFreq() << ", ";
+          out << my_fid.CalcCentroidFreq() << ", ";
+          out << my_fid.CalcAnalyticalFreq() << ", ";
+          out << my_fid.chi2() << ", ";
+          out << my_fid.CalcLorentzianFreq() << ", ";
+          out << my_fid.chi2() << ", ";
+          out << my_fid.CalcSoftLorentzianFreq() << ", ";
+          out << my_fid.chi2() << ", ";
+          out << my_fid.CalcExponentialFreq() << ", ";
+          out << my_fid.chi2() << ", ";
+          out << my_fid.CalcPhaseFreq() << ", ";
+          out << my_fid.chi2() << ", ";
+          out << my_fid.CalcSinusoidFreq() << endl;
+          out << my_fid.chi2() << ", ";
 
-          } // n_fids
+        } // n_fids
 
-        } // snr
+      } // snr
 
-      } // phi
+    } // phi
 
   } // freq
 
   out.close();
   return 0;
 }
-
-} // ::fid

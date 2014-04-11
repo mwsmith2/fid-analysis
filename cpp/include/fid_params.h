@@ -10,6 +10,7 @@
 //--- other includes --------------------------------------------------------//
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
 namespace fid {
 
@@ -35,36 +36,31 @@ extern double i_time;
 extern double d_time;
 
 // default parameters
-extern double freq;
-extern double phi;
-extern double grad;
-extern double snr;
+extern double s_freq;
+extern double s_phase;
+extern double s_grad;
+extern double s_snr;
 
 // sweep parameters
 namespace sweep {
 
   // freqeuency sweep
-  extern double i_freq;
-  extern double f_freq;
-  extern double d_freq;
+  extern bool freq_sweep;
+  extern vec  freq_range;
 
   // phase sweep
-  extern int num_phi;
-  extern double i_phi;
-  extern double f_phi;
-  extern double d_phi;
+  extern bool phase_sweep;
+  extern vec  phase_range;
 
   // gradient sweep
-  extern double i_grad;
-  extern double f_grad;
-  extern double d_grad;
+  extern bool grad_sweep;
+  extern vec  grad_range;
 
-  // signal-to-noise sweep
-  extern double i_snr;
-  extern double f_snr;
-  extern double d_snr;
-  
-} // ::params
+  // signal-to-noise ratio sweep
+  extern bool snr_sweep;
+  extern vec  snr_range;
+
+} // ::sweep
 
 // simulation parameters
 namespace sim {

@@ -1,6 +1,6 @@
 #include "fid_class.h"
 
-namespace fid{
+namespace fid {
 
   FID::FID(const vec& wf, const vec& tm)
   {
