@@ -128,7 +128,7 @@ class FidFactory
 
   double freq_lar_;
   double freq_ref_;
-  double s2n_;
+  double snr_;
 
   //strength and duration pulse; omega_r * t_pulse = 1/4 for pi-pulse
   double omega_r_;

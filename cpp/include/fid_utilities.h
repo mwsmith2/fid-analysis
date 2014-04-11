@@ -26,7 +26,7 @@ namespace fid{
   void DrawFID(fid::FID &my_fid, const string title, const string filename);
 
   // Declare methods
-  void AddWhiteNoise(vec &wf, double s2n=100.0);
+  void AddWhiteNoise(vec &wf, double snr=100.0);
   void ConstructTimeVector(int ntimes, double t0, double dt, vec &tm);
   void ConstructLinearGradient(int npoints, vec &grad);
   void ConstructQuadraticGradient(int npoints, vec &grad);

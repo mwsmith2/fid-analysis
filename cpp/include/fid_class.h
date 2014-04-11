@@ -1,26 +1,22 @@
 #ifndef FID_ANALYSIS_FID_CLASS_H_
 #define FID_ANALYSIS_FID_CLASS_H_
 
-//--- STD Includes ----------------------------------------------------------//
+//--- std includes ----------------------------------------------------------//
 #include <iostream>
-//#include <fstream>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <numeric>
 #include <random>
 #include <cmath>
-using std::vector;
-using std::cout;
-using std::endl;
 
-//--- Other Includes --------------------------------------------------------//
+//--- other includes --------------------------------------------------------//
 #include <fftw3.h>
 #include "TGraph.h"
-//#include "TCanvas.h"
 #include "TF1.h"
 
-typedef vector<double> vec;
+//--- project includes ------------------------------------------------------//
+#include "fid_params.h"
 
 // This library consists of several frequency exaction and analysis methods
 // for FIDs as well as a class to encapsulate all the ideas
@@ -33,9 +29,6 @@ namespace fid
 	  	// ctor
 	  	FID(const vec& wf, const vec& tm);
 	  	//FID(vec& wf, double tStart, double dt, double tZero, double tTotal);
-
-	  	// dtor
-	  	~FID();
 
 			// frequency extraction methods
 			double CalcZeroCountFreq();

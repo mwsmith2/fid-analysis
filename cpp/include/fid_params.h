@@ -19,24 +19,24 @@ using std::endl;
 typedef vector<double> vec;
 
 // constants
-extern const double kTau = 2 * M_PI;
+const double kTau = 2 * M_PI;
+
+// per configuration statistics
+extern int num_fids;
+extern int len_fids;
+
+// time vector variables
+extern double i_time;
+extern double d_time;
+
+// default parameters
+extern double freq;
+extern double phi;
+extern double grad;
+extern double snr;
 
 // sweep parameters
 namespace sweep {
-
-  // per configuration statistics
-  extern int n_fids;
-
-  // default parameters (s_ for single)
-  extern double s_freq;
-  extern double s_phi;
-  extern double s_grad;
-  extern double s_s2n;
-
-  // time vector variables
-  extern int fid_length;
-  extern double i_time;
-  extern double d_time;
 
   // freqeuency sweep
   extern double i_freq;
@@ -44,7 +44,7 @@ namespace sweep {
   extern double d_freq;
 
   // phase sweep
-  extern int n_phi;
+  extern int num_phi;
   extern double i_phi;
   extern double f_phi;
   extern double d_phi;
@@ -55,23 +55,22 @@ namespace sweep {
   extern double d_grad;
 
   // signal-to-noise sweep
-  extern double i_s2n;
-  extern double f_s2n;
-  extern double d_s2n;
+  extern double i_snr;
+  extern double f_snr;
+  extern double d_snr;
   
 } // ::params
 
 // simulation parameters
 namespace sim {
 
-  extern int num_fids;
   extern int num_points;
   extern int reduction;
   extern int num_steps;
 
   extern double d_bfield;
-  extern double ti;
-  extern double tf;
+  extern double i_time;
+  extern double f_time;
   extern double dt;
 
   extern double omega_r;
@@ -83,12 +82,16 @@ namespace sim {
 } // ::sim
 
 // general fid analysis params
-extern int fit_width;
-extern int zc_width;
-extern int ph_edge_ignore;
-extern double start_thresh;
-extern double zc_alpha;
-extern double ph_max_jump;
+namespace params {
+
+  extern int fit_width;
+  extern int zc_width;
+  extern int ph_edge_ignore;
+  extern double start_thresh;
+  extern double zc_alpha;
+  extern double ph_max_jump;
+
+} // ::params
 
 void load_params(int argc, char **argv);
 

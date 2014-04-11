@@ -4,10 +4,10 @@ namespace fid
 {
 	// Find the frequency by counting zeros and interpolating time 
 	// at the first and last zeros.
-	double calcZeroCountFreq(vec& wf, const vec& tm)
+	double zero_count_freq(vec& wf, const vec& tm)
 	{
 		// Find the noise level
-		double w = zc_width;
+		double w = params::fit_width;
 		double noise = std::accumulate(wf.begin(), wf.begin() + w, 0.0, 
 			[](double x, double y){return x + y * y;}); 
 		double temp = std::accumulate(wf.rbegin(), wf.rbegin() + w, 0.0, 
@@ -33,7 +33,7 @@ namespace fid
 		vector<int> diff_vec (fid_f - fid_i, 0);
 
 		// smooth the waveform, exponential moving average algorithm
-		double a = zc_alpha;
+		double a = params::zc_alpha;
 		std::partial_sum(wf.begin() + fid_i, wf.begin() + fid_f, 
 			wf_smooth.begin(), 
 			[a](double sum, double x) {return sum * a + x * (1.0 - a);});
@@ -68,7 +68,7 @@ namespace fid
 		return 0.5 * (zeros - 1) / (tf - ti);
 	}
 
-	double calcCentroidFreq(vec& wf, const vec& tm)
+	double centroid_freq(vec& wf, const vec& tm)
 	{
 		// Get the Spectral Density and frequencies
 		vec power;
@@ -101,7 +101,7 @@ namespace fid
 		return pwfreq / pwsum;
 	}
 
-	double calcAnalyticalFreq(vec& wf, const vec& tm)
+	double analytical_freq(vec& wf, const vec& tm)
 	{
 		// @todo check the algebra on this guy
 		// Set the fit function
@@ -138,7 +138,7 @@ namespace fid
 		return f_fit.GetParameter(0);
 	}
 
-	double calcLorentzianFreq(vec& wf, const vec& tm)
+	double lorentzian_freq(vec& wf, const vec& tm)
 	{
 		// Set the fit function
 		TF1 f_fit = TF1("f_fit", 
@@ -170,7 +170,7 @@ namespace fid
 		return f_fit.GetParameter(0);
 	}
 
-	double calcSoftLorentzianFreq(vec& wf, const vec& tm)
+	double soft_lorentzian_freq(vec& wf, const vec& tm)
 	{
 		// Set the fit function
 		TF1 f_fit = TF1("f_fit", 
@@ -202,7 +202,7 @@ namespace fid
 		return f_fit.GetParameter(0);
 	}
 
-	double calcExponentialFreq(vec& wf, const vec& tm)
+	double exponential_freq(vec& wf, const vec& tm)
 	{
 		// Set the fit function
 		TF1 f_fit = TF1("f_fit", "[2] * exp(-abs(x - [0]) / [1]) + [3]");
@@ -231,7 +231,7 @@ namespace fid
 		return f_fit.GetParameter(0);	
 	}
 
-	double calcPhaseFreq(vec& wf, const vec& tm, int n)
+	double phase_freq(vec& wf, const vec& tm, int n)
 	{
 		// Container for the phase
 		vec phase;
@@ -252,7 +252,7 @@ namespace fid
 
 		// Find the fit range
 		// Need the noise level
-		double w = zc_width;
+		double w = params::fit_width;
 		double noise = std::accumulate(wf.begin(), wf.begin() + w, 0.0, 
 			[](double x, double y){return x + y * y;}); 
 		double temp = std::accumulate(wf.rbegin(), wf.rbegin() + w, 0.0, 
@@ -262,7 +262,7 @@ namespace fid
 		noise = std::pow(noise, 0.5); // Take the 
 
 		// Now find the starting and ending points
-		double thresh = start_thresh * noise;
+		double thresh = params::start_thresh * noise;
 		auto it_i = std::find_if(wf.begin(), wf.end(), 
 				[thresh](double x){return std::abs(x) > thresh;});
 
@@ -273,8 +273,8 @@ namespace fid
 		int fid_f = std::distance(it_f, wf.rend());
 
 		// Adjust to ignore the edges
-		fid_i += ph_edge_ignore;
-		fid_f -= ph_edge_ignore;
+		fid_i += params::ph_edge_ignore;
+		fid_f -= params::ph_edge_ignore;
 
 		// Do the fit.
 		gr_fit.Fit("f_fit", "QRNM", "", tm[fid_i], tm[fid_f]);
@@ -282,7 +282,7 @@ namespace fid
 		return 0.5 * f_fit.GetParameter(1) / M_PI;
 	}
 
-	double calcSinusoidFreq(vec& wf, const vec& tm)
+	double sinusoid_freq(vec& wf, const vec& tm)
 	{
 		// Get the FID envelope function
 		vec env;
@@ -301,7 +301,7 @@ namespace fid
 
 
 		// Find the fit range, Need the noise level.
-		double w = zc_width;
+		double w = params::fit_width;
 		double noise = std::accumulate(wf.begin(), wf.begin() + w, 0.0, 
 			[](double x, double y){return x + y * y;}); 
 		double temp = std::accumulate(wf.rbegin(), wf.rbegin() + w, 0.0, 
@@ -311,7 +311,7 @@ namespace fid
 		noise = std::pow(noise, 0.5); // Take the 
 
 		// Now find the starting and ending points
-		double thresh = start_thresh * noise;
+		double thresh = params::start_thresh * noise;
 		auto it_i = std::find_if(wf.begin(), wf.end(), 
 				[thresh](double x){return std::abs(x) > thresh;});
 
@@ -322,8 +322,8 @@ namespace fid
 		int fid_f = std::distance(it_f, wf.rend());
 
 		// Adjust to ignore the edges
-		fid_i += ph_edge_ignore;
-		fid_f -= ph_edge_ignore;
+		fid_i += params::ph_edge_ignore;
+		fid_f -= params::ph_edge_ignore;
 
 		// Do the fit.
 		gr_fit.Fit("f_fit", "QRNM", "", tm[fid_i], tm[fid_f]);
@@ -334,7 +334,7 @@ namespace fid
 	// FFT Utility Functions
 
 	// Wrapper for a simple 1D fft from fftw
-	void getFFTPower(vec& power, vec& wf){
+	void get_fft_power(vec& power, vec& wf){
 
 		// Set up the FFT plan
 		int N = wf.size();
@@ -373,7 +373,7 @@ namespace fid
 	}
 
 	// Helper function to get frequencies for FFT
-	void getFFTFreq(vec& freq, const vec& tm){
+	void get_fft_freq(vec& freq, const vec& tm){
 
 		int N = tm.size();
 		double df = (N - 1) / (tm[N-1] - tm[0]);
@@ -400,7 +400,7 @@ namespace fid
 		return;
 	}
 
-	void getFIDPhase(vec& ph, vec& wf_re){
+	void get_fid_phase(vec& ph, vec& wf_re){
 
 		// Set up the FFT plan
 		int N = wf_re.size();
@@ -441,7 +441,7 @@ namespace fid
 	
 		// Need to find the point to start unwrapping the phase.
 		// Determine the noise first
-		double w = zc_width;
+		double w = params::fit_width;
 		double noise = std::accumulate(wf_re.begin(), wf_re.begin() + w, 0.0, 
 			[](double x, double y){return x + y * y;}); 
 		temp = std::accumulate(wf_re.rbegin(), wf_re.rbegin() + w, 0.0, 
@@ -451,7 +451,7 @@ namespace fid
 		noise = std::pow(noise, 0.5); // Take the 
 
 		// Now find the starting and ending points
-		double thresh = start_thresh * noise;
+		double thresh = params::start_thresh * noise;
 		auto it_i = std::find_if(wf_re.begin(), wf_re.end(), 
 				[thresh](double x){return std::abs(x) > thresh;});
 
@@ -465,12 +465,12 @@ namespace fid
 			*it += 2 * k * M_PI;
 
 			// Check for jumps, both positive and negative.
-			if (*(it-1) - *it > 2 * ph_max_jump * M_PI) {
+			if (*(it-1) - *it > 2 * params::ph_max_jump * M_PI) {
 
 				k++;
 				*it += 2 * M_PI;
 
-			} else if (*(it-1) - *it < -2 * ph_max_jump * M_PI){
+			} else if (*(it-1) - *it < -2 * params::ph_max_jump * M_PI){
 
 				k--;
 				*it -= 2 * M_PI;
@@ -485,7 +485,7 @@ namespace fid
 		return;
 	}
 
-	void getFIDEnvelope(vec& env, vec& wf_re)
+	void get_fid_envelope(vec& env, vec& wf_re)
 	{
 
 		// Set up the FFT plan
@@ -533,8 +533,8 @@ namespace fid
 	}
 
 	// @bug should overload with more options later
-	void getIdealFID(vec& wf, vec& tm, double f, double phi, 
-		double s2n, double tau, double t0){
+	void get_ideal_fid(vec& wf, vec& tm, double f, double phi, 
+		double snr, double tau, double t0){
 
 		wf.reserve(tm.size());
 		wf.resize(0);
@@ -553,12 +553,11 @@ namespace fid
 				wf.push_back(0.0);
 
 			}
-
 		} 
 
 		// Add some noise
 		static std::default_random_engine gen(0);
-		std::normal_distribution<double> norm(0.0, 1.0 / s2n);
+		std::normal_distribution<double> norm(0.0, 1.0 / snr);
 		for (auto it = wf.begin(); it != wf.end(); it++){
 			*it += norm(gen);
 		}

@@ -662,7 +662,7 @@ def pol3(t, w, b, a2, a3):
 	return b + w * 6.2831853 * t + a2 * t**2 + a3 * t**3
 
 
-def ideal_fid(npoints, ttotal=10.0, s2n=0.01, t0=-1.0, tau2=5.0, f=23.0):
+def ideal_fid(npoints, ttotal=10.0, snr=0.01, t0=-1.0, tau2=5.0, f=23.0):
 
 	# Set the rise time constant
 	tau1 = 0.001
@@ -692,6 +692,6 @@ def ideal_fid(npoints, ttotal=10.0, s2n=0.01, t0=-1.0, tau2=5.0, f=23.0):
 	wf = wf / np.abs(wf).max()
 
 	# Add noise
-	wf += np.random.normal(0.0, s2n, wf.shape)
+	wf += np.random.normal(0.0, snr, wf.shape)
 
 	return tm, wf
