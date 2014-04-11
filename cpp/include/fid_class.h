@@ -1,5 +1,5 @@
-#ifndef __FID_CLASS_H__
-#define __FID_CLASS_H__
+#ifndef FID_ANALYSIS_FID_CLASS_H_
+#define FID_ANALYSIS_FID_CLASS_H_
 
 //--- STD Includes ----------------------------------------------------------//
 #include <iostream>
