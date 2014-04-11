@@ -1,5 +1,5 @@
-#ifndef __FID_UTILITIES_H__
-#define __FID_UTILITIES_H__
+#ifndef FID_ANALYSIS_INCLUDE_FID_UTILITIES_H_
+#define FID_ANALYSIS_INCLUDE_FID_UTILITIES_H_
 
 //--- std includes ----------------------------------------------------------//
 #include <iostream>

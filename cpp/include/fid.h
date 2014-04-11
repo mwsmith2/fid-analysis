@@ -43,8 +43,7 @@ namespace fid
 	void fft_freq(vec& freq, const int N, const double dt);
 	void fid_phase(vec& phase, vec& wf_re);
 	void fid_envelope(vec& env, vec& wf_re);
-	void ideal_fid(vec& wf, vec& tm, double f, double phi=0.0,
-		double snr=100.0, double tau=10.0, double t0=0.0);
+	void ideal_fid(vec& wf, vec& tm, double f, double phi=0.0, double snr=100.0, 			double tau=10.0, double t0=0.0);
 
 } // fid
 

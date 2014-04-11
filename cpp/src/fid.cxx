@@ -73,8 +73,8 @@ namespace fid
 		// Get the Spectral Density and frequencies
 		vec power;
 		vec freq;
-		getFFTPower(power, wf);
-		getFFTFreq(freq, tm);
+		fft_power(power, wf);
+		fft_freq(freq, tm);
 
 		// Find the peak power
 		double max = *std::max_element(power.begin(), power.end());
@@ -124,8 +124,8 @@ namespace fid
 		// Get the Spectral Density and frequencies
 		vec power;
 		vec freq;
-		getFFTPower(power, wf);
-		getFFTFreq(freq, tm);
+		fft_power(power, wf);
+		fft_freq(freq, tm);
 
 		// Make a TGraph to fit
 		TGraph gr_fit = TGraph(freq.size(), &freq[0], &power[0]);
@@ -133,7 +133,8 @@ namespace fid
 		int max_idx = std::distance(power.begin(), 
 			std::max_element(power.begin(), power.end()));
 
-		gr_fit.Fit("f_fit", "QRNM", "", freq[max_idx - fit_w], freq[max_idx + fit_w]);
+		int w = params::fit_width;
+		gr_fit.Fit("f_fit", "QRNM", "", freq[max_idx - w], freq[max_idx + w]);
 
 		return f_fit.GetParameter(0);
 	}
@@ -156,8 +157,8 @@ namespace fid
 		// Get the Spectral Density and frequencies
 		vec power;
 		vec freq;
-		getFFTPower(power, wf);
-		getFFTFreq(freq, tm);
+		fft_power(power, wf);
+		fft_freq(freq, tm);
 
 		// Make a TGraph to fit
 		TGraph gr_fit = TGraph(freq.size(), &freq[0], &power[0]);
@@ -165,7 +166,8 @@ namespace fid
 		int max_idx = std::distance(power.begin(), 
 			std::max_element(power.begin(), power.end()));
 
-		gr_fit.Fit("f_fit", "QRNM", "", freq[max_idx - fit_w], freq[max_idx + fit_w]);
+		int w = params::fit_width;
+		gr_fit.Fit("f_fit", "QRNM", "", freq[max_idx - w], freq[max_idx + w]);
 
 		return f_fit.GetParameter(0);
 	}
@@ -188,8 +190,8 @@ namespace fid
 		// Get the Spectral Density and frequencies
 		vec power;
 		vec freq;
-		getFFTPower(power, wf);
-		getFFTFreq(freq, tm);
+		fft_power(power, wf);
+		fft_freq(freq, tm);
 
 		// Make a TGraph to fit
 		TGraph gr_fit = TGraph(freq.size(), &freq[0], &power[0]);
@@ -197,7 +199,8 @@ namespace fid
 		int max_idx = std::distance(power.begin(), 
 			std::max_element(power.begin(), power.end()));
 
-		gr_fit.Fit("f_fit", "QRNM", "", freq[max_idx - fit_w], freq[max_idx + fit_w]);
+		int w = params::fit_width;
+		gr_fit.Fit("f_fit", "QRNM", "", freq[max_idx - w], freq[max_idx + w]);
 
 		return f_fit.GetParameter(0);
 	}
@@ -210,8 +213,8 @@ namespace fid
 		// Get the Spectral Density and frequencies
 		vec power;
 		vec freq;
-		getFFTPower(power, wf);
-		getFFTFreq(freq, tm);
+		fft_power(power, wf);
+		fft_freq(freq, tm);
 
 		// Make a TGraph to fit
 		TGraph gr_fit = TGraph(freq.size(), &freq[0], &power[0]);
@@ -226,7 +229,8 @@ namespace fid
 		int max_idx = std::distance(power.begin(), 
 			std::max_element(power.begin(), power.end()));
 
-		gr_fit.Fit("f_fit", "QRNM", "", freq[max_idx - fit_w], freq[max_idx + fit_w]);
+		int w = params::fit_width;
+		gr_fit.Fit("f_fit", "QRNM", "", freq[max_idx - w], freq[max_idx + w]);
 
 		return f_fit.GetParameter(0);	
 	}
@@ -237,7 +241,7 @@ namespace fid
 		vec phase;
 
 		// Get the phase
-		getFIDPhase(phase, wf);
+		fid_phase(phase, wf);
 
 		// Make a TGraph to fit
 		TGraph gr_fit = TGraph(tm.size(), &tm[0], &phase[0]);
@@ -286,7 +290,7 @@ namespace fid
 	{
 		// Get the FID envelope function
 		vec env;
-		getFIDEnvelope(env, wf);
+		fid_envelope(env, wf);
 
 		// Normalize the waveform by the envelope
 		vec wf_nm(wf.size(), 0.0);
@@ -334,7 +338,7 @@ namespace fid
 	// FFT Utility Functions
 
 	// Wrapper for a simple 1D fft from fftw
-	void get_fft_power(vec& power, vec& wf){
+	void fft_power(vec& power, vec& wf){
 
 		// Set up the FFT plan
 		int N = wf.size();
@@ -373,7 +377,7 @@ namespace fid
 	}
 
 	// Helper function to get frequencies for FFT
-	void get_fft_freq(vec& freq, const vec& tm){
+	void fft_freq(vec& freq, const vec& tm){
 
 		int N = tm.size();
 		double df = (N - 1) / (tm[N-1] - tm[0]);
@@ -400,7 +404,7 @@ namespace fid
 		return;
 	}
 
-	void get_fid_phase(vec& ph, vec& wf_re){
+	void fid_phase(vec& ph, vec& wf_re){
 
 		// Set up the FFT plan
 		int N = wf_re.size();
@@ -485,7 +489,7 @@ namespace fid
 		return;
 	}
 
-	void get_fid_envelope(vec& env, vec& wf_re)
+	void fid_envelope(vec& env, vec& wf_re)
 	{
 
 		// Set up the FFT plan
@@ -533,7 +537,7 @@ namespace fid
 	}
 
 	// @bug should overload with more options later
-	void get_ideal_fid(vec& wf, vec& tm, double f, double phi, 
+	void ideal_fid(vec& wf, vec& tm, double f, double phi, 
 		double snr, double tau, double t0){
 
 		wf.reserve(tm.size());

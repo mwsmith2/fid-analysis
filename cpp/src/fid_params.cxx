@@ -1,6 +1,5 @@
 #include "fid_params.h"
 
-
 namespace fid {
 
 // per configuration statistics
@@ -51,15 +50,15 @@ namespace sim {
   int num_steps;
 
   double d_bfield;
-  double i_time;
-  double f_time;
-  double dt;
+  double dt_integration;
 
   double omega_r;
   double t_pulse;
   double gamma_g;
   double gamma_1;
   double gamma_2;
+  double freq_ref;
+  double freq_larmor;
 
 } // ::sim
 
@@ -67,18 +66,27 @@ namespace sim {
 namespace params {
 
   int fit_width;
+  int edge_ignore;
   int zc_width;
-  int ph_edge_ignore;
   double start_thresh;
   double zc_alpha;
-  double ph_max_jump;
+  double max_phase_jump;
+  double low_pass_freq;
+  double centroid_thresh;
+  double hyst_thresh;
 
 } // ::params
 
 void load_params(int argc, char **argv)
 {
+  // using directives
+  using namespace sweep;
+  using namespace sim;
+  using namespace params;
+
   // load defaults first
   string config_file("runtime/.default_fid_params.json");
+  ptree pt;
   read_json(config_file, pt);
 
   // general fid parameters
@@ -93,101 +101,107 @@ void load_params(int argc, char **argv)
   grad = pt.get<double>("grad");
 
   // sweep parameters
-  sweep::i_freq = get.get<double>("sweep.i_freq");
-  sweep::f_freq = get.get<double>("sweep.f_freq");
-  sweep::d_freq = get.get<double>("sweep.d_freq");
+  i_freq = pt.get<double>("sweep.i_freq");
+  f_freq = pt.get<double>("sweep.f_freq");
+  d_freq = pt.get<double>("sweep.d_freq");
 
-  sweep::num_phi = get.get<int>("sweep.num_phi");
-  sweep::i_phi = get.get<double>("sweep.i_phi");
-  sweep::f_phi = get.get<double>("sweep.f_phi");
+  num_phi = pt.get<int>("sweep.num_phi");
+  i_phi = pt.get<double>("sweep.i_phi");
+  f_phi = pt.get<double>("sweep.f_phi");
 
-  sweep::i_grad = get.get<double>("sweep.i_grad");
-  sweep::f_grad = get.get<double>("sweep.f_grad");
-  sweep::d_grad = get.get<double>("sweep.d_grad");
+  i_grad = pt.get<double>("sweep.i_grad");
+  f_grad = pt.get<double>("sweep.f_grad");
+  d_grad = pt.get<double>("sweep.d_grad");
 
-  sweep::i_snr = get.get<double>("sweep.i_snr");
-  sweep::f_snr = get.get<double>("sweep.f_snr");
-  sweep::d_snr = get.get<double>("sweep.d_snr");
+  i_snr = pt.get<double>("sweep.i_snr");
+  f_snr = pt.get<double>("sweep.f_snr");
+  d_snr = pt.get<double>("sweep.d_snr");
 
   // sim parameters
-  sim::num_points = get.get<int>("sim.num_points");
-  sim::num_steps = get.get<int>("sim.num_steps");
-  sim::reduction = get.get<int>("sim.reduction");
+  num_points = pt.get<int>("sim.num_points");
+  num_steps = pt.get<int>("sim.num_steps");
+  reduction = pt.get<int>("sim.reduction");
 
-  sim::d_bfield = get.get<double>("sim.d_bfield");
-  sim::dt_integration = get.get<double>("sim.dt_integration");
+  d_bfield = pt.get<double>("sim.d_bfield");
+  dt_integration = pt.get<double>("sim.dt_integration");
 
-  sim::omega_r = get.get<double>("sim.omega_r");
-  sim::t_pulse = get.get<double>("sim.t_pulse");
-  sim::gamma_g = get.get<double>("sim.gamma_g");
-  sim::gamma_1 = get.get<double>("sim.gamma_1");
-  sim::gamma_2 = get.get<double>("sim.gamma_2");
-  sim::freq_ref = get.get<double>("sim.freq_ref");
-  sim::freq_larmor = get.get<double>("sim.freq_larmor");
+  omega_r = pt.get<double>("sim.omega_r");
+  t_pulse = pt.get<double>("sim.t_pulse");
+  gamma_g = pt.get<double>("sim.gamma_g");
+  gamma_1 = pt.get<double>("sim.gamma_1");
+  gamma_2 = pt.get<double>("sim.gamma_2");
+  freq_ref = pt.get<double>("sim.freq_ref");
+  freq_larmor = pt.get<double>("sim.freq_larmor");
 
   // analysis parameters
-  params::fit_width = get.get<int>("params.fit_width");
-  params::start_thresh = get.get<int>("params.start_thresh");
-  params::zc_width = get.get<int>("params.zc_width");
-  params::zc_alpha = get.get<int>("params.zc_alpha");
-  params::ph_edge_ignore = get.get<int>("params.ph_edge_ignore");
-  params::ph_max_jump = get.get<int>("params.ph_max_jump");
+  fit_width = pt.get<int>("params.fit_width");
+  edge_ignore = pt.get<int>("params.edge_ignore");
+  zc_width = pt.get<int>("params.zc_width");
+  start_thresh = pt.get<double>("params.start_thresh");
+  zc_alpha = pt.get<double>("params.zc_alpha");
+  max_phase_jump = pt.get<double>("params.max_phase_jump");
+  low_pass_freq = pt.get<double>("params.low_pass_freq");
+  centroid_thresh = pt.get<double>("params.centroid_thresh");
+  hyst_thresh = pt.get<double>("params.hyst_thresh");
 
   // If the user provided a different config file, load it instead
   if (argc < 2) return;
   config_file = string(argv[1]);
 
   // general fid parameters
-  num_fids = pt.get_optional<int>("num_fids");
-  len_fids = pt.get_optional<int>("len_fids");
-  i_time = pt.get_optional<double>("i_time");
-  d_time = pt.get_optional<double>("d_time");  
+  num_fids = pt.get<int>("num_fids");
+  len_fids = pt.get<int>("len_fids");
+  i_time = pt.get<double>("i_time");
+  d_time = pt.get<double>("d_time");  
 
-  freq = pt.get_optional<double>("freq");
-  phi  = pt.get_optional<double>("phi");
-  snr  = pt.get_optional<double>("snr");
-  grad = pt.get_optional<double>("grad");
+  freq = pt.get<double>("freq");
+  phi  = pt.get<double>("phi");
+  snr  = pt.get<double>("snr");
+  grad = pt.get<double>("grad");
 
   // sweep parameters
-  sweep::i_freq = pt.get_optional<double>("sweep.i_freq");
-  sweep::f_freq = pt.get_optional<double>("sweep.f_freq");
-  sweep::d_freq = pt.get_optional<double>("sweep.d_freq");
+  i_freq = pt.get<double>("sweep.i_freq", i_freq);
+  f_freq = pt.get<double>("sweep.f_freq", f_freq);
+  d_freq = pt.get<double>("sweep.d_freq", d_freq);
 
-  sweep::num_phi = pt.get_optional<int>("sweep.num_phi");
-  sweep::i_phi = pt.get_optional<double>("sweep.i_phi");
-  sweep::f_phi = pt.get_optional<double>("sweep.f_phi");
+  num_phi = pt.get<int>("sweep.num_phi", num_phi);
+  i_phi = pt.get<double>("sweep.i_phi", i_phi);
+  f_phi = pt.get<double>("sweep.f_phi", f_phi);
 
-  sweep::i_grad = pt.get_optional<double>("sweep.i_grad");
-  sweep::f_grad = pt.get_optional<double>("sweep.f_grad");
-  sweep::d_grad = pt.get_optional<double>("sweep.d_grad");
+  i_grad = pt.get<double>("sweep.i_grad", i_grad);
+  f_grad = pt.get<double>("sweep.f_grad", f_grad);
+  d_grad = pt.get<double>("sweep.d_grad", d_grad);
 
-  sweep::i_snr = pt.get_optional<double>("sweep.i_snr");
-  sweep::f_snr = pt.get_optional<double>("sweep.f_snr");
-  sweep::d_snr = pt.get_optional<double>("sweep.d_snr");
+  i_snr = pt.get<double>("sweep.i_snr", i_snr);
+  f_snr = pt.get<double>("sweep.f_snr", f_snr);
+  d_snr = pt.get<double>("sweep.d_snr", d_snr);
 
   // sim parameters
-  sim::num_points = pt.get_optional<int>("sim.num_points");
-  sim::num_steps = pt.get_optional<int>("sim.num_steps");
-  sim::reduction = pt.get_optional<int>("sim.reduction");
+  num_points = pt.get<int>("sim.num_points", num_points);
+  num_steps = pt.get<int>("sim.num_steps", num_steps);
+  reduction = pt.get<int>("sim.reduction", reduction);
 
-  sim::d_bfield = pt.get_optional<double>("sim.d_bfield");
-  sim::dt_integration = pt.get_optional<double>("sim.dt_integration");
+  d_bfield = pt.get<double>("sim.d_bfield", d_bfield);
+  dt_integration = pt.get<double>("sim.dt_integration", dt_integration);
 
-  sim::omega_r = pt.get_optional<double>("sim.omega_r");
-  sim::t_pulse = pt.get_optional<double>("sim.t_pulse");
-  sim::gamma_g = pt.get_optional<double>("sim.gamma_g");
-  sim::gamma_1 = pt.get_optional<double>("sim.gamma_1");
-  sim::gamma_2 = pt.get_optional<double>("sim.gamma_2");
-  sim::freq_ref = pt.get_optional<double>("sim.freq_ref");
-  sim::freq_larmor = pt.get_optional<double>("sim.freq_larmor");
+  omega_r = pt.get<double>("sim.omega_r", omega_r);
+  t_pulse = pt.get<double>("sim.t_pulse", t_pulse);
+  gamma_g = pt.get<double>("sim.gamma_g", gamma_g);
+  gamma_1 = pt.get<double>("sim.gamma_1", gamma_1);
+  gamma_2 = pt.get<double>("sim.gamma_2", gamma_2);
+  freq_ref = pt.get<double>("sim.freq_ref", freq_ref);
+  freq_larmor = pt.get<double>("sim.freq_larmor", freq_larmor);
 
   // analysis parameters
-  params::fit_width = pt.get_optional<int>("params.fit_width");
-  params::start_thresh = pt.get_optional<int>("params.start_thresh");
-  params::zc_width = pt.get_optional<int>("params.zc_width");
-  params::zc_alpha = pt.get_optional<int>("params.zc_alpha");
-  params::ph_edge_ignore = pt.get_optional<int>("params.ph_edge_ignore");
-  params::ph_max_jump = pt.get_optional<int>("params.ph_max_jump");
+  fit_width = pt.get<int>("params.fit_width", fit_width);
+  edge_ignore = pt.get<int>("params.edge_ignore", edge_ignore);
+  zc_width = pt.get<int>("params.zc_width", zc_width);
+  start_thresh = pt.get<double>("params.start_thresh", start_thresh);
+  zc_alpha = pt.get<double>("params.zc_alpha", zc_alpha);
+  max_phase_jump = pt.get<double>("params.max_phase_jump", max_phase_jump);
+  low_pass_freq = pt.get<double>("params.low_pass_freq", low_pass_freq);
+  centroid_thresh = pt.get<double>("params.centroid_thresh", centroid_thresh);
+  hyst_thresh = pt.get<double>("params.hyst_thresh", hyst_thresh);
 
 } // load_params
 

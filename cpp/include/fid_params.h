@@ -3,10 +3,13 @@
 
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
-#include <iomanip>
-#include <fstream>
+#include <string>
 #include <vector>
 #include <cmath>
+
+//--- other includes --------------------------------------------------------//
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 namespace fid {
 
@@ -14,6 +17,8 @@ namespace fid {
 using std::cout;
 using std::vector;
 using std::endl;
+using std::string;
+using boost::property_tree::ptree;
 
 // typedefs
 typedef vector<double> vec;
@@ -69,15 +74,15 @@ namespace sim {
   extern int num_steps;
 
   extern double d_bfield;
-  extern double i_time;
-  extern double f_time;
-  extern double dt;
+  extern double dt_integration;
 
   extern double omega_r;
   extern double t_pulse;
   extern double gamma_g;
   extern double gamma_1;
   extern double gamma_2;
+  extern double freq_ref;
+  extern double freq_larmor;
 
 } // ::sim
 
@@ -86,10 +91,13 @@ namespace params {
 
   extern int fit_width;
   extern int zc_width;
-  extern int ph_edge_ignore;
+  extern int edge_ignore;
   extern double start_thresh;
   extern double zc_alpha;
-  extern double ph_max_jump;
+  extern double max_phase_jump;
+  extern double low_pass_freq;
+  extern double centroid_thresh;
+  extern double hyst_thresh;
 
 } // ::params
 

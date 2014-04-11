@@ -55,19 +55,6 @@ namespace fid
 		private:
 
 			// Member Variables
-			// constants
-			const int kZCWidth = 40;
-			const int kFitWidth = 20;
-			const int kEdgeIgnore = 10;
-			const double kStartThresh = 20.0;
-			const double kZCAlpha = 0.8;
-			const double kLowPassFreq = 100.0; // 100 kHz
-			const double kMaxPhaseJump = 0.3 * 2 * M_PI;
-			const double kCentroidThresh = 0.01;
-			const double kTau = 2 * M_PI;
-			const double kHystThresh = 0.3;
-
-			// mutable variables
 			int i_wf_; // start and stop of relevant data
 			int f_wf_;
 			int i_fft_;

@@ -12,10 +12,10 @@
 	"i_time":-1.0,
 	"d_time": 0.001,
 
-	"freq":23.45678,
-	"phi":0.0,
-	"grad":0.0,
-	"snr":300,
+	"s_freq":23.45678,
+	"s_phi":0.0,
+	"s_grad":0.0,
+	"s_snr":300,
 
 	"sweep":{
 		"i_freq":23.0,
@@ -54,10 +54,13 @@
 
 	"params":{
 		"fit_width":20,
-		"start_thresh":20,
 		"zc_width":40,
+		"edge_ignore":10,
+		"start_thresh":20.0,
 		"zc_alpha":0.5,
-		"ph_edge_ignore":10,
-		"ph_max_jump":0.7
+		"max_phase_jump":1.8,
+		"low_pass_freq":100.0,
+		"centroid_thresh":0.01,
+		"hyst_thresh":0.3
 	}
 }
