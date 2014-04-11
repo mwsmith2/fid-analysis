@@ -96,3 +96,5 @@ namespace params {
 void load_params(int argc, char **argv);
 
 } // ::fid
+
+#endif

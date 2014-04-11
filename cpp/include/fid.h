@@ -38,12 +38,12 @@ namespace fid
 	double sinusoid_freq(vec& wf, const vec& tm);
 
 	// utility functions
-	void get_fft_power(vec& power, vec& wf);
-	void get_fft_freq(vec& freq, const vec& tm);
-	void get_fft_freq(vec& freq, const int N, const double dt);
-	void get_fid_phase(vec& phase, vec& wf_re);
-	void get_fid_envelope(vec& env, vec& wf_re);
-	void get_ideal_fid(vec& wf, vec& tm, double f, double phi=0.0,
+	void fft_power(vec& power, vec& wf);
+	void fft_freq(vec& freq, const vec& tm);
+	void fft_freq(vec& freq, const int N, const double dt);
+	void fid_phase(vec& phase, vec& wf_re);
+	void fid_envelope(vec& env, vec& wf_re);
+	void ideal_fid(vec& wf, vec& tm, double f, double phi=0.0,
 		double snr=100.0, double tau=10.0, double t0=0.0);
 
 } // fid
