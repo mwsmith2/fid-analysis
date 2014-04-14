@@ -77,8 +77,8 @@
 			"root_file":"runtime/sim_fids.root",
 			"fid_branch":"fid",
 			"min":-500.0,
-			"max":500.0,
-		}
+			"max":500.0
+		},
 
 		"params":{
 			"fit_width":20,

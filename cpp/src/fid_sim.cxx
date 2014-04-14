@@ -242,8 +242,9 @@ GradientFidFactory::GradientFidFactory()
   pf_fid_ = new TFile(grad::root_file.c_str());
   pt_fid_ = (TTree *)pf_fid_->Get("t");
   
-  pt_fid_->GetEntry(0);
+  wf_.resize(len_fids);
   pt_fid_->SetBranchAddress(grad::fid_branch.c_str(), &wf_[0]);
+  pt_fid_->GetEntry(0);
 
   num_sim_fids_ = pt_fid_->GetEntries();
   d_grad_ = (grad::max - grad::min) / num_sim_fids_;

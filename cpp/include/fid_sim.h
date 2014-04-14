@@ -151,7 +151,7 @@ class GradientFidFactory
 
   TFile *pf_fid_;
   TTree *pt_fid_;
-  std::vector<Double_t> wf_;
+  vector<Double_t> wf_;
 
   int GetTreeIndex(double grad_strength);
 };

@@ -5,10 +5,12 @@
 
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <random>
 using std::vector;
 using std::string;
+using std::ofstream;
 
 //--- root includes ---------------------------------------------------------//
 #include "TCanvas.h"
@@ -26,6 +28,8 @@ namespace fid{
     const string filename, const string title);
   void DrawFID(FID &my_fid, const string filename, const string title);
 
+  void CalcFreqSaveCsv(FID &my_fid, ofstream &out);
+
   // Add Gaussian noise to the given waveform
   void AddWhiteNoise(vec &wf, double snr=100.0);
 
@@ -40,7 +44,7 @@ namespace fid{
 
   // Use for getting sweep ranges
   template<typename T>
-  inline vector<T> ConstructSweepRange(const vector<T>& range_vec){
+  inline vector<T> ConstructSweepRange(const vector<T> &range_vec){
     vector<T> res;
 
     for (T it = range_vec[0]; it <= range_vec[1]; it += range_vec[2]){
