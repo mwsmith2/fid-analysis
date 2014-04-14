@@ -392,14 +392,14 @@ namespace fid {
     return f_fit_.GetParameter(0); 
   }
 
-  double FID::CalcPhaseFreq(int n)
+  double FID::CalcPhaseFreq(int poln)
   {
     // 
     gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &phase_[i_wf_]);
 
     // Now set up the polynomial phase fit
     char fcn[20];
-    sprintf(fcn, "pol%d", n);
+    sprintf(fcn, "pol%d", poln);
     f_fit_ = TF1("f_fit_", fcn);
 
     // Set the parameter guesses
@@ -426,7 +426,7 @@ namespace fid {
 
     gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &temp_[i_wf_]);    
 
-    f_fit_ = TF1("f_fit_", "[1] * sin([0] * x + [2])");
+    f_fit_ = TF1("f_fit_", "[1] * sin([0] * x) + [2] * cos([0]))");
 
     // Set guess parameters
     f_fit_.SetParameter(0, 23.0 * kTau);

@@ -28,7 +28,6 @@ namespace fid
 	  public:
 	  	// ctor
 	  	FID(const vec& wf, const vec& tm);
-	  	//FID(vec& wf, double tStart, double dt, double tZero, double tTotal);
 
 			// frequency extraction methods
 			double CalcZeroCountFreq();
@@ -37,7 +36,7 @@ namespace fid
 			double CalcLorentzianFreq();
 			double CalcSoftLorentzianFreq();
 			double CalcExponentialFreq();
-			double CalcPhaseFreq(int n=1);
+			double CalcPhaseFreq(int poln=1);
 			double CalcSinusoidFreq();
 
 			// accessors

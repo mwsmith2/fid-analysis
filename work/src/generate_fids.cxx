@@ -78,12 +78,8 @@ int main(int argc, char **argv)
 
         ff.SimulateFid(wf, tm);
 
-        cout << "SimulatedFid: ";
-        for (auto it = wf.begin(); it != wf.end(); ++it){
-          cout << *it;
-        }
-        cout << endl;
-        fid::FID my_fid(wf, tm);
+        FID my_fid(wf, tm);
+        DrawFID(my_fid, string("data/fig/test.pdf"), string("Test FID"));
 
       } // snr
 

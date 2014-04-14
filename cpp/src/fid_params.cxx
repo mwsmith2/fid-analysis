@@ -40,6 +40,7 @@ namespace sweep {
 // simulation parameters
 namespace sim {
 
+  int seed;
   int num_points;
   int reduction;
   vec spin_0;
@@ -119,6 +120,7 @@ void load_params(int argc, char **argv)
   }
 
   // sim parameters
+  seed = pt.get<int>("sim.seed");
   num_points = pt.get<int>("sim.num_points");
   reduction = pt.get<int>("sim.reduction");
   BOOST_FOREACH(ptree::value_type &v, pt.get_child("sim.spin_0")){
@@ -136,6 +138,8 @@ void load_params(int argc, char **argv)
   freq_ref = pt.get<double>("sim.freq_ref");
   freq_larmor = pt.get<double>("sim.freq_larmor");
 
+
+
   // analysis parameters
   fit_width = pt.get<int>("params.fit_width");
   edge_ignore = pt.get<int>("params.edge_ignore");
@@ -148,8 +152,11 @@ void load_params(int argc, char **argv)
   hyst_thresh = pt.get<double>("params.hyst_thresh");
 
   // If the user provided a different config file, load it instead
-  if (argc < 2) return;
-  config_file = string(argv[1]);
+  if (argc < 2) {
+    config_file = string("./runtime/fid_params.json");
+  } else {
+    config_file = string(argv[1]);
+  }
 
   // general fid parameters
   num_fids = pt.get<int>("num_fids", num_fids);
@@ -204,6 +211,7 @@ void load_params(int argc, char **argv)
   catch (boost::property_tree::ptree_bad_path){};
 
   // sim parameters
+  seed = pt.get<int>("sim.seed", seed);
   num_points = pt.get<int>("sim.num_points", num_points);
   reduction = pt.get<int>("sim.reduction", reduction);
 

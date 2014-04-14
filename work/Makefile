@@ -5,7 +5,7 @@ OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 # Set the directory of the FID headers and lib
 FID_DIR = ../cpp
 
-FLAGS = -std=c++11 -O3 -I$(FID_DIR)/include
+FLAGS = -std=c++11 -g -I$(FID_DIR)/include
 LIBS = -lfftw3 -lm -L$(FID_DIR)/lib/ -lFid
 
 FLAGS += $(shell root-config --cflags)

@@ -23,8 +23,8 @@ namespace fid{
 
   // Plots and saves an image of the FID
   void DrawFID(const vec &wf, const vec &tm, 
-    const string title, const string filename);
-  void DrawFID(fid::FID &my_fid, const string title, const string filename);
+    const string filename, const string title);
+  void DrawFID(FID &my_fid, const string filename, const string title);
 
   // Add Gaussian noise to the given waveform
   void AddWhiteNoise(vec &wf, double snr=100.0);

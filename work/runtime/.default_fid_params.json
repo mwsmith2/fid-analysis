@@ -2,7 +2,7 @@
 	"header":{
 		"author":"Matthias W Smith",
 		"email":"mwsmith2@uw.edu",
-		"date":"10/04/14",
+		"date":"14/04/14",
 		"notes":[
 			"The default parameters for FID analysis library"
 			]
@@ -18,6 +18,7 @@
 		"s_phase":0.0,
 		"s_grad":0.0,
 		"s_snr":300,
+		"s_tau":10.0,
 
 		"sweep":{
 			"freq_sweep":true,
@@ -50,6 +51,7 @@
 		},
 
 		"sim":{
+			"seed":0,
 			"num_points":100000,
 			"num_steps":5,
 			"reduction":10,

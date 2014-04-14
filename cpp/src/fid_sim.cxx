@@ -42,6 +42,36 @@ void FidFactory::SimulateFid(vec& wf, vec& tm)
   }
 }
 
+// Create an idealized FID with current Simulation parameters
+void FidFactory::IdealFid(vec& wf, vec& tm)
+{
+  wf.reserve(tm.size());
+  wf.resize(0);
+
+  // Define the waveform
+  double temp;
+
+  for (auto it = tm.begin(); it != tm.end(); ++it){
+
+    if (*it >= sim::t_pulse){
+      temp = std::exp(-(*it - sim::t_pulse) * sim::s_tau);
+      temp *= std::sin((*it) * kTau * sim::s_freq + sim::s_phase);
+      wf.push_back(temp);
+
+    } else {
+      wf.push_back(0.0);
+
+    }
+  } 
+
+  // Add some noise
+  static std::default_random_engine gen(sim::seed);
+  std::normal_distribution<double> norm(0.0, 1.0 / s_snr);
+  for (auto it = wf.begin(); it != wf.end(); ++it){
+    *it += norm(gen);
+  }
+}
+
 void FidFactory::Bloch(vec const &s, vec &dsdt, double t)
 {
   // Again static to save time on memory allocations.
@@ -100,7 +130,7 @@ void FidFactory::Printer(vec const &s , double t){
   static int index = 0;
   static int fid_num = 0;
   static int step_num = 0;
-  static int ref_count = (tf_ - ti_) / (dt_ * sim::num_points + 0.5); 
+  static int ref_count = (tf_ - ti_) / (dt_ * sim::num_points) + 0.5; 
 
   // Cache the cosine function for mixing later.
   if (cos_cache_.size() == 0){
@@ -121,7 +151,7 @@ void FidFactory::Printer(vec const &s , double t){
     // Record spin in the y-direction and mix down
     spin_[index] = s[1] * cos_cache_[index]; 
 
-    // Record the time
+    // Record the time and increment index
     time_vec_[index++] = t;
 
     // If the FID is done, do more stuff.

@@ -70,6 +70,7 @@ namespace sweep {
 // simulation parameters
 namespace sim {
 
+  extern int seed;   // the seed for the random generator
   // NOTE: the FID is simulated then mixed down, so it needs to be simulated
   // at a higher sampling rate to capture the original, large frequency
   extern int num_points;  // number of points in simulated FID

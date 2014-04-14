@@ -536,7 +536,7 @@ namespace fid
 		return;
 	}
 
-	// @bug should overload with more options later
+	// Generate an ideal FID
 	void ideal_fid(vec& wf, vec& tm, double f, double phi, 
 		double snr, double tau, double t0){
 
