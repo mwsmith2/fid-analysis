@@ -51,6 +51,7 @@ extern double s_freq;  // default frequency
 extern double s_phase; // default phase
 extern double s_grad;  // default gradient strength
 extern double s_snr;   // default signal-to-noise ratio
+extern double s_tau;   // default FID decay time
 
 // sweep parameters
 namespace sweep {
@@ -89,6 +90,14 @@ namespace sim {
   extern double freq_larmor; // Larmor frequency to be simulated
 
 } // ::sim
+
+namespace grad {
+
+  extern string root_file;
+  extern string fid_branch;
+  extern double min;
+  extern double max;
+}
 
 // general fid analysis params
 namespace params {

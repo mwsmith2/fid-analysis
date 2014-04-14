@@ -15,6 +15,7 @@ double s_freq;
 double s_phase;
 double s_grad;
 double s_snr;
+double s_tau;
 
 // sweep parameters
 namespace sweep {
@@ -58,6 +59,13 @@ namespace sim {
 
 } // ::sim
 
+namespace grad {
+  string root_file;
+  string fid_branch;
+  double min;
+  double max;
+}
+
 // general fid analysis params
 namespace params {
 
@@ -97,6 +105,7 @@ void load_params(int argc, char **argv)
   s_phase  = pt.get<double>("s_phase");
   s_snr  = pt.get<double>("s_snr");
   s_grad = pt.get<double>("s_grad");
+  s_tau = pt.get<double>("s_tau");
 
   // sweep parameters
   freq_sweep = pt.get<bool>("sweep.freq_sweep");
@@ -138,7 +147,11 @@ void load_params(int argc, char **argv)
   freq_ref = pt.get<double>("sim.freq_ref");
   freq_larmor = pt.get<double>("sim.freq_larmor");
 
-
+  // gradient fid file parameters
+  grad::root_file = pt.get<string>("grad.root_file");
+  grad::fid_branch = pt.get<string>("grad.fid_branch");
+  grad::min = pt.get<double>("grad.min");
+  grad::max = pt.get<double>("grad.max");
 
   // analysis parameters
   fit_width = pt.get<int>("params.fit_width");
@@ -168,6 +181,7 @@ void load_params(int argc, char **argv)
   s_phase  = pt.get<double>("s_phase", s_phase);
   s_snr  = pt.get<double>("s_snr", s_snr);
   s_grad = pt.get<double>("s_grad", s_grad);
+  s_tau = pt.get<double>("s_tau", s_tau);
 
   // sweep parameters
   freq_sweep = pt.get<bool>("sweep.freq_sweep", freq_sweep);
@@ -234,6 +248,12 @@ void load_params(int argc, char **argv)
   gamma_2 = pt.get<double>("sim.gamma_2", gamma_2);
   freq_ref = pt.get<double>("sim.freq_ref", freq_ref);
   freq_larmor = pt.get<double>("sim.freq_larmor", freq_larmor);
+
+  // gradient fid file parameters
+  grad::root_file = pt.get<string>("grad.root_file", grad::root_file);
+  grad::fid_branch = pt.get<string>("grad.fid_branch", grad::fid_branch);
+  grad::min = pt.get<double>("grad.min", grad::min);
+  grad::max = pt.get<double>("grad.max", grad::max);
 
   // analysis parameters
   fit_width = pt.get<int>("params.fit_width", fit_width);

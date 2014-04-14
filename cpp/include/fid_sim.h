@@ -31,6 +31,8 @@ initalization
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 #include <armadillo>
+#include "TFile.h"
+#include "TTree.h"
 
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
@@ -87,10 +89,6 @@ class FidFactory
   // ctors
   FidFactory();
 
-  // accessors
-
-  // mutators
-
   // member methods
   void SimulateFid(vec& wf, vec& tm);
   void IdealFid(vec& wf, vec& tm);
@@ -131,6 +129,32 @@ class FidFactory
   static void Printer(vec const &s , double t);
 
 }; // FidFactory
+
+class GradientFidFactory
+{
+ public:
+
+  // ctor
+  GradientFidFactory();
+
+  // dtor
+  ~GradientFidFactory();
+
+  // member methods
+  void ConstructFid(const vec& gradient, vec& wf);
+
+ private:
+
+  int num_sim_fids_;
+  int zero_idx_;
+  double d_grad_;
+
+  TFile *pf_fid_;
+  TTree *pt_fid_;
+  std::vector<Double_t> wf_;
+
+  int GetTreeIndex(double grad_strength);
+};
 
 } // ::fid
 

@@ -15,7 +15,11 @@ vec FidFactory::spin_sum_;
 vec FidFactory::cos_cache_;
 vec FidFactory::gradient_(1, 0.0);
 
-// ctor
+
+//---------------------------------------------------------------------------//
+//--- FID Factory -----------------------------------------------------------//
+//---------------------------------------------------------------------------//
+
 FidFactory::FidFactory(){
   
   ti_ = i_time;
@@ -54,8 +58,8 @@ void FidFactory::IdealFid(vec& wf, vec& tm)
   for (auto it = tm.begin(); it != tm.end(); ++it){
 
     if (*it >= sim::t_pulse){
-      temp = std::exp(-(*it - sim::t_pulse) * sim::s_tau);
-      temp *= std::sin((*it) * kTau * sim::s_freq + sim::s_phase);
+      temp = std::exp(-(*it - sim::t_pulse) * s_tau);
+      temp *= std::sin((*it) * kTau * s_freq + s_phase);
       wf.push_back(temp);
 
     } else {
@@ -226,6 +230,51 @@ vec FidFactory::LowPassFilter(vec& s){
 
   // This confusing oneliner, get the inverse FFT and converts to a std::vector
   return arma::conv_to<vec>::from(arma::real(arma::ifft(fft)));
+}
+
+
+//---------------------------------------------------------------------------//
+//--- Gradient FID Factory --------------------------------------------------//
+//---------------------------------------------------------------------------//
+GradientFidFactory::GradientFidFactory()
+{
+  // open the default root file
+  pf_fid_ = new TFile(grad::root_file.c_str());
+  pt_fid_ = (TTree *)pf_fid_->Get("t");
+  
+  pt_fid_->GetEntry(0);
+  pt_fid_->SetBranchAddress(grad::fid_branch.c_str(), &wf_[0]);
+
+  num_sim_fids_ = pt_fid_->GetEntries();
+  d_grad_ = (grad::max - grad::min) / num_sim_fids_;
+  zero_idx_ = -1 * grad::min / d_grad_ + 0.5;
+}
+
+GradientFidFactory::~GradientFidFactory()
+{
+  // closing the TFile will take care of the TTree pointer
+  pf_fid_->Close();
+  delete pf_fid_;
+}
+
+void GradientFidFactory::ConstructFid(const vec& gradient, vec& wf)
+{
+  // Find the appropriate FIDs and sum them
+  wf.assign(len_fids, 0.0);
+
+  for (auto val : gradient){
+
+    pt_fid_->GetEntry(GetTreeIndex(val));
+
+    for (int i = 0; i < wf.size(); i++){
+      wf[i] += wf_[i] / gradient.size();
+    }
+  }
+}
+
+int GradientFidFactory::GetTreeIndex(double grad_strength)
+{
+  return (int)(std::nearbyint(grad_strength / d_grad_ + zero_idx_) + 0.5);
 }
 
 } // ::fid

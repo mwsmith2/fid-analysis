@@ -12,8 +12,8 @@ checks for parameters in ./runtime/fid_params.json after loading the defaults.
 "fid_params.h" is present in all of the project.  It holds the parameter
 namespace "fid" as well as a typedef for vec=std::vector<double>.
 
-library
-=======
+library overview
+================
 
 "fid_class.h"
 
@@ -50,6 +50,9 @@ class FidFactory()
 
 SimulateFid(vec& wf, vec& tm)
 IdealFid(vec& wf, vec& tm)
+
+class GradientFidFactory()
+
 
 
 "fid.h"
