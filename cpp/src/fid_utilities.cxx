@@ -60,41 +60,53 @@ void construct_linear_gradient(int num_points, vec &grad)
 }
 
 
-void draw_fid(const vec &wf, 
-                  const vec &tm, 
-                  const string filename,
-                  const string title)
+void draw_graph(TGraph &gr, string fname, string title)
 {
+  // Set up the graph
+  string new_title(title);
+  new_title.append("; time [ms]; amplitude [a.u.]");
+  gr.SetTitle(new_title.c_str());
+
   // Get our own TCanvas
   TCanvas c1;
 
-  // Set up the graph
-  TGraph gr(wf.size(), &tm[0], &wf[0]);
-  string new_title(title);
-  new_title.append("; time [ms]; amplitude [a.u.]");
-  gr.SetTitle(title.c_str());
-
   // Draw the waveform
   gr.Draw();
-  c1.Print(filename.c_str());
+  c1.Print(fname.c_str());
+}
+
+void draw_graph(const vec &wf, const vec &tm, string fname, string title)
+{
+  // Create a graph
+  TGraph gr(wf.size(), &tm[0], &wf[0]);
+
+  draw_graph(gr, fname, title);
 }
 
 
-void draw_fid(FID &my_fid, const string filename, const string title)
+void draw_fid(const FID &my_fid, string fname, string title)
 {
-  // Get our own TCanvas
-  TCanvas c1;
+  // Get the data vectors
+  vec wf = my_fid.wf();
+  vec tm = my_fid.tm();
 
-  // Set up the graph
-  int N = my_fid.wf().size();
-  TGraph gr(N, &my_fid.tm()[0], &my_fid.wf()[0]);
-  string new_title(title);
-  new_title.append("; time [ms]; amplitude [a.u.]");
-  gr.SetTitle(title.c_str());
+  draw_graph(wf, tm, fname, title);
+}
 
-  // Draw the waveform
-  gr.Draw();
-  c1.Print(filename.c_str());
+
+void draw_fid_time_fit(const FID &my_fid, string fname, string title)
+{
+  // Copy the graph
+  TGraph gr = my_fid.gr_time_series();
+  draw_graph(gr, fname, title);
+}
+
+
+void draw_fid_freq_fit(const FID &my_fid, string fname, string title)
+{
+  // Copy the graph
+  TGraph gr = my_fid.gr_freq_series();
+  draw_graph(gr, fname, title);
 }
 
 
@@ -122,6 +134,26 @@ void calc_freq_save_csv(FID& my_fid, ofstream& out)
   out << my_fid.CalcExponentialFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcPhaseFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << ", ";
+}
+
+void read_fid_file(string fname, vec &wf, vec &tm)
+{
+  // open the file first
+  std::ifstream in(fname);
+
+  // shrink vectors
+  wf.resize(0);
+  tm.resize(0);
+
+  double wf_temp;
+  double tm_temp;
+
+  while (in.good())
+  {
+    in >> tm_temp >> wf_temp;
+    tm.push_back(tm_temp);
+    wf.push_back(wf_temp);
+  }
 }
 
 } // fid

@@ -23,12 +23,20 @@ using std::ofstream;
 
 namespace fid{
 
-  // Plots and saves an image of the FID
-  void draw_fid(const vec &wf, const vec &tm, 
-    const string filename, const string title);
-  void draw_fid(FID &my_fid, const string filename, const string title);
+  // Plots and saves an image
+  void draw_graph(TGraph &gr, string fname, string title);
+  void draw_graph(const vec &wf, const vec &tm, string fname, string title);
 
+  // Plots and save specific FID images
+  void draw_fid(const FID &my_fid, string fname, string title);
+  void draw_fid_time_fit(const FID &my_fid, string fname, string title);
+  void draw_fid_freq_fit(const FID &my_fid, string fname, string title);
+
+  // Try all frequency extraction methods and write in a csv format
   void calc_freq_save_csv(FID &my_fid, ofstream &out);
+
+  // Read a FID file which is two space delimited columns (time voltage)
+  void read_fid_file(string fname, vec &wf, vec &tm);
 
   // Add Gaussian noise to the given waveform
   void add_white_noise(vec &wf, double snr=100.0);

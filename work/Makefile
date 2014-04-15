@@ -6,7 +6,7 @@ OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 FID_DIR = ../cpp
 
 FLAGS = -std=c++11 -g -I$(FID_DIR)/include
-LIBS = -lfftw3 -lm -L$(FID_DIR)/lib/ -lFid
+LIBS = -lfftw3 -lm -L/usr/local/lib/ -lboost_filesystem -lboost_system -L$(FID_DIR)/lib/ -lFid
 
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)

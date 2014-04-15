@@ -40,16 +40,16 @@ namespace fid
 			double CalcSinusoidFreq();
 
 			// accessors
-			vec& wf() {return wf_;};
-			vec& tm() {return tm_;};
-			const vec& power() {return power_;};
-			const vec& freq() {return freq_;};
-			const vec& phase() {return phase_;}
-			const vec& env() {return env_;};
-			const double& chi2() {return chi2_;};
-			const TGraph& gr_time_series() {return gr_time_series_;};
-			const TGraph& gr_freq_series() {return gr_freq_series_;};
-			const TF1&    f_fit() {return f_fit_;};
+			const vec& wf() const {return wf_;};
+			const vec& tm() const {return tm_;};
+			const vec& power() const {return power_;};
+			const vec& freq() const {return freq_;};
+			const vec& phase() const {return phase_;}
+			const vec& env() const {return env_;};
+			const double& chi2() const {return chi2_;};
+			const TGraph& gr_time_series() const {return gr_time_series_;};
+			const TGraph& gr_freq_series() const {return gr_freq_series_;};
+			const TF1&    f_fit() const {return f_fit_;};
 
 		private:
 
