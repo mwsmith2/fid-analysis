@@ -2,206 +2,78 @@
 
 Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
-Date:   11/02/14
+Date:   15/04/14
 
-File:   prog/sim_fid_lin_grad.cxx
-Detail: The program tests the effects of linear gradients on frequency extraction from free induction decays.  The waveforms are simulated.
+Detail: The program is meant to test the effects of linear field gradients on the FID frequency extraction.  The sweep parameters are set in a separate config file here, but the user need not rely on the config parameters.  All that needs to be done is the defining of a gradient vector.
 
 \*===========================================================================*/
 
-
 //--- std includes ----------------------------------------------------------//
-#include <iostream>
 #include <fstream>
-#include <vector>
-#include <random>
-#include <cmath>
-#include <numeric>
-#include <algorithm>
-using std::vector;
-using std::cout;
-using std::endl;
 
-//-- other includes ---------------------------------------------------------//
+//--- other includes --------------------------------------------------------//
 #include "TFile.h"
 #include "TTree.h"
 
 //--- project includes ------------------------------------------------------//
-#include "fid.h"
+#include "fid_params.h"
 #include "fid_class.h"
+#include "fid_sim.h"
+#include "fid_utilities.h"
 
-// unnamed local global namespace
-namespace {
-  // declare variables
-  int fid_length = 10000;
-  double ti = -1.0;
-  double dt = 0.001;
+using namespace fid;
+using namespace fid::sweep;
 
-  int nfids = 500;
-  int npoints = 21;
-
-  double gmin = 0.0;
-  double gmax = 200.0;
-  double dg = 50.0;
-
-  // Get our root data
-  TFile *pf = new TFile("input/sim_fids.root");
-  TTree *pt = (TTree *)pf->Get("t");
-  vector<double> my_fid;
-}
-
-// Declare methods
-void AddWhiteNoise(vector<double> &wf, double snr=100.0);
-void SetTimeVector(int ntimes, double t0, double dt, vector<double> &tm);
-void ConstructGradient(int npoints, vector<double> &grad);
-void ConstructFID(vector<double> &grad, vector<double> &wf);
-
-inline int GetTreeIndex(double grad_strength){
-  return (int)(std::nearbyint(grad_strength / (0.1) + 5000) + 0.5);
-}
-
-// Implement main function
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-  // set precision
-  cout.precision(10);
-  cout.setf(std::ios::fixed, std:: ios::floatfield);
+  // initialize the configurable parameters
+  load_params(argc, argv);
 
-  // Declare objects
+  // some necessary parameters
+  vec wf;
+  vec tm;
+  vec grads;
+  vec grad_0;
+  vec gradient;
+
+  construct_time_vector(len_fids, i_time, d_time, tm);
+  grads = construct_sweep_range(grad_range);
+
+  // Make FidFactory
+  GradientFidFactory gff;
+  construct_linear_gradient(20, grad_0);
+
+  // csv output
   std::ofstream out;
   out.precision(10);
-  out.setf(std::ios::fixed, std:: ios::floatfield);
-  out.open("output/lin_grad_data.csv");
+  out.setf(std::ios::fixed, std::ios::floatfield);
+  out.open("data/sim_fid_lin_grad_data.csv");
 
-  vector<double> wf;
-  vector<double> tm;
-  wf.reserve(fid_length);
-  tm.reserve(fid_length);
-  
-  SetTimeVector(fid_length, ti, dt, tm);
+  // begin sweeps
+  for (auto g: grads){
 
-  vector<double> grad_strengths;
-  vector<double> grad_norm;
-  vector<double> gradient;
+    cout << "gradient strength " << g << endl;
 
-  ConstructGradient(npoints, grad_norm);
-  gradient = grad_norm;
+    for (int i = 0; i < num_fids; ++i){
 
-  for (double g = 0.0; g <= 500.0; g += dg){
-    grad_strengths.push_back(g);
-  }
+      gradient.resize(0);
 
-  // root stuff
+      for (auto val : grad_0){
+        gradient.push_back(val * g);
+      }
 
-  my_fid.resize(fid_length);
-  pt->SetBranchAddress("fid", &::my_fid[0]);
-  pt->GetEntry(0);
+      gff.ConstructFid(gradient, wf);
+      FID my_fid(wf, tm);
 
-  for (auto val : grad_strengths){
+      calc_freq_save_csv(my_fid, out);
 
-    for (int i = 0; i < grad_norm.size(); i++){
-      gradient[i] = val * grad_norm[i];
+      if (i == 0){
+        static char str[60];
+        sprintf(str, "data/fig/fid_lin_grad_%03dppb.pdf", (int)g);
+        draw_fid(my_fid, str, string("Test FID")); 
+      }
     }
+  } // grad
 
-    cout << "Running for gradient strength " << val << " ppm.\n";
-
-    for (int i = 0; i < nfids; i++){
-
-        ConstructFID(gradient, wf);
-        AddWhiteNoise(wf);
-
-        fid::FID my_fid(wf, tm);
-
-        out << val << ", ";
-        out << my_fid.CalcZeroCountFreq() << ", ";
-        out << my_fid.CalcCentroidFreq() << ", ";
-        out << my_fid.CalcAnalyticalFreq() << ", ";
-        out << my_fid.CalcLorentzianFreq() << ", ";
-        out << my_fid.CalcSoftLorentzianFreq() << ", ";
-        out << my_fid.CalcExponentialFreq() << ", ";
-        out << my_fid.CalcPhaseFreq() << ", ";
-        out << my_fid.CalcSinusoidFreq() << endl;
-    }
-  }
-
-  out.close();
-  pf->Close();
-  delete pf;
   return 0;
 }
-
-// Implement helper functions
-void AddWhiteNoise(vector<double> &wf, double snr){
-  static std::default_random_engine gen;
-  static std::normal_distribution<double> nrm(0.0, snr);
-
-  double max = *std::max_element(wf.begin(), wf.end());
-  double min = *std::min_element(wf.begin(), wf.end());
-  double scale = max > min ? max : min;
-
-  for (auto x : wf){
-    x += scale * nrm(gen);
-  }
-
-  return;
-}
-
-void SetTimeVector(int ntimes, double t0, double dt, vector<double> &tm)
-{
-  if (tm.size() != ntimes){
-    tm.resize(ntimes);
-  }
-
-  for (int i = 0; i < ntimes; i++){
-    tm[i] = dt * i - t0;
-  }
-
-  return;
-}
-
-void ConstructGradient(int npoints, vector<double> &grad)
-{
-  // construct a normalize linear gradient
-
-  // first get the spacing right
-  for (int i = 0; i < npoints; i++){
-    grad.push_back((double)i);
-  }
-
-  // subtract off the average
-  double avg = std::accumulate(grad.begin(), grad.end(), 0.0) / grad.size();
-  for (int i = 0; i < grad.size(); i++){
-    grad[i] -= avg;
-  }
-
-  // normalize by largest value
-  double max = *std::max_element(grad.begin(), grad.end());
-  for (int i = 0; i < grad.size(); i++){
-    grad[i] /= max;
-  }
-
-  cout << endl;
-
-}
-
-void ConstructFID(vector<double> &grad, vector<double> &wf)
-{
-  // Find the appropriate FIDs and sum them
-  wf.assign(fid_length, 0.0);
-
-  for (auto val : grad){
-
-    pt->GetEntry(GetTreeIndex(val));
-
-    for (int i = 0; i < wf.size(); i++){
-      wf[i] += my_fid[i] / grad.size();
-    }
-  }
-
-  return;
-}
-
-
-
-
-

@@ -2,9 +2,13 @@
 
 Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
-Date:   11/02/14
+Date:   15/04/14
 
-Detail: This is a new test program for my FID libraries 
+Detail: The program is meant to test the effects of field gradients
+        on the FID frequency extraction.  The sweep parameters are
+        set in a separate config file here, but the user need not rely
+        on the config parameters.  All that needs to be done is the
+        defining of a gradient vector.
 
 \*===========================================================================*/
 
@@ -18,8 +22,8 @@ Detail: This is a new test program for my FID libraries
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
 #include "fid_class.h"
-#include "fid_utilities.h"
 #include "fid_sim.h"
+#include "fid_utilities.h"
 
 using namespace fid;
 using namespace fid::sweep;
@@ -36,17 +40,18 @@ int main(int argc, char **argv)
   vec grad_0;
   vec gradient;
 
-  fid::ConstructTimeVector(len_fids, i_time, d_time, tm);
-  grads = ConstructSweepRange(grad_range);
+  construct_time_vector(len_fids, i_time, d_time, tm);
+  grads = construct_sweep_range(grad_range);
 
   // Make FidFactory
   GradientFidFactory gff;
-  ConstructQuadraticGradient(20, grad_0);
+  construct_quadratic_gradient(20, grad_0);
 
   // csv output
   std::ofstream out;
   out.precision(10);
   out.setf(std::ios::fixed, std::ios::floatfield);
+  out.open("data/sim_fid_quad_grad_data.csv");
 
   // begin sweeps
   for (auto g: grads){
@@ -64,12 +69,12 @@ int main(int argc, char **argv)
       gff.ConstructFid(gradient, wf);
       FID my_fid(wf, tm);
 
-      CalcFreqSaveCsv(my_fid, out);
+      calc_freq_save_csv(my_fid, out);
 
       if (i == 0){
         static char str[60];
         sprintf(str, "data/fig/fid_quad_grad_%03dppb.pdf", (int)g);
-        DrawFID(my_fid, str, string("Test FID")); 
+        draw_fid(my_fid, str, string("Test FID")); 
       }
     }
   } // grad

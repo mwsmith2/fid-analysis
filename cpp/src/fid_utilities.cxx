@@ -2,7 +2,7 @@
 
 namespace fid {
 
-void ConstructTimeVector(int num_times, double t0, double dt, vec &tm)
+void construct_time_vector(int num_times, double t0, double dt, vec &tm)
 {
   if (tm.size() != num_times){
     tm.resize(num_times);
@@ -14,7 +14,7 @@ void ConstructTimeVector(int num_times, double t0, double dt, vec &tm)
 }
 
 
-void ConstructQuadraticGradient(int num_points, vec &grad)
+void construct_quadratic_gradient(int num_points, vec &grad)
 {
   // construct a normalize linear gradient
 
@@ -37,7 +37,7 @@ void ConstructQuadraticGradient(int num_points, vec &grad)
 }
 
 
-void ConstructLinearGradient(int num_points, vec &grad)
+void construct_linear_gradient(int num_points, vec &grad)
 {
   // construct a normalize linear gradient
 
@@ -60,7 +60,7 @@ void ConstructLinearGradient(int num_points, vec &grad)
 }
 
 
-void DrawFID(const vec &wf, 
+void draw_fid(const vec &wf, 
                   const vec &tm, 
                   const string filename,
                   const string title)
@@ -80,7 +80,7 @@ void DrawFID(const vec &wf,
 }
 
 
-void DrawFID(FID &my_fid, const string filename, const string title)
+void draw_fid(FID &my_fid, const string filename, const string title)
 {
   // Get our own TCanvas
   TCanvas c1;
@@ -98,7 +98,7 @@ void DrawFID(FID &my_fid, const string filename, const string title)
 }
 
 
-void AddWhiteNoise(vec &wf, double snr){
+void add_white_noise(vec &wf, double snr){
   static std::default_random_engine gen;
   static std::normal_distribution<double> nrm(0.0, snr);
 
@@ -111,19 +111,17 @@ void AddWhiteNoise(vec &wf, double snr){
   }
 }
 
-void CalcFreqSaveCsv(FID& my_fid, ofstream& out)
+void calc_freq_save_csv(FID& my_fid, ofstream& out)
 {
   // Test all the frequency extraction methods and write the results
   out << my_fid.CalcZeroCountFreq() << ", " << 0.0 << ", ";
   out << my_fid.CalcCentroidFreq() << ", " << 0.0 << ", ";
   out << my_fid.CalcAnalyticalFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcLorentzianFreq() << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcZeroCountFreq() << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcZeroCountFreq() << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcZeroCountFreq() << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcZeroCountFreq() << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcZeroCountFreq() << ", " << my_fid.chi2() << ", " << endl;
-
+  out << my_fid.CalcSoftLorentzianFreq() << ", " << my_fid.chi2() << ", ";
+  out << my_fid.CalcExponentialFreq() << ", " << my_fid.chi2() << ", ";
+  out << my_fid.CalcPhaseFreq() << ", " << my_fid.chi2() << ", ";
+  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << ", ";
 }
 
 } // fid

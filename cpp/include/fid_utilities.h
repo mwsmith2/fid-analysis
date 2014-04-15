@@ -24,27 +24,27 @@ using std::ofstream;
 namespace fid{
 
   // Plots and saves an image of the FID
-  void DrawFID(const vec &wf, const vec &tm, 
+  void draw_fid(const vec &wf, const vec &tm, 
     const string filename, const string title);
-  void DrawFID(FID &my_fid, const string filename, const string title);
+  void draw_fid(FID &my_fid, const string filename, const string title);
 
-  void CalcFreqSaveCsv(FID &my_fid, ofstream &out);
+  void calc_freq_save_csv(FID &my_fid, ofstream &out);
 
   // Add Gaussian noise to the given waveform
-  void AddWhiteNoise(vec &wf, double snr=100.0);
+  void add_white_noise(vec &wf, double snr=100.0);
 
   // Get a time vector for the FID
-  void ConstructTimeVector(int num_times, double t0, double dt, vec &tm);
+  void construct_time_vector(int num_times, double t0, double dt, vec &tm);
 
   // Get a linear gradient with a max(abs(grad)) == 1 and mean(grad) == 0
-  void ConstructLinearGradient(int num_points, vec &grad);
+  void construct_linear_gradient(int num_points, vec &grad);
 
   // Get a quadratic gradient with a max(abs(grad)) == 1 and mean(grad) = 0
-  void ConstructQuadraticGradient(int num_points, vec &grad);
+  void construct_quadratic_gradient(int num_points, vec &grad);
 
   // Use for getting sweep ranges
   template<typename T>
-  inline vector<T> ConstructSweepRange(const vector<T> &range_vec){
+  inline vector<T> construct_sweep_range(const vector<T> &range_vec){
     vector<T> res;
 
     for (T it = range_vec[0]; it <= range_vec[1]; it += range_vec[2]){

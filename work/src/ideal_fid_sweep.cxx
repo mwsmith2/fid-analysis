@@ -41,19 +41,19 @@ int main(int argc, char **argv)
 
   // Get the range to sweep over.
   if (freq_sweep){
-    freqs = ConstructSweepRange(freq_range);
+    freqs = construct_sweep_range(freq_range);
   } else {
     freqs.push_back(s_freq);
   }
 
   if (phase_sweep){
-    phases = ConstructSweepRange(phase_range);
+    phases = construct_sweep_range(phase_range);
   } else {
     phases.push_back(s_phase);
   }
 
   if (snr_sweep){
-    snrs = ConstructSweepRange(snr_range);
+    snrs = construct_sweep_range(snr_range);
   } else {
     snrs.push_back(s_snr);
   }
@@ -76,24 +76,10 @@ int main(int argc, char **argv)
           if (phase_sweep) out << p << ", ";
           if (snr_sweep) out << s << ", ";
 
-          fid::ideal_fid(wf, tm, f, p, s);
-          fid::FID my_fid(wf, tm);
+          ideal_fid(wf, tm, f, p, s);
+          FID my_fid(wf, tm);
 
-          out << my_fid.CalcZeroCountFreq() << ", ";
-          out << my_fid.CalcCentroidFreq() << ", ";
-          out << my_fid.CalcAnalyticalFreq() << ", ";
-          out << my_fid.chi2() << ", ";
-          out << my_fid.CalcLorentzianFreq() << ", ";
-          out << my_fid.chi2() << ", ";
-          out << my_fid.CalcSoftLorentzianFreq() << ", ";
-          out << my_fid.chi2() << ", ";
-          out << my_fid.CalcExponentialFreq() << ", ";
-          out << my_fid.chi2() << ", ";
-          out << my_fid.CalcPhaseFreq() << ", ";
-          out << my_fid.chi2() << ", ";
-          out << my_fid.CalcSinusoidFreq() << endl;
-          out << my_fid.chi2() << ", ";
-
+          calc_freq_save_csv()
         } // n_fids
 
       } // snr
