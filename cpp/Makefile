@@ -27,7 +27,7 @@ LIBNAME = lib/libFid.a
 AR = ar
 ARFLAGS = rvs 
 
-FLAGS = -O3 -Iinclude
+FLAGS += -O3 -Iinclude
 LIBS = -lfftw3 -lm
 
 FLAGS += $(shell root-config --cflags)
