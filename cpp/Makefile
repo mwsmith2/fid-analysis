@@ -21,6 +21,7 @@ ifeq ($UNAME_S, Linux)
 	CXX = g++
 	CC  = gcc
 	FLAGS = -std=c++0x
+endif
 
 LIBNAME = lib/libFid.a
 AR = ar

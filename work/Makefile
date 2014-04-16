@@ -20,6 +20,7 @@ ifeq ($UNAME_S, Linux)
 	CXX = g++
 	CC  = gcc
 	FLAGS = -std=c++0x
+endif
 
 FLAGS += -O2 -I$(FID_DIR)/include
 LIBS = -lfftw3 -lm -lboost_filesystem -lboost_system -L$(FID_DIR)/lib/ -lFid
