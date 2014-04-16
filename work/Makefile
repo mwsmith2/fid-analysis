@@ -8,15 +8,15 @@ FID_DIR = ../cpp
 # Figure out the architecture
 UNAME_S = $(shell uname -s)
 
-ifeq ($UNAME_S, Darwin)
-	# Clang compiler
+# Clang compiler
+ifeq ($(UNAME_S), Darwin)
 	CXX = clang++
 	CC  = clang
 	FLAGS = -std=c++11
 endif
 
-ifeq ($UNAME_S, Linux)
-	# Gnu compiler
+# Gnu compiler
+ifeq ($(UNAME_S), Linux)
 	CXX = g++
 	CC  = gcc
 	FLAGS = -std=c++0x
