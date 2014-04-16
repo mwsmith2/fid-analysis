@@ -24,13 +24,15 @@ using std::ofstream;
 namespace fid{
 
   // Plots and saves an image
-  void draw_graph(TGraph &gr, string fname, string title);
+  void draw_graph(TGraph gr, string fname, string title);
   void draw_graph(const vec &wf, const vec &tm, string fname, string title);
 
   // Plots and save specific FID images
   void draw_fid(const FID &my_fid, string fname, string title);
   void draw_fid_time_fit(const FID &my_fid, string fname, string title);
   void draw_fid_freq_fit(const FID &my_fid, string fname, string title);
+  void draw_fid_time_res(const FID &my_fid, string fname, string title);
+  void draw_fid_freq_res(const FID &my_fid, string fname, string title);
 
   // Try all frequency extraction methods and write in a csv format
   void calc_freq_save_csv(FID &my_fid, ofstream &out);

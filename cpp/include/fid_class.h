@@ -42,6 +42,7 @@ namespace fid
 			// accessors
 			const vec& wf() const {return wf_;};
 			const vec& tm() const {return tm_;};
+			const vec& res() const {return res_;};
 			const vec& power() const {return power_;};
 			const vec& freq() const {return freq_;};
 			const vec& phase() const {return phase_;}
@@ -70,6 +71,7 @@ namespace fid
 			// bigger data arrays
 			vec wf_;
 			vec tm_;
+			vec res_;
 			vec power_;
 			vec env_;
 			vec phase_;

@@ -60,7 +60,7 @@ void construct_linear_gradient(int num_points, vec &grad)
 }
 
 
-void draw_graph(TGraph &gr, string fname, string title)
+void draw_graph(TGraph gr, string fname, string title)
 {
   // Set up the graph
   string new_title(title);
@@ -106,6 +106,47 @@ void draw_fid_freq_fit(const FID &my_fid, string fname, string title)
 {
   // Copy the graph
   TGraph gr = my_fid.gr_freq_series();
+  draw_graph(gr, fname, title);
+}
+
+void draw_fid_time_res(const FID &my_fid, string fname, string title)
+{
+  // Copy the residuals
+  vec res = my_fid.res();
+
+  // Copy the time series graph
+  TGraph gr_fit = my_fid.gr_time_series();
+  TGraph gr(res.size());
+
+  // Set the points
+  for (int i = 0; i < res.size(); ++i){
+    static double x, y;
+
+    gr_fit.GetPoint(i, x, y);
+    gr.SetPoint(i, x, res[i]); 
+  }
+
+  draw_graph(gr, fname, title);
+}
+
+
+void draw_fid_freq_res(const FID &my_fid, string fname, string title)
+{
+  // Copy the residuals
+  vec res = my_fid.res();
+
+  // Copy the frequency series graph
+  TGraph gr_fit = my_fid.gr_freq_series();
+  TGraph gr(res.size());
+
+  // Set the points
+  for (int i = 0; i < res.size(); ++i){
+    static double x, y;
+
+    gr_fit.GetPoint(i, x, y);
+    gr.SetPoint(i, x, res[i]); 
+  }
+
   draw_graph(gr, fname, title);
 }
 

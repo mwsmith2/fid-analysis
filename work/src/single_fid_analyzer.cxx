@@ -8,9 +8,10 @@ notes: This program extracts the frequency of a single fid file and produces plo
 
 usage:
 
-./single_fid_analyzer <fid_data> [<output_file> <figure_directory>]
+./single_fid_analyzer <fid_data> [<output_dir>]
 
-The parameters in brackets are optional.
+The parameters in brackets are optional.  The default output is 
+data/single_fid.
 
 \*===========================================================================*/
 
@@ -38,6 +39,7 @@ int main(int argc, char **argv)
   // filenames
   string data_file;
   string out_file;
+  string out_dir;
   string fig_dir;
 
   // get fid data file
@@ -47,28 +49,21 @@ int main(int argc, char **argv)
   // now get optional output file
   if (argc > 2){
 
-    out_file = string(argv[2]);
+    out_dir = string(argv[2]);
 
   } else {
 
-    out_file = string("data/ideal_fid_sweep_data.csv");
+    out_dir = string("data/single_fid/");
 
   }
 
+  out_file = out_dir + string("single_fid_data.csv");
+  fig_dir = out_dir + string("fig/");
+
+  // open the output file  
   ofstream out;
   out.precision(10);
   out.open(out_file);
-
-  // now get optional figure directory
-  if (argc > 3){
-
-    fig_dir = string(argv[3]);
-
-  } else {
-
-    fig_dir = string("data/fig/single_fid/");
-
-  }
 
   // make certain that the directory exists by creating it
   boost::filesystem::path dir(fig_dir);
@@ -85,14 +80,29 @@ int main(int argc, char **argv)
   // test all methods and save the frequency results
   calc_freq_save_csv(my_fid, out);
 
-  // now make some plots
+  out.close();
+
+  // now make some fit plots
   string title("FID Fit");
   my_fid.CalcAnalyticalFreq();
-  draw_fid_freq_fit(my_fid, fig_dir + string("/analytical_fit.pdf"), title);
-  draw_fid_freq_fit(my_fid, fig_dir + string("/lorentzian_fit.pdf"), title);
-  draw_fid_freq_fit(my_fid, fig_dir + string("/exponential_fit.pdf"), title);
-  draw_fid_time_fit(my_fid, fig_dir + string("/lin_phase_fit.pdf"), title);
-  draw_fid_time_fit(my_fid, fig_dir + string("/sin_fit.pdf"), title);
+  draw_fid_freq_fit(my_fid, fig_dir + string("analytical_fit.pdf"), title);
+  draw_fid_freq_res(my_fid, fig_dir + string("analytical_res.pdf"), title);  
+
+  my_fid.CalcLorentzianFreq();
+  draw_fid_freq_fit(my_fid, fig_dir + string("lorentzian_fit.pdf"), title);
+  draw_fid_freq_res(my_fid, fig_dir + string("lorentzian_res.pdf"), title);  
+
+  my_fid.CalcExponentialFreq();
+  draw_fid_freq_fit(my_fid, fig_dir + string("exponential_fit.pdf"), title);
+  draw_fid_freq_res(my_fid, fig_dir + string("exponential_res.pdf"), title);  
+
+  my_fid.CalcPhaseFreq();
+  draw_fid_time_fit(my_fid, fig_dir + string("lin_phase_fit.pdf"), title);
+  draw_fid_time_res(my_fid, fig_dir + string("lin_phase_res.pdf"), title);  
+
+  my_fid.CalcSinusoidFreq();
+  draw_fid_time_fit(my_fid, fig_dir + string("sinusoid_fit.pdf"), title);
+  draw_fid_time_res(my_fid, fig_dir + string("sinusoid_res.pdf"), title);  
 
   // todo residuals
   out.close();
