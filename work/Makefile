@@ -1,6 +1,7 @@
 # Grab the targets and sources as two batches
 SOURCES = $(wildcard src/*.cxx)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
+TARGETS = $(patsubst src/%.cxx,%,$(SOURCES))
 
 # Set the directory of the FID headers and lib
 FID_DIR = ../cpp
@@ -28,7 +29,7 @@ LIBS = -lfftw3 -lm -lboost_filesystem -lboost_system -L$(FID_DIR)/lib/ -lFid
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)
 
-all:
+all: $(TARGETS)
 
 build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $< 

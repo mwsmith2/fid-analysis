@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
 
-  fid::getIdealFID(wf, tm, ftruth);
+  fid::ideal_fid(wf, tm, ftruth);
 
   fid::FID my_fid(wf, tm);
 

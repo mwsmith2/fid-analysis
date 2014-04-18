@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   vec wf;
   vec tm;
 
-  fid::ConstructTimeVector(len_fids, i_time, d_time, tm);
+  fid::construct_time_vector(len_fids, i_time, d_time, tm);
 
   ofstream out;
   out.precision(10);
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
           ideal_fid(wf, tm, f, p, s);
           FID my_fid(wf, tm);
 
-          calc_freq_save_csv()
+          calc_freq_save_csv(my_fid, out);
         } // n_fids
 
       } // snr

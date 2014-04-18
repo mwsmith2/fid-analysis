@@ -33,7 +33,7 @@ int main(int argc, char **argv)
   vec wf;
   vec tm;
 
-  fid::ConstructTimeVector(len_fids, i_time, d_time, tm);
+  construct_time_vector(len_fids, i_time, d_time, tm);
 
   vec freqs;
   vec phases;
@@ -41,19 +41,19 @@ int main(int argc, char **argv)
 
   // Get the range to sweep over.
   if (freq_sweep){
-    freqs = ConstructSweepRange(freq_range);
+    freqs = construct_sweep_range(freq_range);
   } else {
     freqs.push_back(s_freq);
   }
 
   if (phase_sweep){
-    phases = ConstructSweepRange(phase_range);
+    phases = construct_sweep_range(phase_range);
   } else {
     phases.push_back(s_phase);
   }
 
   if (snr_sweep){
-    snrs = ConstructSweepRange(snr_range);
+    snrs = construct_sweep_range(snr_range);
   } else {
     snrs.push_back(s_snr);
   }
