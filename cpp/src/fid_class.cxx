@@ -437,6 +437,15 @@ double FID::CalcPhaseFreq(int poln)
   return f_fit_.GetParameter(1) / kTau;
 }
 
+double FID::CalcPhaseDerivFreq(int poln)
+{
+  // Do the normal polynomial phase fit to set the fit function
+  CalcPhaseFreq(poln);
+
+  // Find the initial phase by looking at the function's derivative
+  return f_fit_.Derivative(tm_[i_wf_ + params::edge_ignore]);
+} 
+
 
 double FID::CalcSinusoidFreq()
 {
