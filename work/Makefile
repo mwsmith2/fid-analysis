@@ -28,8 +28,6 @@ LIBS = -lfftw3 -lm -lboost_filesystem -lboost_system -L$(FID_DIR)/lib/ -lFid
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)
 
-CXX = clang++
-
 all:
 
 build/%.o: src/%.cxx
