@@ -35,10 +35,10 @@ namespace fid{
   void draw_fid_freq_res(const FID &my_fid, string fname, string title);
 
   // Try all frequency extraction methods and write in a csv format
-  void calc_freq_save_csv(FID &my_fid, ofstream &out);
+  void calc_freq_write_csv(FID &my_fid, ofstream &out);
 
   // Try all phase related frequency extraction methods and write to csv
-  void calc_phase_freq_save_csv(FID &my_fid, ofstream &out);
+  void calc_phase_freq_write_csv(FID &my_fid, ofstream &out);
 
   // Read a FID file which is two space delimited columns (time voltage)
   void read_fid_file(string fname, vec &wf, vec &tm);

@@ -164,7 +164,7 @@ void add_white_noise(vec &wf, double snr){
   }
 }
 
-void calc_freq_save_csv(FID& my_fid, ofstream& out)
+void calc_freq_write_csv(FID& my_fid, ofstream& out)
 {
   // Test all the frequency extraction methods and write the results
   out << my_fid.CalcZeroCountFreq() << ", " << 0.0 << ", ";
@@ -174,10 +174,10 @@ void calc_freq_save_csv(FID& my_fid, ofstream& out)
   out << my_fid.CalcSoftLorentzianFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcExponentialFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcPhaseFreq() << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << ", ";
+  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << endl;;
 }
 
-void calc_phase_freq_save_csv(FID& my_fid, ofstream& out)
+void calc_phase_freq_write_csv(FID& my_fid, ofstream& out)
 {
   // Test all the frequency extraction methods using the phase
   out << my_fid.CalcPhaseFreq() << ", " << my_fid.chi2() << ", ";
@@ -186,7 +186,7 @@ void calc_phase_freq_save_csv(FID& my_fid, ofstream& out)
   out << my_fid.CalcPhaseDerivFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcPhaseDerivFreq(2) << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcPhaseDerivFreq(3) << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << ", ";
+  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << endl;
 }
 
 void read_fid_file(string fname, vec &wf, vec &tm)

@@ -69,7 +69,7 @@ int main(int argc, char **argv)
       gff.ConstructFid(gradient, wf);
       FID my_fid(wf, tm);
 
-      calc_phase_freq_save_csv(my_fid, out);
+      calc_phase_freq_write_csv(my_fid, out);
 
       if (i == 0){
         static char str[60];

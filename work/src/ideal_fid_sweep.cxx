@@ -79,7 +79,7 @@ int main(int argc, char **argv)
           ideal_fid(wf, tm, f, p, s);
           FID my_fid(wf, tm);
 
-          calc_freq_save_csv(my_fid, out);
+          calc_freq_write_csv(my_fid, out);
         } // n_fids
 
       } // snr
