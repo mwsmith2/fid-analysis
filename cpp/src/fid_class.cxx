@@ -443,6 +443,7 @@ double FID::CalcPhaseDerivFreq(int poln)
   CalcPhaseFreq(poln);
 
   // Find the initial phase by looking at the function's derivative
+  cout << "Derivative at t = " << tm_[i_wf_ + params::edge_ignore]) << endl;
   return f_fit_.Derivative(tm_[i_wf_ + params::edge_ignore]);
 } 
 

@@ -78,7 +78,7 @@ int main(int argc, char **argv)
   FID my_fid(wf, tm);
 
   // test all methods and save the frequency results
-  calc_freq_save_csv(my_fid, out);
+  calc_freq_write_csv(my_fid, out);
 
   out.close();
 
