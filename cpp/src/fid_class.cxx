@@ -443,8 +443,7 @@ double FID::CalcPhaseDerivFreq(int poln)
   CalcPhaseFreq(poln);
 
   // Find the initial phase by looking at the function's derivative
-  cout << "Derivative at t = " << tm_[i_wf_ + params::edge_ignore]) << endl;
-  return f_fit_.Derivative(tm_[i_wf_ + params::edge_ignore]);
+  return f_fit_.Derivative(tm_[i_wf_ + params::edge_ignore]) / kTau;
 } 
 
 
@@ -460,8 +459,8 @@ double FID::CalcSinusoidFreq()
 
   f_fit_ = TF1("f_fit_", "[1] * sin([0] * x) + [2] * cos([0] * x)");
 
-  // Set guess parameters
-  f_fit_.SetParameter(0, 23.0 * kTau);
+  // Guess parameters
+  f_fit_.SetParameter(0, kTau * CalcZeroCountFreq());
   f_fit_.SetParameter(1, 1.0);
   f_fit_.SetParameter(2, phase_[i_wf_]);
 
