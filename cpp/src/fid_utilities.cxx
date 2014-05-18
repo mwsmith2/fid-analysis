@@ -16,7 +16,7 @@ void construct_time_vector(int num_times, double t0, double dt, vec &tm)
 
 void construct_quadratic_gradient(int num_points, vec &grad)
 {
-  // construct a normalize linear gradient
+  // construct a normalized, centered quadratic gradient
 
   // first get the spacing right
   for (int i = 0; i < num_points; i++){
@@ -39,11 +39,11 @@ void construct_quadratic_gradient(int num_points, vec &grad)
 
 void construct_linear_gradient(int num_points, vec &grad)
 {
-  // construct a normalize linear gradient
+  // construct a normalized, centered linear gradient
 
   // first get the spacing right
   for (int i = 0; i < num_points; i++){
-    grad.push_back((double)i * i);
+    grad.push_back((double)i);
   }
 
   // subtract off the average

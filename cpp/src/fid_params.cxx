@@ -64,6 +64,8 @@ namespace grad {
   string fid_branch;
   double min;
   double max;
+  int poln_order;
+  vec poln_coefs;
 }
 
 // general fid analysis params
@@ -152,6 +154,11 @@ void load_params(int argc, char **argv)
   grad::fid_branch = pt.get<string>("grad.fid_branch");
   grad::min = pt.get<double>("grad.min");
   grad::max = pt.get<double>("grad.max");
+  grad::poln_order = pt.get<double>("grad.poln_order");
+
+  BOOST_FOREACH(ptree::value_type &v, pt.get_child("grad.poln_coefs")){
+    grad::poln_coefs.push_back(v.second.get_value<double>());
+  }
 
   // analysis parameters
   fit_width = pt.get<int>("params.fit_width");
@@ -254,6 +261,16 @@ void load_params(int argc, char **argv)
   grad::fid_branch = pt.get<string>("grad.fid_branch", grad::fid_branch);
   grad::min = pt.get<double>("grad.min", grad::min);
   grad::max = pt.get<double>("grad.max", grad::max);
+  grad::poln_order = pt.get<double>("grad.poln_order", grad::poln_order);
+
+  try {
+    vec tmp;
+    BOOST_FOREACH(ptree::value_type &v, pt.get_child("grad.poln_coefs")){
+      tmp.push_back(v.second.get_value<double>());
+    }
+    grad::poln_coefs = tmp;
+  }
+  catch (boost::property_tree::ptree_bad_path){};
 
   // analysis parameters
   fit_width = pt.get<int>("params.fit_width", fit_width);

@@ -59,5 +59,15 @@
 		"zc_alpha":0.5,
 		"ph_edge_ignore":10,
 		"ph_max_jump":0.7
+	},
+
+	"grad":{
+		"poly_num":3,
+		"poly_coef":[
+			0.0,
+			0.0,
+			1.0,
+			0.0
+		]
 	}
 }

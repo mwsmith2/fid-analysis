@@ -77,7 +77,14 @@
 			"root_file":"runtime/sim_fids.root",
 			"fid_branch":"fid",
 			"min":-500.0,
-			"max":500.0
+			"max":500.0,
+			"poln_order":2,
+			"poln_coefs":[
+				0.0,
+				0.0,
+				1.0,
+				0.0
+			]
 		},
 
 		"params":{

@@ -97,6 +97,8 @@ namespace grad {
   extern string fid_branch;
   extern double min;
   extern double max;
+  extern int poln_order;
+  extern vec poln_coefs;
 }
 
 // general fid analysis params
