@@ -47,7 +47,7 @@ int main(int argc, char **argv)
   GradientFidFactory gff;
 
   // construct a normalized, centered polynomial gradient
-  char str[10];
+  char str[60];
   int npoints = 21;
   sprintf(str, "pol%d", grad::poln_order);
   TF1 f1("f1", str);
@@ -80,7 +80,8 @@ int main(int argc, char **argv)
   std::ofstream out;
   out.precision(10);
   out.setf(std::ios::fixed, std::ios::floatfield);
-  out.open("data/sim_fid_quad_grad_data.csv");
+  sprintf(str, "data/sim_fid_pol%d_grad_data.csv", grad::poln_order);
+  out.open(str);
 
   // begin sweeps
   for (auto g: grads){
@@ -101,8 +102,7 @@ int main(int argc, char **argv)
       calc_freq_write_csv(my_fid, out);
 
       if (i == 0){
-        static char str[60];
-        sprintf(str, "data/fig/fid_quad_grad_%03dppb.pdf", (int)g);
+        sprintf(str, "data/fig/fid_pol%d_grad_%03dppb.pdf", grad::poln_order, (int)g);
         draw_fid(my_fid, str, string("Test FID")); 
       }
     }
