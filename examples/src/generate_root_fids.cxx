@@ -14,6 +14,7 @@ Detail: This is a new test program for my FID libraries
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
 #include "TTree.h"
+#include "TString.h"
 
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
@@ -22,74 +23,51 @@ Detail: This is a new test program for my FID libraries
 #include "fid_sim.h"
 
 using namespace fid;
-using namespace fid::sweep;
+using namespace fid::sim;
 
 int main(int argc, char **argv)
 {
   // initialize the configurable parameters
   load_params(argc, argv);
+  len_fids = num_points / reduction; // from fid::sim
 
   // some necessary parameters
   vec wf;
   vec tm;
+  wf.reserve(len_fids);
+  tm.reserve(len_fids);
+  double delta_b;
+  double max_grad = 500; // in ppm
+  double freq_0 = sim::freq_larmor;
 
   construct_time_vector(len_fids, i_time, d_time, tm);
-
-  vec freqs;
-  vec phases;
-  vec snrs;
-
-  // Get the range to sweep over.
-  if (freq_sweep){
-    freqs = construct_sweep_range(freq_range);
-  } else {
-    freqs.push_back(s_freq);
-  }
-
-  if (phase_sweep){
-    phases = construct_sweep_range(phase_range);
-  } else {
-    phases.push_back(s_phase);
-  }
-
-  if (snr_sweep){
-    snrs = construct_sweep_range(snr_range);
-  } else {
-    snrs.push_back(s_snr);
-  }
 
   // Make FidFactory
   FidFactory ff;
 
   // Set up the ROOT tree to hold the results
-  // todo
+  TFile pf("test.root", "recreate");
+  TTree pt("t", "FID Tree");
 
-  // begin sweeps
-  for (auto f: freqs){
+  pt.Branch("db", &delta_b, "delta_b/D");
+  pt.Branch("fid", &wf[0], TString::Format("fid[%d]/D", len_fids));
+  pt.Branch("tm", &tm[0], TString::Format("time[%d]/D", len_fids));
 
-    for (auto p: phases){
+  // begin grad sims
+  for (int i = -1 * num_fids / 2; i < num_fids / 2 + 1; ++i){
 
-      for (auto s: snrs){
+    delta_b = max_grad * 2 * i / num_fids;
 
-        if (freq_sweep) cout << "Running for frequency " << f;
-        if (phase_sweep) cout << ", phase " << p;
-        if (snr_sweep) cout << ", signal-to-noise " << s;
-        cout << endl;
+    sim::freq_larmor = 1.0e-6 * delta_b + freq_0;
 
-        ff.SimulateFid(wf, tm);
+    ff.SimulateFid(wf, tm);
 
-        cout << "SimulatedFid: ";
-        for (auto it = wf.begin(); it != wf.end(); ++it){
-          cout << *it;
-        }
-        cout << endl;
-        fid::FID my_fid(wf, tm);
+    pt.Fill();
 
-      } // snr
+  } // grad
 
-    } // phi
-
-  } // freq
+  pf.Write();
+  pf.Close();
 
   return 0;
 }
