@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.interpolate import splrep, sproot
-from pandas import read_csv
+#from pandas import read_csv
 
 
 """ The FID class

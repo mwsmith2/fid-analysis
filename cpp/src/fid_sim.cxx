@@ -105,7 +105,7 @@ vec FidFactory::Bfield(const double& x, const double& t)
   // Made static to save on memory calls.
   static vec a = {0., 0., 0.}; // holds constant external field
   static vec b = {0., 0., 0.}; // for time dependent B field
-  static double w = kTau * sim::freq_ref;
+  static double w = kTau * sim::freq_larmor;
 
   // Return static external field if after the pulsed field.
   if (t >= sim::t_pulse){
@@ -177,7 +177,7 @@ void FidFactory::Printer(vec const &s , double t){
         count = 0;
 
         // Progress report
-        if (fid_num % (num_fids/10) == 0){
+        if (fid_num % (num_fids/10) == 0 && fid_num != 0){
           cout << fid_num << " FIDs have been simulated." << endl;
         }
 
@@ -199,7 +199,7 @@ vec FidFactory::LowPassFilter(vec& s){
 
   // Store the filter statically though this might be a minimal speed boost.
   static vec filter;
-  static double freq_cut = kTau * sim::freq_ref;
+  static double freq_cut = kTau * sim::freq_larmor;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
   if (filter.size() == 0){

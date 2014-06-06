@@ -42,11 +42,8 @@ int main(int argc, char **argv)
 
   construct_time_vector(len_fids, i_time, d_time, tm);
 
-  // Make FidFactory
-  FidFactory ff;
-
   // Set up the ROOT tree to hold the results
-  TFile pf("test.root", "recreate");
+  TFile pf("sim_fids.root", "recreate");
   TTree pt("t", "FID Tree");
 
   pt.Branch("db", &delta_b, "delta_b/D");
@@ -56,10 +53,11 @@ int main(int argc, char **argv)
   // begin grad sims
   for (int i = -1 * num_fids / 2; i < num_fids / 2 + 1; ++i){
 
-    delta_b = max_grad * 2 * i / num_fids;
-
+    delta_b = max_grad * 2.0 * i / num_fids;
     sim::freq_larmor = 1.0e-6 * delta_b + freq_0;
 
+    // Make FidFactory
+    FidFactory ff;
     ff.SimulateFid(wf, tm);
 
     pt.Fill();
