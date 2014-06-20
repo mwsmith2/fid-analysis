@@ -10,6 +10,7 @@ Detail: This is a new test program for my FID libraries
 
 //--- std includes ----------------------------------------------------------//
 #include <fstream>
+#include <iostream>
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -54,7 +55,9 @@ int main(int argc, char **argv)
   for (int i = -1 * num_fids / 2; i < num_fids / 2 + 1; ++i){
 
     delta_b = max_grad * 2.0 * i / num_fids;
-    sim::freq_larmor = 1.0e-6 * delta_b + freq_0;
+    sim::freq_larmor = (1.0 + 1.0e-6 * delta_b) * freq_0;
+
+    std::cout << sim::freq_larmor << std::endl;
 
     // Make FidFactory
     FidFactory ff;

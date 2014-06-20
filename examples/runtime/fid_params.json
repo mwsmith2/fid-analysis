@@ -7,7 +7,7 @@
 },
 
 "fid":{
-	"num_fids":20,
+	"num_fids":100,
 	"len_fids":10000,
 	"i_time":-1.0,
 	"d_time": 0.001,
