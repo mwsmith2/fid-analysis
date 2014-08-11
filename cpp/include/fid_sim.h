@@ -23,6 +23,7 @@ initalization
 #include <algorithm>
 #include <random>
 #include <cmath>
+#include <functional>
 
 //--- other includes --------------------------------------------------------//
 #include <boost/numeric/odeint.hpp>
@@ -95,21 +96,23 @@ class FidFactory
 
  private:
 
-  static double ti_;
-  static double tf_;
-  static double dt_;
-  static double x_;
+  double ti_;
+  double tf_;
+  double dt_;
+  int sim_to_fid_;
+  int sim_length_;
+  int printer_idx_;
 
-  static vec s_;
-  static vec spin_;
-  static vec time_vec_;
-  static vec spin_sum_;
-  static vec cos_cache_;
-  static vec gradient_;
+  vec s_;
+  vec spin_vec_;
+  vec time_vec_;
+  vec spin_sum_;
+  vec cos_cache_;
+  vec gradient_;
   
   // private member functions
   // Define the cross product for 3-vectors.
-  static inline void Cross(const vec& u, const vec& v, vec& res)
+  inline void Cross(const vec& u, const vec& v, vec& res)
   {
     res[0] = u[1] * v[2] - u[2] * v[1];
     res[1] = u[2] * v[0] - u[0] * v[2];
@@ -117,16 +120,16 @@ class FidFactory
   } 
 
   // Low pass filter to extract mixed down signal.
-  static vector<double> LowPassFilter(vector<double>& s);
+  vector<double> LowPassFilter(vector<double>& s);
 
   // Function which returns time dependent Bfield.
-  static vec Bfield(const double& x, const double& t);
+  vec Bfield(const double& t);
 
   // The time evolution equation for the fields.
-  static void Bloch(vec const &s, vec &dsdt, double t);
+  void Bloch(vec const &s, vec &dsdt, double t);
 
   // The integration monitor function
-  static void Printer(vec const &s , double t);
+  void Printer(vec const &s , double t);
 
 }; // FidFactory
 

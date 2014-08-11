@@ -42,11 +42,8 @@ namespace sweep {
 namespace sim {
 
   int seed;
-  int num_points;
-  int reduction;
   vec spin_0;
 
-  double d_bfield;
   double dt_integration;
 
   double omega_r;
@@ -132,13 +129,10 @@ void load_params(int argc, char **argv)
 
   // sim parameters
   seed = pt.get<int>("sim.seed");
-  num_points = pt.get<int>("sim.num_points");
-  reduction = pt.get<int>("sim.reduction");
   BOOST_FOREACH(ptree::value_type &v, pt.get_child("sim.spin_0")){
     spin_0.push_back(v.second.get_value<double>());
   }
 
-  d_bfield = pt.get<double>("sim.d_bfield");
   dt_integration = pt.get<double>("sim.dt_integration");
 
   omega_r = pt.get<double>("sim.omega_r");
@@ -177,6 +171,8 @@ void load_params(int argc, char **argv)
   } else {
     config_file = string(argv[1]);
   }
+  read_json(config_file, pt);
+  pt = pt.get_child("fid");
 
   // general fid parameters
   num_fids = pt.get<int>("num_fids", num_fids);
@@ -233,8 +229,6 @@ void load_params(int argc, char **argv)
 
   // sim parameters
   seed = pt.get<int>("sim.seed", seed);
-  num_points = pt.get<int>("sim.num_points", num_points);
-  reduction = pt.get<int>("sim.reduction", reduction);
 
   try {
     vec tmp;
@@ -245,7 +239,6 @@ void load_params(int argc, char **argv)
   }
   catch (boost::property_tree::ptree_bad_path){};
 
-  d_bfield = pt.get<double>("sim.d_bfield", d_bfield);
   dt_integration = pt.get<double>("sim.dt_integration", dt_integration);
 
   omega_r = pt.get<double>("sim.omega_r", omega_r);

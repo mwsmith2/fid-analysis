@@ -72,15 +72,9 @@ namespace sweep {
 namespace sim {
 
   extern int seed;   // the seed for the random generator
-  // NOTE: the FID is simulated then mixed down, so it needs to be simulated
-  // at a higher sampling rate to capture the original, large frequency
-  extern int num_points;  // number of points in simulated FID
-  extern int reduction;   // ratio of sim::num_points / len_fids
-  extern vec spin_0;      // the initial spin vector
-  
-  extern double d_bfield; // step size of magnetic field perturbations
   extern double dt_integration; // step size of time for integration
 
+  extern vec spin_0;      // the initial spin vector
   extern double omega_r;  // frequency of nmr pulse
   extern double t_pulse;  // start time of nmr pulse
   extern double gamma_g;  // gyromagnetic ratio of proton
