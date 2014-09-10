@@ -52,6 +52,7 @@ namespace sim {
   double gamma_1;
   double gamma_2;
   double freq_ref;
+  double mixdown_phi;
   double freq_larmor;
 
 } // ::sim
@@ -141,6 +142,7 @@ void load_params(int argc, char **argv)
   gamma_1 = pt.get<double>("sim.gamma_1");
   gamma_2 = pt.get<double>("sim.gamma_2");
   freq_ref = pt.get<double>("sim.freq_ref");
+  mixdown_phi = pt.get<double>("sim.mixdown_phi");
   freq_larmor = pt.get<double>("sim.freq_larmor");
 
   // gradient fid file parameters
@@ -246,7 +248,7 @@ void load_params(int argc, char **argv)
   gamma_g = pt.get<double>("sim.gamma_g", gamma_g);
   gamma_1 = pt.get<double>("sim.gamma_1", gamma_1);
   gamma_2 = pt.get<double>("sim.gamma_2", gamma_2);
-  freq_ref = pt.get<double>("sim.freq_ref", freq_ref);
+  mixdown_phi = pt.get<double>("sim.mixdown_phi", mixdown_phi);
   freq_larmor = pt.get<double>("sim.freq_larmor", freq_larmor);
 
   // gradient fid file parameters

@@ -75,12 +75,13 @@ namespace sim {
   extern double dt_integration; // step size of time for integration
 
   extern vec spin_0;      // the initial spin vector
-  extern double omega_r;  // frequency of nmr pulse
-  extern double t_pulse;  // start time of nmr pulse
+  extern double omega_r;  // strength of rf-pulse
+  extern double t_pulse;  // length of nmr pulse
   extern double gamma_g;  // gyromagnetic ratio of proton
   extern double gamma_1;  // relaxation time gamma_1
   extern double gamma_2;  // relaxation time gamma_2
   extern double freq_ref; // reference frequency used to mix down
+  extern double mixdown_phi; // arbitrary phase for mixing freq
   extern double freq_larmor; // Larmor frequency to be simulated
 
 } // ::sim

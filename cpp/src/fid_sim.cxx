@@ -90,8 +90,8 @@ vec FidFactory::Bfield(const double& t)
   if (t < 0.0) return a;
 
   // If none of the above, return the time-dependent, pulsed field.
-  b[0] = sim::omega_r * cos(sim::freq_ref * t);
-  b[1] = sim::omega_r * sin(sim::freq_ref * t);
+  b[0] = sim::omega_r * cos(kTau * sim::freq_ref * t);
+  b[1] = sim::omega_r * sin(kTau * sim::freq_ref * t);
   return b;
 }
 
@@ -104,7 +104,7 @@ void FidFactory::Printer(vec const &s , double t)
 
     double temp = t;
     for (int i = 0; i < sim_length_; i++){
-      cos_cache_.push_back(cos(kTau * sim::freq_ref * temp));
+      cos_cache_.push_back(cos(kTau * sim::freq_ref * temp + sim::mixdown_phi));
       temp += dt_;
     }
 
@@ -138,7 +138,7 @@ vec FidFactory::LowPassFilter(vec& s)
 {
   // Store the filter statically though this might be a minimal speed boost.
   static vec filter;
-  static double freq_cut = kTau * sim::freq_larmor;
+  static double freq_cut = 0.2 * sim::freq_larmor;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
   if (filter.size() == 0){
@@ -151,7 +151,7 @@ vec FidFactory::LowPassFilter(vec& s)
     // The filter is symmetric, so we can fill both sides in tandem.
     while (i < sim_length_ / 2){
       // scaling term
-      temp = pow((kTau * i) / (dt_ * sim_length_ * freq_cut), 6);
+      temp = pow(i / (dt_ * sim_length_ * freq_cut), 6);
       filter[i] = pow(1.0 / (1.0 + temp), 0.5);
       filter[j--] = filter[i++];
     }
