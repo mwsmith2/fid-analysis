@@ -6,15 +6,15 @@ namespace fid
 	// at the first and last zeros.
 	double zero_count_freq(vec& wf, const vec& tm)
 	{
-		// Find the noise level
-		double w = params::fit_width;
-		double noise = std::accumulate(wf.begin(), wf.begin() + w, 0.0, 
-			[](double x, double y){return x + y * y;}); 
-		double temp = std::accumulate(wf.rbegin(), wf.rbegin() + w, 0.0, 
-			[](double x, double y){return x + y * y;}); 
+		// Find the noise level at the head and tail.
+		double head = stdev(wf_.begin(), wf_.begin() + params::zc_width);
+		double tail = stdev(wf_.rbegin(), wf_.rbegin() + params::zc_width);
 
-		noise = (temp < noise) ? (temp / w) : (noise / w);
-		noise = std::pow(noise, 0.5); // Take the 
+		// Take the smaller of the two.
+		double noise = (tail < head) ? (tail / w) : (head / w);
+
+		// And set the rms noise.
+		noise = std::sqrt(noise); // Want the RMS
 
 		// Now find the starting and ending points
 		double thresh = 20 * noise;

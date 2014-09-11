@@ -20,25 +20,21 @@ FID::FID(const vec& wf, const vec& tm)
 }
 
 void FID::CalcNoise()
-{
-  // Find the noise level
-  int w = params::zc_width;
-  double noise = std::accumulate(wf_.begin(), wf_.begin() + w, 0.0, 
-                  [](double x, double y) {return x + y * y;}); 
-  double temp = std::accumulate(wf_.rbegin(), wf_.rbegin() + w, 0.0,
-                  [](double x, double y) {return x + y * y;});
+{ 
+  // Find the noise level in the head and tail.
+  double head = stdev(wf_.begin(), wf_.begin() + params::zc_width);
+  double tail = stdev(wf_.rbegin(), wf_.rbegin() + params::zc_width);
 
-  noise = (temp < noise) ? (temp / w) : (noise / w);
+  // Take the smaller of the two.
+  noise_ = (tail < head) ? (tail / w) : (head / w);
 
-  // Set the member noise
-  noise_ = std::pow(noise, 0.5); // Want the RMS
+  // And set the member noise.
+  noise_ = std::sqrt(noise_); // Want the RMS
 }
-
 
 void FID::FindFidRange()
 {
   // Find the starting and ending points
-
   double thresh = params::start_thresh * noise_;
 
   // Find the first element with magnitude larger than thresh
@@ -54,139 +50,31 @@ void FID::FindFidRange()
   f_wf_ = std::distance(it_f, wf_.rend());
 }
 
-
 void FID::CalcPowerEnvAndPhase()
 {
-  // Do the FFT and find the power and envelope function
+  // Get the fft of the waveform first and grab the reference frequencies.
+  auto fid_fft = dsp::fft(wf);
+  freq_ = dsp::fftfreq(fid_fft);
 
-  // Set up the FFT plan
-  int N = wf_.size();  // size of data
-  int n = N / 2 + 1;      // size of rfft
-  double Nroot = std::sqrt(N);
-  double temp = 0.0;
+  // Now get the imaginary harmonic complement to the waveform.
+  auto wf_im = dsp::hilbert(fid_fft);
 
-  // Resize vectors
-  freq_.resize(n);
-  power_.resize(n);
-  phase_.resize(N);
+  // Optional lowpass filter. 
+//  double df = (wf.size() - 1) / (wf.size() * (tm_[wf.size() - 1] - tm_[0]));
+//  double cutoff_index = params::low_pass_freq / df;
+//  
 
-  // To store inverse transform
-  vec wf_im(N, 0.0);
-
-  // Plan and execute the FFT
-  fftw_complex *fft = new fftw_complex[n];
-  fftw_complex *ffti = new fftw_complex[n];
-
-  fftw_plan wf_to_fft;
-  wf_to_fft = fftw_plan_dft_r2c_1d(N, &wf_[0], &fft[0], FFTW_ESTIMATE);
-  fftw_execute(wf_to_fft);
-
-  // Store the power
-  for (int i = 0; i < n; i++){
-    power_[i] = std::pow(fft[i][0], 2) + std::pow(fft[i][1], 2);
-  }
-
-  // Apply low-pass Butterworth Filter
-  double df = (N - 1) / (N * (tm_[N - 1] - tm_[0]));
-  // convert cutoff frequency to fft index
-  double cutoff_index = params::low_pass_freq / df;
-
-  // Apply low pass and get fft * (-i)
-  for (int i = 0; i < n; i++){
-    fft[i][0] *= 1.0 / Nroot; //LowPassFilter(i, cutoff_index, 2) / Nroot;
-    fft[i][1] *= 1.0 / Nroot; //LowPassFilter(i, cutoff_index, 2) / Nroot;
-    ffti[i][0] = fft[i][1];
-    ffti[i][1] = -1 * fft[i][0];
-  }
-
-  // Now get the denoised waveform
-  fftw_plan fft_to_wf;
-  fft_to_wf = fftw_plan_dft_c2r_1d(N, &fft[0], &wf_[0], FFTW_ESTIMATE);
-  fftw_execute(fft_to_wf);
-
-  // Now get the Hilbert transform
-  fftw_plan fft_to_wf_im;
-  fft_to_wf_im = fftw_plan_dft_c2r_1d(N, &ffti[0], &wf_im[0], FFTW_ESTIMATE);
-  fftw_execute(fft_to_wf_im);
-
-  // fftw is unnormalized fft, so rescale
-  for (auto it = wf_im.begin(); it != wf_im.end(); it++){
-    *it /= Nroot;
-  }
-
-  for (auto it = wf_.begin(); it != wf_.end(); it++){
-    *it /= Nroot;
-  }
-
-  // Set the envelope function
-  env_.resize(N);
-  std::transform(wf_.begin(), wf_.end(), wf_im.begin(), env_.begin(),
-    [](double re, double im) {return std::sqrt(im * im + re * re);});
-
-  // Store the moduloed phase
-  phase_.resize(N);
-  std::transform(wf_.begin(), wf_.end(), wf_im.begin(), phase_.begin(),
-    [](double re, double im) {return std::atan2(im, re);});
-
-  // Now unwrap the phase
-  double thresh = params::max_phase_jump;
-  for (auto it = phase_.begin() + i_wf_ + 1; it != phase_.end(); it++){
-    static int k;
-    if (it == phase_.begin() + i_wf_ + 1) k = 0; // reset
-
-    // Add current total
-    *it += k * kTau;
-
-    // Check for jumps, both positive and negative.
-    if (*(it-1) - *it > thresh){
-      k++;
-      *it += kTau;
-
-    } else if (*it - *(it-1) > thresh){
-      k--;
-      *it -= kTau;
-
-    }
-  }
-
-  // Clean up
-  delete[] fft;
-  delete[] ffti;
-  fftw_destroy_plan(wf_to_fft);
-  fftw_destroy_plan(fft_to_wf);
-  fftw_destroy_plan(fft_to_wf_im);
+  // Now we can get power, envelope and phase.
+  power_ = dsp::psd(fid_fft);
+  phase_ = dsp::psd(wf, wf_im);
+  env_ = dsp::phase(wf, wf_im);
 }
-
 
 void FID::CalcFftFreq()
 {
-  // Set up an array of FFT frequencies
-  // @bug This could be stored as first, last, step_size...
-  int N = wf_.size();
-  double df = (N - 1) / (N * (tm_[N - 1] - tm_[0]));
-
-  if (N % 2 == 0){
-
-    freq_.reserve(N / 2 + 1);
-    freq_.resize(0);
-    
-    for (int i = 0; i < N / 2 + 1; i++){
-      freq_.push_back(i * df);
-    }
-
-  } else {
-
-    freq_.reserve((N + 1) / 2);
-    freq_.resize(0);
-
-    for (int i = 0; i < (N + 1) / 2 + 1; i++){
-      freq_.push_back(i * df);
-    }
-  }
-
-  return;
+  // @todo: consider storing as start, step, stop
+  freq_ = dsp::fftfreq(wf);
 }
-
 
 void FID::GuessFitParams()
 {

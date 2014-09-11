@@ -38,7 +38,7 @@ initalization
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
 
-/*--- Namespaces ------------------------------------------------------------*/
+//--- namespaces ------------------------------------------------------------//
 
 using std::cout;
 using std::endl;
@@ -51,37 +51,6 @@ using namespace boost::property_tree;
 
 
 namespace fid {
-
-// A template function to handle vector addition.
-template <typename T>
-inline vector<T>& operator+(vector<T>& a, vector<T>& b)
-{
-  assert(a.size() == b.size());
-
-  transform(a.begin(), a.end(), b.begin(), a.begin(), std::plus<T>());
-  return a;
-}
-
-// A template function to handle vector subtraction.
-template <typename T>
-inline vector<T>& operator-(vector<T>& a, vector<T>& b)
-{
-  assert(a.size() == b.size());
-
-  transform(a.begin(), a.end(), b.begin(), a.begin(), std::minus<T>());
-  return a;
-}
-
-// A template function to handle vector multiplying with a scalar.
-template <typename T>
-inline vector<T>& operator*(T c, vector<T>& a)
-{
-  for (auto it = a.begin(); it != a.end(); ++it){
-    *it = c * (*it);
-  }
-
-  return a;
-}
 
 class FidFactory
 {

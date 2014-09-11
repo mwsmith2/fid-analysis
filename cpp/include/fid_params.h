@@ -18,6 +18,7 @@ about: This header file holds the projects parameter namespace.  These
 #include <string>
 #include <vector>
 #include <cmath>
+#include <complex>
 
 //--- other includes --------------------------------------------------------//
 #include <boost/property_tree/ptree.hpp>
@@ -34,6 +35,7 @@ using std::string;
 
 // typedefs
 typedef vector<double> vec;
+typedef vector<std::complex<double>> cvec;
 
 // constants
 const double kTau = 2 * M_PI;
