@@ -11,6 +11,10 @@ Detail: This is a new test program for my FID libraries
 //--- std includes ----------------------------------------------------------//
 #include <fstream>
 
+//--- other includes --------------------------------------------------------//
+#include "TFile.h"
+#include "TTree.h"
+
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
 
@@ -26,11 +30,7 @@ int main(int argc, char **argv)
   vec wf;
   vec tm;
 
-  fid::construct_time_vector(len_fids, i_time, d_time, tm);
-
-  ofstream out;
-  out.precision(10);
-  out.open("data/ideal_fid_sweep_data.csv");
+  construct_time_vector(len_fids, i_time, d_time, tm);
 
   vec freqs;
   vec phases;
@@ -38,22 +38,28 @@ int main(int argc, char **argv)
 
   // Get the range to sweep over.
   if (freq_sweep){
-    freqs = construct_range(freq_range);
+    freqs = construct_sweep_range(freq_range);
   } else {
     freqs.push_back(s_freq);
   }
 
   if (phase_sweep){
-    phases = construct_range(phase_range);
+    phases = construct_sweep_range(phase_range);
   } else {
     phases.push_back(s_phase);
   }
 
   if (snr_sweep){
-    snrs = construct_range(snr_range);
+    snrs = construct_sweep_range(snr_range);
   } else {
     snrs.push_back(s_snr);
   }
+
+  // Make FidFactory
+  FidFactory ff;
+
+  // Set up the ROOT tree to hold the results
+  // todo
 
   // begin sweeps
   for (auto f: freqs){
@@ -67,17 +73,10 @@ int main(int argc, char **argv)
         if (snr_sweep) cout << ", signal-to-noise " << s;
         cout << endl;
 
-        for (int i = 0; i < num_fids; i++){
+        ff.SimulateFid(wf, tm);
 
-          if (freq_sweep) out << f << ", ";
-          if (phase_sweep) out << p << ", ";
-          if (snr_sweep) out << s << ", ";
-
-          ideal_fid(wf, tm, f, p, s);
-          FID my_fid(wf, tm);
-
-          calc_freq_write_csv(my_fid, out);
-        } // n_fids
+        FID my_fid(wf, tm);
+        draw_fid(my_fid, string("data/fig/test.pdf"), string("Test FID"));
 
       } // snr
 
@@ -85,6 +84,5 @@ int main(int argc, char **argv)
 
   } // freq
 
-  out.close();
   return 0;
 }

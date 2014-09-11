@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   vec gradient;
 
   construct_time_vector(len_fids, i_time, d_time, tm);
-  grads = construct_range(grad_range);
+  grads = construct_sweep_range(grad_range);
 
   // Make FidFactory
   GradientFidFactory gff;

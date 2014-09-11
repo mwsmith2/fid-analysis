@@ -4,12 +4,14 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   15/04/14
 
-Detail: The program is meant to test the effects of linear field gradients on the FID frequency extraction.  The sweep parameters are set in a separate config file here, but the user need not rely on the config parameters.  All that needs to be done is the defining of a gradient vector.
+Detail: The program is meant to generate a set of example gradient FIDs in
+        plaintext format.
 
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
 #include <fstream>
+#include <iostream>        
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -33,44 +35,44 @@ int main(int argc, char **argv)
   vec grad_0;
   vec gradient;
 
+  char str[60];
+
   construct_time_vector(len_fids, i_time, d_time, tm);
-  grads = construct_range(grad_range);
+  grads = construct_sweep_range(grad_range);
 
   // Make FidFactory
   GradientFidFactory gff;
-  construct_linear_gradient(20, grad_0);
+  construct_quadratic_gradient(20, grad_0);
 
   // csv output
   std::ofstream out;
   out.precision(10);
   out.setf(std::ios::fixed, std::ios::floatfield);
-  out.open("data/sim_fid_lin_grad_data.csv");
 
   // begin sweeps
   for (auto g: grads){
 
-    cout << "gradient strength " << g << endl;
+    sprintf(str, "data/test_fids/quad_%03dppb.fid", (int)g);
+    out.open(str);
 
-    for (int i = 0; i < num_fids; ++i){
+    gradient.resize(0);
 
-      gradient.resize(0);
-
-      for (auto val : grad_0){
-        gradient.push_back(val * g);
-      }
-
-      gff.ConstructFid(gradient, wf);
-      FID my_fid(wf, tm);
-
-      calc_freq_write_csv(my_fid, out);
-
-      if (i == 0){
-        static char str[60];
-        sprintf(str, "data/fig/fid_lin_grad_%03dppb.pdf", (int)g);
-        draw_fid(my_fid, str, string("Test FID")); 
-      }
+    for (auto val : grad_0){
+      gradient.push_back(val * g);
     }
+
+    gff.ConstructFid(gradient, wf);
+
+    for (int i = 0; i < tm.size(); ++i){
+
+      out << tm[i] << " " << wf[i] << endl;
+
+    }
+
+    out.close();
+
   } // grad
 
   return 0;
 }
+

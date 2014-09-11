@@ -1,6 +1,18 @@
 #ifndef FID_ANALYSIS_FID_CLASS_H_
 #define FID_ANALYSIS_FID_CLASS_H_
 
+/*===========================================================================*\
+
+author: Matthias W. Smith
+email: mwmsith2@uw.edu
+
+notes:
+
+  This library consists of several frequency extraction and analysis 
+  methods for FIDs as well as a class to encapsulate all the ideas.
+
+\*===========================================================================*/
+
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
 #include <string>
@@ -17,90 +29,75 @@
 
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
-
-// This library consists of several frequency exaction and analysis methods
-// for FIDs as well as a class to encapsulate all the ideas
+#include "fid_math.h"
 
 namespace fid
 {
 
 class FID {
 
-public:
+  public:
 
-	// ctor
-  	FID(const vec& wf, const vec& tm);
+		// ctor
+		FID(const vec& wf, const vec& tm);
 
-	// frequency extraction methods
-	double CalcZeroCountFreq();
-	double CalcCentroidFreq();
-	double CalcAnalyticalFreq();
-	double CalcLorentzianFreq();
-	double CalcSoftLorentzianFreq();
-	double CalcExponentialFreq();
-	double CalcPhaseFreq(int poln=1);
-	double CalcPhaseDerivFreq(int poln=1);
-	double CalcSinusoidFreq();
+		// frequency extraction methods
+		double CalcZeroCountFreq();
+		double CalcCentroidFreq();
+		double CalcAnalyticalFreq();
+		double CalcLorentzianFreq();
+		double CalcSoftLorentzianFreq();
+		double CalcExponentialFreq();
+		double CalcPhaseFreq(int poln=1);
+		double CalcPhaseDerivFreq(int poln=1);
+		double CalcSinusoidFreq();
 
-	// accessors
-	const vec& wf() const {return wf_;};
-	const vec& tm() const {return tm_;};
-	const vec& res() const {return res_;};
-	const vec& power() const {return power_;};
-	const vec& freq() const {return freq_;};
-	const vec& phase() const {return phase_;}
-	const vec& env() const {return env_;};
-	const double& chi2() const {return chi2_;};
-	const TGraph& gr_time_series() const {return gr_time_series_;};
-	const TGraph& gr_freq_series() const {return gr_freq_series_;};
-	const TF1&    f_fit() const {return f_fit_;};
+		// accessors
+		const vec& wf() const {return wf_;};
+		const vec& tm() const {return tm_;};
+		const vec& res() const {return res_;};
+		const vec& power() const {return power_;};
+		const vec& freq() const {return freq_;};
+		const vec& phase() const {return phase_;}
+		const vec& env() const {return env_;};
+		const double& chi2() const {return chi2_;};
+		const TGraph& gr_time_series() const {return gr_time_series_;};
+		const TGraph& gr_freq_series() const {return gr_freq_series_;};
+		const TF1&    f_fit() const {return f_fit_;};
 
-private:
+	private:
 
-	// Member Variables
-	int i_wf_; // start and stop of relevant data
-	int f_wf_;
-	int i_fft_;
-	int f_fft_;
-	double i_tm_;
-	double f_tm_;
-	double noise_;
-	double chi2_; // Store the most recent chi2
-	vec guess_;
-	TF1 f_fit_;
-	TGraph gr_time_series_;
-	TGraph gr_freq_series_;
+		// Member Variables
+		int i_wf_; // start and stop of relevant data
+		int f_wf_;
+		int i_fft_;
+		int f_fft_;
+		double i_tm_;
+		double f_tm_;
+		double noise_;
+		double chi2_; // Store the most recent chi2
+		vec guess_;
+		TF1 f_fit_;
+		TGraph gr_time_series_;
+		TGraph gr_freq_series_;
 
-	// bigger data arrays
-	vec wf_;
-	vec tm_;
-	vec res_;
-	vec power_;
-	vec env_;
-	vec phase_;
-	vec freq_;
-	vec temp_; // for random transformations
+		// bigger data arrays
+		vec wf_;
+		vec tm_;
+		vec res_;
+		vec power_;
+		vec env_;
+		vec phase_;
+		vec freq_;
+		vec temp_; // for random transformations
 
-	// internal utility functions
-	void CalcNoise();			
-	void FindFidRange();
-	void CalcPowerEnvAndPhase();
-	void CalcFftFreq();
-	void GuessFitParams();
-	void FreqFit(TF1& func);
-
-	// Simple n-order Butterworth filter
-	inline double LowPassFilter(double f, double f0, int n){
-		double denom = 1.0 + pow(f / f0, 2 * n);
-		return sqrt(1.0 / denom);
-	}
-
-	// Questionable fnctions
-	void GetFftPower(vec& power, vec& wf);
-	void GetFftFreq(vec& freq, const vec& tm);
-	void GetFftFreq(vec& freq, const int N, const double dt);
-	void GetFidPhase(vec& phase, vec& wf_re);
-	void GetFidEnvelope(vec& env, vec& wf_re);
+		// internal utility functions
+		void CalcNoise();			
+		void FindFidRange();
+		void CalcPowerEnvAndPhase();
+		void CalcFftFreq();
+		void GuessFitParams();
+		void FreqFit(TF1& func);
 
 }; // FID
 

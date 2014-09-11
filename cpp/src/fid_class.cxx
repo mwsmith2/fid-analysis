@@ -21,9 +21,12 @@ FID::FID(const vec& wf, const vec& tm)
 
 void FID::CalcNoise()
 { 
+  // Grab a new handle to the noise window width for aesthetics.
+  int w = params::zc_width;
+
   // Find the noise level in the head and tail.
-  double head = stdev(wf_.begin(), wf_.begin() + params::zc_width);
-  double tail = stdev(wf_.rbegin(), wf_.rbegin() + params::zc_width);
+  double head = stdev(wf_.begin(), wf_.begin() + w);
+  double tail = stdev(wf_.rbegin(), wf_.rbegin() + w);
 
   // Take the smaller of the two.
   noise_ = (tail < head) ? (tail / w) : (head / w);
@@ -53,8 +56,8 @@ void FID::FindFidRange()
 void FID::CalcPowerEnvAndPhase()
 {
   // Get the fft of the waveform first and grab the reference frequencies.
-  auto fid_fft = dsp::fft(wf);
-  freq_ = dsp::fftfreq(fid_fft);
+  auto fid_fft = dsp::fft(wf_);
+  freq_ = dsp::fftfreq(wf_);
 
   // Now get the imaginary harmonic complement to the waveform.
   auto wf_im = dsp::hilbert(fid_fft);
@@ -66,14 +69,14 @@ void FID::CalcPowerEnvAndPhase()
 
   // Now we can get power, envelope and phase.
   power_ = dsp::psd(fid_fft);
-  phase_ = dsp::psd(wf, wf_im);
-  env_ = dsp::phase(wf, wf_im);
+  phase_ = dsp::phase(wf_, wf_im);
+  env_ = dsp::envelope(wf_, wf_im);
 }
 
 void FID::CalcFftFreq()
 {
   // @todo: consider storing as start, step, stop
-  freq_ = dsp::fftfreq(wf);
+  freq_ = dsp::fftfreq(wf_);
 }
 
 void FID::GuessFitParams()
@@ -154,8 +157,9 @@ double FID::CalcZeroCountFreq()
   int nzeros = 0;
   bool pos = wf_[i_wf_] >= 0;
   bool hyst = false;
-  double max = *std::max_element(wf_.begin(), wf_.end(), 
-    [](double largest, double x) {return largest < std::abs(x);});
+  
+  auto mm = std::minmax(wf_.begin(), wf_.end()); // returns pair(&min, &max)
+  double max = (-*mm.first > *mm.second) ? -*mm.first : *mm.second;
   double thresh = params::hyst_thresh * max;
 
   int i_zero = -1;

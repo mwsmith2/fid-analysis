@@ -7,10 +7,9 @@ author: Matthias W. Smith
 email: mwmsith2@uw.edu
 
 notes:
+
   The class, FidFactory simulates FIDs using the Bloch equations and 
   numerical integration.
-
-initalization
 
 \*===========================================================================*/
 
@@ -37,6 +36,7 @@ initalization
 
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
+#include "fid_math.h"
 
 //--- namespaces ------------------------------------------------------------//
 
@@ -49,12 +49,11 @@ using namespace std::chrono;
 using namespace boost::numeric::odeint;
 using namespace boost::property_tree;
 
-
 namespace fid {
 
 class FidFactory
 {
- public:
+public:
 
   // ctors
   FidFactory();
@@ -79,15 +78,6 @@ class FidFactory
   vec cos_cache_;
   vec gradient_;
   
-  // private member functions
-  // Define the cross product for 3-vectors.
-  inline void Cross(const vec& u, const vec& v, vec& res)
-  {
-    res[0] = u[1] * v[2] - u[2] * v[1];
-    res[1] = u[2] * v[0] - u[0] * v[2];
-    res[2] = u[0] * v[1] - u[1] * v[0];
-  } 
-
   // Low pass filter to extract mixed down signal.
   vector<double> LowPassFilter(vector<double>& s);
 

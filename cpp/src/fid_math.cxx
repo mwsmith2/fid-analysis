@@ -90,7 +90,7 @@ vec dsp::psd(const cvec& fft_vec)
 }
 
 // Helper function to get frequencies for FFT
-vec fftfreq(const vec& tm) 
+vec dsp::fftfreq(const vec& tm) 
 {
 	int N = tm.size();
 	double dt = (tm[N-1] - tm[0]) / (N - 1); // sampling rate
@@ -98,7 +98,7 @@ vec fftfreq(const vec& tm)
 	return dsp::fftfreq(N, dt);
 }
 
-vec fftfreq(const int N, const double dt)
+vec dsp::fftfreq(const int N, const double dt)
 {
 	// Instantiate return vector.
 	vec freq;

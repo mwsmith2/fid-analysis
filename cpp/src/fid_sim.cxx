@@ -141,7 +141,7 @@ vec FidFactory::LowPassFilter(vec& s)
   static double freq_cut = 0.2 * sim::freq_larmor;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
-  if (filter.size() == 0){
+  if (filter.size() == 0) {
 
     filter.resize(sim_length_);
     int i = 0;
@@ -195,12 +195,7 @@ void FidFactory::IdealFid(vec& wf, vec& tm)
     }
   } 
 
-  // Add some noise
-  static std::default_random_engine gen(sim::seed);
-  std::normal_distribution<double> norm(0.0, 1.0 / s_snr);
-  for (auto it = wf.begin(); it != wf.end(); ++it){
-    *it += norm(gen);
-  }
+  addnoise(wf, s_snr, sim::seed);
 }
 
 //---------------------------------------------------------------------------//

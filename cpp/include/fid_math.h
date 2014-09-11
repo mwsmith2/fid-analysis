@@ -16,6 +16,7 @@ using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "fftw3.h"
+#include "armadillo.hpp"
 
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
@@ -58,9 +59,16 @@ inline vector<T>& operator*(T c, vector<T>& a)
   return a;
 }
 
+inline void Cross(const vec& u, const vec& v, vec& res)
+{
+    res[0] = u[1] * v[2] - u[2] * v[1];
+    res[1] = u[2] * v[0] - u[0] * v[2];
+    res[2] = u[0] * v[1] - u[1] * v[0];
+}
+
 // Standard deviation calculation based on whole vector.
 template <typename T>
-T stdev(const T& wf) {
+inline double stdev(const T& wf) {
 	auto x = std::accumulate(wf.begin(), wf.end(), 0.0, 
 		[](double x, double y) { return x + y*y; });
 
@@ -69,11 +77,46 @@ T stdev(const T& wf) {
 
 // Standard deviation calculation based on start/stop iterators.
 template <typename T>
-T stdev(const T& begin, const T& end) {
+inline double stdev(const T& begin, const T& end) {
 	auto x = std::accumulate(begin, end, 0.0, 
 		[](double x, double y) { return x + y*y; });
 
 	return std::sqrt(x);
+}
+
+// Add white noise to an array.
+template <typename T>
+void addnoise(vector<T>& wf, T snr, int seed=0) {
+  static std::default_random_engine gen(seed);
+  static std::normal_distribution<T> nrm(0, snr);
+
+  T max = *std::max_element(wf.begin(), wf.end());
+  T min = *std::min_element(wf.begin(), wf.end());
+  T scale = max > min ? max : min;
+
+  for (auto &x : wf){
+    x += scale * nrm(gen);
+  }
+}
+
+// Construct a range from params first, step, last
+template<typename T>
+inline vector<T> construct_range(const T& i, const T& f, const T& d) {
+	vector<T> res;
+	for (T x = i; x <= f; x += d){
+	  res.push_back(x);
+	}
+	return res;
+}
+
+// Construct a range from vector <first, last, step>
+template<typename T>
+inline vector<T> construct_range(const vector<T>& range_vec){
+	vector<T> res;
+	for (T x = range_vec[0]; x <= range_vec[1]; x += range_vec[2]){
+	  res.push_back(x);
+	}
+	return res;
 }
 
 namespace dsp
@@ -97,9 +140,10 @@ vec envelope(const vec& wf);
 vec envelope(const vec& wf_re, const vec& wf_im);	
 
 template <typename T>
-std::vector<T> lowpass(const std::vector<T>& wf, double cut_idx=0, int n=3) {
+vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {
 	// A simple Butterworth n-order filter.
-	std::vector<T> filtered_wf = wf;
+	if (cut_idx == -1) cut_idx = wf.size() / 2;
+	vector<T> filtered_wf = wf;
 
 	std::transform(wf.begin(), wf.end(), filtered_wf.begin(), // lambda filter
 				  [cut_idx, n](double x) { 
@@ -107,6 +151,7 @@ std::vector<T> lowpass(const std::vector<T>& wf, double cut_idx=0, int n=3) {
 				  });
 
 	return filtered_wf;
+
 }
 
 } // ::dsp

@@ -18,10 +18,7 @@ Detail: The program is meant to generate a set of example gradient FIDs in
 #include "TTree.h"
 
 //--- project includes ------------------------------------------------------//
-#include "fid_params.h"
-#include "fid_class.h"
-#include "fid_sim.h"
-#include "fid_utilities.h"
+#include "fid.h"
 
 using namespace fid;
 using namespace fid::sweep;
@@ -41,7 +38,7 @@ int main(int argc, char **argv)
   char str[60];
 
   construct_time_vector(len_fids, i_time, d_time, tm);
-  grads = construct_sweep_range(grad_range);
+  grads = construct_range(grad_range);
 
   // Make FidFactory
   GradientFidFactory gff;

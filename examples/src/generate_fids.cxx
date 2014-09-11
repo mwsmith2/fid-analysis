@@ -16,10 +16,7 @@ Detail: This is a new test program for my FID libraries
 #include "TTree.h"
 
 //--- project includes ------------------------------------------------------//
-#include "fid_params.h"
-#include "fid_class.h"
-#include "fid_utilities.h"
-#include "fid_sim.h"
+#include "fid.h"
 
 using namespace fid;
 using namespace fid::sweep;
@@ -41,19 +38,19 @@ int main(int argc, char **argv)
 
   // Get the range to sweep over.
   if (freq_sweep){
-    freqs = construct_sweep_range(freq_range);
+    freqs = construct_range(freq_range);
   } else {
     freqs.push_back(s_freq);
   }
 
   if (phase_sweep){
-    phases = construct_sweep_range(phase_range);
+    phases = construct_range(phase_range);
   } else {
     phases.push_back(s_phase);
   }
 
   if (snr_sweep){
-    snrs = construct_sweep_range(snr_range);
+    snrs = construct_range(snr_range);
   } else {
     snrs.push_back(s_snr);
   }
