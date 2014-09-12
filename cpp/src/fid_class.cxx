@@ -55,9 +55,8 @@ void FID::FindFidRange()
 
 void FID::CalcPowerEnvAndPhase()
 {
-  // Get the fft of the waveform first and grab the reference frequencies.
+  // Get the fft of the waveform first.
   auto fid_fft = dsp::fft(wf_);
-  freq_ = dsp::fftfreq(wf_);
 
   // Now get the imaginary harmonic complement to the waveform.
   auto wf_im = dsp::hilbert(fid_fft);

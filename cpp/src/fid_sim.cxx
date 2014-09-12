@@ -62,7 +62,7 @@ void FidFactory::Bloch(vec const &s, vec &dsdt, double t)
   s2[2] = sim::gamma_1 * (s[2] - 1.0);
 
   // Calculate the cross product.
-  Cross(b, s, s1);
+  cross(b, s, s1);
 
   // Set the differential to be integrated.
   dsdt = s1 - s2;

@@ -8,7 +8,7 @@ OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
 # Some optional flags
 DEBUG = -g -pg
-OPTIMIZE = -O3
+#OPTIMIZE = -O3
 
 # Figure out the architecture
 UNAME_S = $(shell uname -s)

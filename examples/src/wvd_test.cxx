@@ -17,10 +17,12 @@ using std::vector;
 using std::cout;
 using std::endl;
 
+//--- other includes --------------------------------------------------------//
+#include <armadillo>
 
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
-#include "fid_class.h"
+using namespace fid;
 
 
 int main(int argc, char** argv)
@@ -30,7 +32,7 @@ int main(int argc, char** argv)
   cout.setf(std::ios::fixed, std:: ios::floatfield);
 
   // declare variables
-  int fid_length = 10000;
+  int fid_length = 2000;
   double ti = -1.0;
   double dt = 0.001;
   double ftruth = 23.0;
@@ -41,24 +43,18 @@ int main(int argc, char** argv)
   tm.reserve(fid_length);
 
   std::ofstream out;
-  cout << out.precision() << endl;
+  out.precision(10);
 
   for (int i = 0; i < fid_length; i++){
     tm.push_back(i * dt + ti);
   }
 
-  fid::ideal_fid(wf, tm, ftruth);
+  ideal_fid(wf, tm, ftruth);
 
-  fid::FID my_fid(wf, tm);
+  FID my_fid(wf, tm);
 
-  cout << my_fid.CalcZeroCountFreq() << endl;
-  cout << my_fid.CalcCentroidFreq() << endl;
-  cout << my_fid.CalcAnalyticalFreq() << endl;
-  cout << my_fid.CalcLorentzianFreq() << endl;
-  cout << my_fid.CalcSoftLorentzianFreq() << endl;
-  cout << my_fid.CalcExponentialFreq() << endl;
-  cout << my_fid.CalcPhaseFreq() << endl;
-  cout << my_fid.CalcSinusoidFreq() << endl;
+  auto res = dsp::wvd(wf);
+  res.quiet_save("wvd_test.dat", arma::csv_ascii);
 
   return 0;
 }

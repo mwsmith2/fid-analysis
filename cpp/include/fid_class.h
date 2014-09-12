@@ -36,7 +36,7 @@ namespace fid
 
 class FID {
 
-  public:
+	public:
 
 		// ctor
 		FID(const vec& wf, const vec& tm);

@@ -12,7 +12,7 @@ cvec dsp::fft(const vec &wf)
 
   // Instantiate the result vector.
   cvec fft_vec(n, 0.0);
-  auto wf_vec = wf; // copy waveform since fftw destroys it.
+  auto wf_vec = wf; // copy waveform since fftw destroys it
 
   // Plan and execute the fft.
   fftw_plan wf_to_fft;
@@ -21,8 +21,8 @@ cvec dsp::fft(const vec &wf)
   fftw_execute(wf_to_fft);
   fftw_destroy_plan(wf_to_fft);
 
-  for (auto& val: fft_vec) {
-  	val /= Nroot;
+  for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
+    *it /= Nroot;
   }
 
   return fft_vec;
@@ -36,19 +36,19 @@ vec dsp::ifft(const cvec& fft)
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
-  vec ifft_vec(n, 0.0);
-  auto fft_vec = fft;
+  vec ifft_vec(N, 0.0);
+  fftw_complex *fft_ptr = new fftw_complex[n];
+  memcpy(fft_ptr, &fft[0], sizeof(fftw_complex) * n);
 
   // Plan and execute the fft.
   fftw_plan fft_to_wf;
-  fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
   fft_to_wf = fftw_plan_dft_c2r_1d(N, fft_ptr, &ifft_vec[0], FFTW_ESTIMATE);
   fftw_execute(fft_to_wf);
   fftw_destroy_plan(fft_to_wf);
 
   // fftw is unnormalized, so we need to fix that.
-  for (auto& val: ifft_vec) {
-  	val /= Nroot;
+  for (auto it = ifft_vec.begin(); it != ifft_vec.end(); ++it) {
+  	*it /= Nroot;
   }
 
   return ifft_vec;
@@ -61,11 +61,11 @@ vec dsp::hilbert(const vec& wf)
 	return dsp::hilbert(fft_vec);
 }
 
-vec dsp::hilbert(cvec& fft_vec)
+vec dsp::hilbert(cvec fft_vec)
 {
 	// Multiply in the -i.
-	for (auto& val : fft_vec) {
-		val = std::complex<double>(-val.imag(), val.real());
+	for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
+		*it = std::complex<double>(-(*it).imag(), (*it).real());
 	}
 
 	// Reverse the fft.
@@ -174,6 +174,31 @@ vec dsp::envelope(const vec& wf_re, const vec& wf_im)
     			   [](double r, double i) { return std::sqrt(r*r + i*i); });
 
 	return env;
+}
+
+
+arma::mat dsp::wvd(const vec& wf) 
+{
+  // Instiate the return matrix
+  arma::mat res(wf.size(), wf.size(), arma::fill::zeros);
+
+  // Make the signal harmonic
+  arma::cx_vec v(wf.size());
+
+  auto wf_im = dsp::hilbert(wf);
+
+  for (int i = 0; i < wf.size(); ++i) {
+    v[i] = arma::cx_double(wf[i], wf_im[i]);
+  }
+
+  // Now compute the Wigner-Ville Distribution
+  int idx = 0;
+  for (auto it = wf.begin(); it != wf.end(); ++it) {
+    arma::vec fft(arma::abs(arma::fft(dsp::rconvolve(v, idx))));
+    res.col(idx++) = arma::square(fft);
+  }
+
+  return res;
 }
 
 } // ::fid

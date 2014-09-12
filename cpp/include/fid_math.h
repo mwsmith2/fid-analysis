@@ -1,6 +1,18 @@
 #ifndef FID_INCLUDE_FID_MATH_H_
 #define FID_INCLUDE_FID_MATH_H_
 
+/*===========================================================================*\
+
+author: Matthias W. Smith
+email: mwmsith2@uw.edu
+
+notes: 
+
+	This header defines some commonly used mathematical and digital 
+	signal processing functions for the FID library.
+
+\*===========================================================================*/
+
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
 #include <fstream>
@@ -15,14 +27,11 @@ using std::cout;
 using std::endl;
 
 //--- other includes --------------------------------------------------------//
+#include <armadillo>
 #include "fftw3.h"
-#include "armadillo.hpp"
 
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
-
-// This header defines some commonly used mathematical and digital 
-// signal processing functions for the FID library.
 
 namespace fid
 {
@@ -59,7 +68,7 @@ inline vector<T>& operator*(T c, vector<T>& a)
   return a;
 }
 
-inline void Cross(const vec& u, const vec& v, vec& res)
+inline void cross(const vec& u, const vec& v, vec& res)
 {
     res[0] = u[1] * v[2] - u[2] * v[1];
     res[1] = u[2] * v[0] - u[0] * v[2];
@@ -125,7 +134,7 @@ cvec fft(const vec& wf);
 vec ifft(const cvec& fft_vec);
 
 vec hilbert(const vec& wf);
-vec hilbert(cvec& fft_vec);
+vec hilbert(cvec fft_vec);
 
 vec psd(const vec& wf);
 vec psd(const cvec& fft);
@@ -139,6 +148,8 @@ vec phase(const vec& wf_re, const vec& wf_im);
 vec envelope(const vec& wf);
 vec envelope(const vec& wf_re, const vec& wf_im);	
 
+arma::mat wvd(const vec& wf);
+
 template <typename T>
 vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {
 	// A simple Butterworth n-order filter.
@@ -151,8 +162,23 @@ vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {
 				  });
 
 	return filtered_wf;
-
 }
+
+template <typename T>
+arma::Col<T> rconvolve(const arma::Col<T>& v, int idx=0) {
+	int ridx = v.n_elem - idx;
+	arma::Col<T> rv(arma::flipud(v));
+	arma::Col<T> res(v.n_elem, arma::fill::zeros);
+
+	if (idx > ridx) {
+		std::transform(v.begin() + idx, v.end(), rv.begin() + ridx, res.begin(),
+			[](T z1, T z2) { return z1 * std::conj(z2); });
+	} else {
+		std::transform(rv.begin() + ridx, rv.end(), v.begin() + idx, res.begin(),
+			[](T z2, T z1) { return z1 * std::conj(z2); });
+	}
+	return res;
+} 
 
 } // ::dsp
 
