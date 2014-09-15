@@ -27,7 +27,6 @@ using std::cout;
 using std::endl;
 
 //--- other includes --------------------------------------------------------//
-#include "fftw3.h"
 #include "TGraph.h"
 #include "TCanvas.h"
 #include "TF1.h"

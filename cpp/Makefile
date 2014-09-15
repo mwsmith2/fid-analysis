@@ -2,13 +2,17 @@
 SOURCES = $(wildcard src/*.cxx)
 HEADERS = $(SOURCES:.cxx=.hh)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
-# Grab the sources in prog
-#SOURCES = $(wildcard prog/*.cxx)
-#MODULES = $(patsubst prog%.cxx,build%.o,$(SOURCES))
+
+# Versioning info
+MAJOR=0
+MINOR=3
+SONAME=libfid.so
+LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
+LIBPREFIX=/usr/local/lib
 
 # Some optional flags
 DEBUG = -g -pg
-#OPTIMIZE = -O3
+OPTIMIZE = -O3
 
 # Figure out the architecture
 UNAME_S = $(shell uname -s)
@@ -18,6 +22,7 @@ ifeq ($(UNAME_S), Darwin)
 	CXX = clang++
 	CC  = clang
 	FLAGS = -std=c++11 $(DEBUG) $(OPTIMIZE)
+	LDCONFIG = cp $(LIB_PREFIX)/$(LIBNAME) $(LIB_PREFIX)/$(SONAME).$(MAJOR)
 endif
 
 # Gnu compiler
@@ -25,11 +30,8 @@ ifeq ($(UNAME_S), Linux)
 	CXX = g++
 	CC  = gcc
 	FLAGS = -std=c++0x $(DEBUG) $(OPTIMIZE)
+	LDCONFIG = ldconfig -n -v $(LIB_PREFIX)/$(LIBNAME)
 endif
-
-LIBNAME = lib/libFid.a
-AR = ar
-ARFLAGS = rvs 
 
 FLAGS += -Iinclude
 LIBS = -lfftw3 -lm
@@ -37,13 +39,13 @@ LIBS = -lfftw3 -lm
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)
 
-all:
+all: $(LIBNAME)
 
 build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $<
 
-lib: $(OBJECTS)
-	$(AR) $(ARFLAGS) $(LIBNAME) $+
+$(LIBNAME): $(OBJECTS)
+	$(CXX) -shared -fPIC $+ -o $(LIBNAME) $(LIBS)
 
 clean:
 	rm -f $(TARGETS) build/* 

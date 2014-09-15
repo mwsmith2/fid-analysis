@@ -177,7 +177,7 @@ vec dsp::envelope(const vec& wf_re, const vec& wf_im)
 }
 
 
-arma::mat dsp::wvd(const vec& wf) 
+arma::mat dsp::wvd(const vec& wf)
 {
   // Instiate the return matrix
   arma::mat res(wf.size(), wf.size(), arma::fill::zeros);
