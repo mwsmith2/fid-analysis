@@ -22,7 +22,7 @@ ifeq ($(UNAME_S), Darwin)
 	CXX = clang++
 	CC  = clang
 	FLAGS = -std=c++11 $(DEBUG) $(OPTIMIZE)
-	LDCONFIG = cp $(LIB_PREFIX)/$(LIBNAME) $(LIB_PREFIX)/$(SONAME).$(MAJOR)
+	LDCONFIG = cp $(LIBPREFIX)/$(LIBNAME) $(LIBPREFIX)/$(SONAME).$(MAJOR)
 endif
 
 # Gnu compiler
@@ -30,7 +30,7 @@ ifeq ($(UNAME_S), Linux)
 	CXX = g++
 	CC  = gcc
 	FLAGS = -std=c++0x $(DEBUG) $(OPTIMIZE)
-	LDCONFIG = ldconfig -n -v $(LIB_PREFIX)/$(LIBNAME)
+	LDCONFIG = ldconfig -n -v $(LIBPREFIX)/$(LIBNAME)
 endif
 
 FLAGS += -Iinclude
@@ -48,12 +48,12 @@ $(LIBNAME): $(OBJECTS)
 	$(CXX) -shared -fPIC $+ -o $(LIBNAME) $(LIBS)
 
 install:
-	cp $(LIBNAME) $(LIB_PREFIX)/$(LIBNAME)
+	cp $(LIBNAME) $(LIBPREFIX)/$(LIBNAME)
 	$(LDCONFIG)
-	ln -s $(LIB_PREFIX)/$(LIBNAME) $(LIB_PREFIX)/$(SONAME)
+	ln -s $(LIBPREFIX)/$(LIBNAME) $(LIBPREFIX)/$(SONAME)
 
 uninstall:
-	rm -f $(LIB_PREFIX)/$(SONAME)*
+	rm -f $(LIBPREFIX)/$(SONAME)*
 
 clean:
 	rm -f $(TARGETS) build/* 
