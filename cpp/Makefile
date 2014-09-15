@@ -47,5 +47,13 @@ build/%.o: src/%.cxx
 $(LIBNAME): $(OBJECTS)
 	$(CXX) -shared -fPIC $+ -o $(LIBNAME) $(LIBS)
 
+install:
+	cp $(LIBNAME) $(LIB_PREFIX)/$(LIBNAME)
+	$(LDCONFIG)
+	ln -s $(LIB_PREFIX)/$(LIBNAME) $(LIB_PREFIX)/$(SONAME)
+
+uninstall:
+	rm -f $(LIB_PREFIX)/$(SONAME)*
+
 clean:
 	rm -f $(TARGETS) build/* 
