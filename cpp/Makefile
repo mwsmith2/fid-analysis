@@ -1,6 +1,6 @@
 # Grab the targets and sources as two batches
 SOURCES = $(wildcard src/*.cxx)
-HEADERS = $(SOURCES:.cxx=.hh)
+HEADERS = $(wildcard include/*.h)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
 # Versioning info
@@ -8,7 +8,7 @@ MAJOR=0
 MINOR=3
 SONAME=libfid.so
 LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
-LIBPREFIX=/usr/local/lib
+PREFIX=/usr/local
 
 # Some optional flags
 DEBUG = -g -pg
@@ -21,19 +21,19 @@ UNAME_S = $(shell uname -s)
 ifeq ($(UNAME_S), Darwin)
 	CXX = clang++
 	CC  = clang
-	FLAGS = -std=c++11 $(DEBUG) $(OPTIMIZE)
-	LDCONFIG = cp $(LIBPREFIX)/$(LIBNAME) $(LIBPREFIX)/$(SONAME).$(MAJOR)
+	FLAGS = -std=c++11
+	LDCONFIG = cp $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME).$(MAJOR)
 endif
 
 # Gnu compiler
 ifeq ($(UNAME_S), Linux)
 	CXX = g++
 	CC  = gcc
-	FLAGS = -std=c++0x $(DEBUG) $(OPTIMIZE)
-	LDCONFIG = ldconfig -n -v $(LIBPREFIX)/$(LIBNAME)
+	FLAGS = -std=c++0x 
+	LDCONFIG = ldconfig -n -v $(PREFIX)/lib
 endif
 
-FLAGS += -Iinclude
+FLAGS += -fPIC $(DEBUG) $(OPTIMIZE) -Iinclude
 LIBS = -lfftw3 -lm
 
 FLAGS += $(shell root-config --cflags)
@@ -48,12 +48,14 @@ $(LIBNAME): $(OBJECTS)
 	$(CXX) -shared -fPIC $+ -o $(LIBNAME) $(LIBS)
 
 install:
-	cp $(LIBNAME) $(LIBPREFIX)/$(LIBNAME)
+	cp $(LIBNAME) $(PREFIX)/lib/$(LIBNAME)
+	cp $(HEADERS) $(PREFIX)/include/
 	$(LDCONFIG)
-	ln -s $(LIBPREFIX)/$(LIBNAME) $(LIBPREFIX)/$(SONAME)
+	ln -s $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME)
 
 uninstall:
-	rm -f $(LIBPREFIX)/$(SONAME)*
+	rm -f $(PREFIX)/lib/$(SONAME)*
+	rm -f $(patsubst include/%,$(PREFIX)/include/%,$(HEADERS))
 
 clean:
 	rm -f $(TARGETS) build/* 
