@@ -94,7 +94,7 @@ class FID {
   
   // internal utility functions
   void CalcNoise();			
-  void CalcMean();
+  void CenterFid();
   void FindFidRange();
   void CalcPowerEnvAndPhase();
   void CalcFftFreq();

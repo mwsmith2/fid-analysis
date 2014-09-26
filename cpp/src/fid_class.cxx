@@ -12,12 +12,22 @@ FID::FID(const vec& wf, const vec& tm)
   temp_.reserve(wf_.size());
 
   // Initialize the FID for analysis
+  CenterFid();
   CalcNoise();
-  CalcMean();
   FindFidRange();
   CalcPowerEnvAndPhase();
   CalcFftFreq();
   GuessFitParams();
+}
+
+void FID::CenterFid()
+{
+  int w = params::zc_width;
+  double sum  = std::accumulate(wf_.begin(), wf_.begin() + w, 0.0);
+  double avg = sum / w; // to pass into lambda
+  mean_ = avg; // save to class
+
+  std::for_each(wf_.begin(), wf_.end(), [avg](double& x){ x -= avg; });
 }
 
 void FID::CalcNoise()
@@ -30,16 +40,7 @@ void FID::CalcNoise()
   double tail = stdev(wf_.rbegin(), wf_.rbegin() + w);
 
   // Take the smaller of the two.
-  noise_ = (tail < head) ? (tail / w) : (head / w);
-
-  // And set the member noise.
-  noise_ = std::sqrt(noise_); // Want the RMS
-}
-
-void FID::CalcMean()
-{
-  double sum  = std::accumulate(wf_.begin(), wf_.end(), 0.0);
-  mean_ = sum / wf_.size();
+  noise_ = (tail < head) ? (tail) : (head);
 }
 
 void FID::FindFidRange()
@@ -161,7 +162,7 @@ double FID::CalcZeroCountFreq()
   temp_.resize(f_wf_ - i_wf_);
 
   int nzeros = 0;
-  bool pos = wf_[i_wf_] >= mean_;
+  bool pos = wf_[i_wf_] >= 0.0;
   bool hyst = false;
   
   auto mm = std::minmax(wf_.begin(), wf_.end()); // returns pair(&min, &max)
@@ -181,7 +182,7 @@ double FID::CalcZeroCountFreq()
     }
 
     // check for a sign change
-    if ((wf_[i] >= mean_) != pos){
+    if ((wf_[i] >= 0.0) != pos){
       nzeros++;
       f_zero = i;
       if (i_zero == -1) i_zero = i;

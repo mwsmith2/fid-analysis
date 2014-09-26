@@ -50,6 +50,7 @@ $(LIBNAME): $(OBJECTS)
 install:
 	cp $(LIBNAME) $(PREFIX)/lib/$(LIBNAME)
 	cp $(HEADERS) $(PREFIX)/include/
+	cp config/
 	$(LDCONFIG)
 	ln -s $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME)
 

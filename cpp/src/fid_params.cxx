@@ -90,7 +90,7 @@ void load_params(int argc, char **argv)
   using namespace params;
 
   // load defaults first
-  string config_file("runtime/.default_fid_params.json");
+  string config_file("~/.config/fid/.default_fid_params.json");
   ptree pt;
   read_json(config_file, pt);
   pt = pt.get_child("fid");
