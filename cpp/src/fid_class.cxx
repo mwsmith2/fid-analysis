@@ -13,6 +13,7 @@ FID::FID(const vec& wf, const vec& tm)
 
   // Initialize the FID for analysis
   CalcNoise();
+  CalcMean();
   FindFidRange();
   CalcPowerEnvAndPhase();
   CalcFftFreq();
@@ -33,6 +34,12 @@ void FID::CalcNoise()
 
   // And set the member noise.
   noise_ = std::sqrt(noise_); // Want the RMS
+}
+
+void FID::CalcMean()
+{
+  double sum  = std::accumulate(wf_.begin(), wf_.end(), 0.0);
+  mean_ = sum / wf_.size();
 }
 
 void FID::FindFidRange()
@@ -154,7 +161,7 @@ double FID::CalcZeroCountFreq()
   temp_.resize(f_wf_ - i_wf_);
 
   int nzeros = 0;
-  bool pos = wf_[i_wf_] >= 0;
+  bool pos = wf_[i_wf_] >= mean_;
   bool hyst = false;
   
   auto mm = std::minmax(wf_.begin(), wf_.end()); // returns pair(&min, &max)
@@ -174,7 +181,7 @@ double FID::CalcZeroCountFreq()
     }
 
     // check for a sign change
-    if ((wf_[i] >= 0) != pos){
+    if ((wf_[i] >= mean_) != pos){
       nzeros++;
       f_zero = i;
       if (i_zero == -1) i_zero = i;

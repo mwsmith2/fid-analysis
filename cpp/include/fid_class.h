@@ -36,71 +36,73 @@ namespace fid
 
 class FID {
 
-	public:
-
-		// ctor
-		FID(const vec& wf, const vec& tm);
-
-		// frequency extraction methods
-		double CalcZeroCountFreq();
-		double CalcCentroidFreq();
-		double CalcAnalyticalFreq();
-		double CalcLorentzianFreq();
-		double CalcSoftLorentzianFreq();
-		double CalcExponentialFreq();
-		double CalcPhaseFreq(int poln=1);
-		double CalcPhaseDerivFreq(int poln=1);
-		double CalcSinusoidFreq();
-
-		// accessors
-		const vec& wf() const {return wf_;};
-		const vec& tm() const {return tm_;};
-		const vec& res() const {return res_;};
-		const vec& power() const {return power_;};
-		const vec& freq() const {return freq_;};
-		const vec& phase() const {return phase_;}
-		const vec& env() const {return env_;};
-		const double& chi2() const {return chi2_;};
-		const TGraph& gr_time_series() const {return gr_time_series_;};
-		const TGraph& gr_freq_series() const {return gr_freq_series_;};
-		const TF1&    f_fit() const {return f_fit_;};
-
-	private:
-
-		// Member Variables
-		int i_wf_; // start and stop of relevant data
-		int f_wf_;
-		int i_fft_;
-		int f_fft_;
-		double i_tm_;
-		double f_tm_;
-		double noise_;
-		double chi2_; // Store the most recent chi2
-		vec guess_;
-		TF1 f_fit_;
-		TGraph gr_time_series_;
-		TGraph gr_freq_series_;
-
-		// bigger data arrays
-		vec wf_;
-		vec tm_;
-		vec res_;
-		vec power_;
-		vec env_;
-		vec phase_;
-		vec freq_;
-		vec temp_; // for random transformations
-
-		// internal utility functions
-		void CalcNoise();			
-		void FindFidRange();
-		void CalcPowerEnvAndPhase();
-		void CalcFftFreq();
-		void GuessFitParams();
-		void FreqFit(TF1& func);
-
+ public:
+  
+  // ctor
+  FID(const vec& wf, const vec& tm);
+  
+  // frequency extraction methods
+  double CalcZeroCountFreq();
+  double CalcCentroidFreq();
+  double CalcAnalyticalFreq();
+  double CalcLorentzianFreq();
+  double CalcSoftLorentzianFreq();
+  double CalcExponentialFreq();
+  double CalcPhaseFreq(int poln=1);
+  double CalcPhaseDerivFreq(int poln=1);
+  double CalcSinusoidFreq();
+  
+  // accessors
+  const vec& wf() const {return wf_;};
+  const vec& tm() const {return tm_;};
+  const vec& res() const {return res_;};
+  const vec& power() const {return power_;};
+  const vec& freq() const {return freq_;};
+  const vec& phase() const {return phase_;}
+  const vec& env() const {return env_;};
+  const double& chi2() const {return chi2_;};
+  const TGraph& gr_time_series() const {return gr_time_series_;};
+  const TGraph& gr_freq_series() const {return gr_freq_series_;};
+  const TF1&    f_fit() const {return f_fit_;};
+  
+ private:
+  
+  // Member Variables
+  int i_wf_; // start and stop of relevant data
+  int f_wf_;
+  int i_fft_;
+  int f_fft_;
+  double i_tm_;
+  double f_tm_;
+  double noise_;
+  double mean_;
+  double chi2_; // Store the most recent chi2
+  vec guess_;
+  TF1 f_fit_;
+  TGraph gr_time_series_;
+  TGraph gr_freq_series_;
+  
+  // bigger data arrays
+  vec wf_;
+  vec tm_;
+  vec res_;
+  vec power_;
+  vec env_;
+  vec phase_;
+  vec freq_;
+  vec temp_; // for random transformations
+  
+  // internal utility functions
+  void CalcNoise();			
+  void CalcMean();
+  void FindFidRange();
+  void CalcPowerEnvAndPhase();
+  void CalcFftFreq();
+  void GuessFitParams();
+  void FreqFit(TF1& func);
+  
 }; // FID
-
+ 
 } // fid
 
 #endif
