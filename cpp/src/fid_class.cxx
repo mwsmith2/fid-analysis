@@ -59,6 +59,18 @@ void FID::FindFidRange()
   // Turn the iterators into indexes
   i_wf_ = std::distance(wf_.begin(), it_i);
   f_wf_ = std::distance(it_f, wf_.rend());
+
+  // Mark the signal as bad if it didn't find signal above threshold.
+  if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
+
+    isgood_ = false;
+    i_wf_ = 0;
+    f_wf_ = wf_.size() * 0.01;
+
+  } else {
+
+    isgood_ = true;
+  }
 }
 
 void FID::CalcPowerEnvAndPhase()

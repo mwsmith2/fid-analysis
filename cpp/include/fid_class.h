@@ -53,6 +53,7 @@ class FID {
   double CalcSinusoidFreq();
   
   // accessors
+  const bool& isgood() const {return isgood_;};
   const vec& wf() const {return wf_;};
   const vec& tm() const {return tm_;};
   const vec& res() const {return res_;};
@@ -68,6 +69,7 @@ class FID {
  private:
   
   // Member Variables
+  bool isgood_;
   int i_wf_; // start and stop of relevant data
   int f_wf_;
   int i_fft_;

@@ -169,7 +169,7 @@ void load_params(int argc, char **argv)
 
   // If the user provided a different config file, load it instead
   if (argc < 2) {
-    config_file = string("./runtime/fid_params.json");
+    return;
   } else {
     config_file = string(argv[1]);
   }
