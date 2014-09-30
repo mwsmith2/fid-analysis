@@ -178,7 +178,7 @@ double FID::CalcZeroCountFreq()
   bool hyst = false;
   
   auto mm = std::minmax(wf_.begin(), wf_.end()); // returns pair(&min, &max)
-  double max = (-*mm.first > *mm.second) ? -*mm.first : *mm.second;
+  double max = (-(*mm.first) > *mm.second) ? -(*mm.first) : *mm.second;
   double thresh = params::hyst_thresh * max;
 
   int i_zero = -1;
