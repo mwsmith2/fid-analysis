@@ -177,8 +177,12 @@ double FID::CalcZeroCountFreq()
   bool pos = wf_[i_wf_] >= 0.0;
   bool hyst = false;
   
-  auto mm = std::minmax(wf_.begin(), wf_.end()); // returns pair(&min, &max)
-  double max = (-(*mm.first) > *mm.second) ? -(*mm.first) : *mm.second;
+  auto mm = std::minmax_element(wf_.begin(), wf_.end()); // returns {&min, &max}
+
+  double max = *mm.second;
+  if (std::abs(*mm.first) > max) max = std::abs(*mm.first);
+  
+  //  double max = (-(*mm.first) > *mm.second) ? -(*mm.first) : *mm.second;
   double thresh = params::hyst_thresh * max;
 
   int i_zero = -1;

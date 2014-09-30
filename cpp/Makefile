@@ -33,7 +33,7 @@ ifeq ($(UNAME_S), Linux)
 	LDCONFIG = ldconfig -n -v $(PREFIX)/lib
 endif
 
-FLAGS += -fPIC $(DEBUG) $(OPTIMIZE) -Iinclude
+FLAGS += -Wall -fPIC $(DEBUG) $(OPTIMIZE) -Iinclude
 LIBS = -lfftw3 -lm
 
 FLAGS += $(shell root-config --cflags)
