@@ -82,7 +82,7 @@ vec dsp::psd(const cvec& fft_vec)
 	// Instatiate the power vector and fill it with the magnitude of fft_vec.
 	vec power(fft_vec.size(), 0.0);
 
-	for (int i = 0; i < fft_vec.size(); ++i) {
+	for (uint i = 0; i < fft_vec.size(); ++i) {
 		power[i] = std::norm(fft_vec[i]);
 	}
 
@@ -187,7 +187,7 @@ arma::mat dsp::wvd(const vec& wf)
 
   auto wf_im = dsp::hilbert(wf);
 
-  for (int i = 0; i < wf.size(); ++i) {
+  for (uint i = 0; i < wf.size(); ++i) {
     v[i] = arma::cx_double(wf[i], wf_im[i]);
   }
 

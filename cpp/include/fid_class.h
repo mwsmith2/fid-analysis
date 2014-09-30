@@ -70,10 +70,10 @@ class FID {
   
   // Member Variables
   bool isgood_;
-  int i_wf_; // start and stop of relevant data
-  int f_wf_;
-  int i_fft_;
-  int f_fft_;
+  uint i_wf_; // start and stop of relevant data
+  uint f_wf_;
+  uint i_fft_;
+  uint f_fft_;
   double i_tm_;
   double f_tm_;
   double noise_;

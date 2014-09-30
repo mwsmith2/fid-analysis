@@ -35,13 +35,13 @@ void ideal_fid(vec& wf, vec& tm, double f, double phi,
 	return;
 }
 
-void construct_time_vector(int num_times, double t0, double dt, vec &tm)
+void construct_time_vector(uint num_times, double t0, double dt, vec &tm)
 {
   if (tm.size() != num_times){
     tm.resize(num_times);
   }
 
-  for (int i = 0; i < num_times; i++){
+  for (uint i = 0; i < num_times; i++){
     tm[i] = dt * i + t0;
   }
 }
@@ -58,13 +58,13 @@ void construct_quadratic_gradient(int num_points, vec &grad)
 
   // subtract off the average
   double avg = std::accumulate(grad.begin(), grad.end(), 0.0) / grad.size();
-  for (int i = 0; i < grad.size(); i++){
+  for (uint i = 0; i < grad.size(); i++){
     grad[i] -= avg;
   }
 
   // normalize by largest value
   double max = *std::max_element(grad.begin(), grad.end());
-  for (int i = 0; i < grad.size(); i++){
+  for (uint i = 0; i < grad.size(); i++){
     grad[i] /= max;
   }
 }
@@ -81,13 +81,13 @@ void construct_linear_gradient(int num_points, vec &grad)
 
   // subtract off the average
   double avg = std::accumulate(grad.begin(), grad.end(), 0.0) / grad.size();
-  for (int i = 0; i < grad.size(); i++){
+  for (uint i = 0; i < grad.size(); i++){
     grad[i] -= avg;
   }
 
   // normalize by largest value
   double max = *std::max_element(grad.begin(), grad.end());
-  for (int i = 0; i < grad.size(); i++){
+  for (uint i = 0; i < grad.size(); i++){
     grad[i] /= max;
   }
 }
@@ -152,7 +152,7 @@ void draw_fid_time_res(const FID &my_fid, string fname, string title)
   TGraph gr(res.size());
 
   // Set the points
-  for (int i = 0; i < res.size(); ++i){
+  for (uint i = 0; i < res.size(); ++i){
     static double x, y;
 
     gr_fit.GetPoint(i, x, y);
@@ -173,7 +173,7 @@ void draw_fid_freq_res(const FID &my_fid, string fname, string title)
   TGraph gr(res.size());
 
   // Set the points
-  for (int i = 0; i < res.size(); ++i){
+  for (uint i = 0; i < res.size(); ++i){
     static double x, y;
 
     gr_fit.GetPoint(i, x, y);

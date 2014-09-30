@@ -232,7 +232,7 @@ void GradientFidFactory::ConstructFid(const vec& gradient, vec& wf)
 
     pt_fid_->GetEntry(GetTreeIndex(val));
 
-    for (int i = 0; i < wf.size(); i++){
+    for (uint i = 0; i < wf.size(); i++){
       wf[i] += wf_[i] / gradient.size();
     }
   }
