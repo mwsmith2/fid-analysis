@@ -179,7 +179,7 @@ vec dsp::envelope(const vec& wf_re, const vec& wf_im)
 
 arma::mat dsp::wvd(const vec& wf) 
 {
-  // Instiate the return matrix
+  // Instiate the return matrix (and autoconvultion matrix-Ronaldo)
   arma::mat res(wf.size(), wf.size(), arma::fill::zeros);
 
   // Make the signal harmonic
@@ -195,7 +195,8 @@ arma::mat dsp::wvd(const vec& wf)
   int idx = 0;
   for (auto it = wf.begin(); it != wf.end(); ++it) {
     arma::vec fft(arma::abs(arma::fft(dsp::rconvolve(v, idx))));
-    res.col(idx++) = arma::square(fft);
+    res.col(idx++) = fft;
+ 
   }
 
   return res;

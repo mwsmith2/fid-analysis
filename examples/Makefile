@@ -27,7 +27,7 @@ ifeq ($(UNAME_S), Linux)
 endif
 
 FLAGS += -I$(FID_DIR)/include
-LIBS = -lfftw3 -lm -lboost_filesystem -lboost_system -L$(FID_DIR)/lib/ -lFid
+LIBS = -lfftw3 -lm -lboost_filesystem -lboost_system -L$(FID_DIR)/lib/ -lFid -larmadillo
 
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)
