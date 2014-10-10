@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   cout.setf(std::ios::fixed, std:: ios::floatfield);
 
   // declare variables
-  int fid_length = 2000;
+  int fid_length = 10000;
   double ti = -1.0;
   double dt = 0.001;
   double ftruth = 23.0;

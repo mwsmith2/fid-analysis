@@ -1,5 +1,6 @@
 # Grab the targets and sources as two batches
 SOURCES = $(wildcard src/*.cxx)
+<<<<<<< Updated upstream
 HEADERS = $(wildcard include/*.h)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
@@ -45,7 +46,7 @@ build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $<
 
 $(LIBNAME): $(OBJECTS)
-	$(CXX) -shared -fPIC $+ -o $(LIBNAME) $(LIBS)
+	$(CXX) -shared -fPIC $+ -o lib/$(LIBNAME) $(LIBS)
 
 install:
 	cp $(LIBNAME) $(PREFIX)/lib/$(LIBNAME)
