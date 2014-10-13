@@ -177,25 +177,32 @@ vec dsp::envelope(const vec& wf_re, const vec& wf_im)
 }
 
 
-arma::mat dsp::wvd(const vec& wf)
+arma::cx_mat dsp::wvd(const vec& wf)
 {
   // Instiate the return matrix
-  arma::mat res(wf.size(), wf.size(), arma::fill::zeros);
+  arma::cx_mat res(2*wf.size(), wf.size(), arma::fill::zeros);
+
+  // Artificially double the sampling rate by doubling each sample.
+  vec wf_upsample(wf.size() * 2, 0.0);
+
+  auto it1 = wf_upsample.begin();
+  for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
+    *(it1++) = *it2;
+    *(it1++) = *it2;
+  }
 
   // Make the signal harmonic
-  arma::cx_vec v(wf.size());
+  arma::cx_vec v(wf_upsample.size());
 
-  auto wf_im = dsp::hilbert(wf);
+  auto wf_im = dsp::hilbert(wf_upsample);
 
-  for (uint i = 0; i < wf.size(); ++i) {
-    v[i] = arma::cx_double(wf[i], wf_im[i]);
+  for (uint i = 0; i < wf_upsample.size(); ++i) {
+    v[i] = arma::cx_double(wf_upsample[i], wf_im[i]);
   }
 
   // Now compute the Wigner-Ville Distribution
-  int idx = 0;
-  for (auto it = wf.begin(); it != wf.end(); ++it) {
-    arma::vec fft(arma::abs(arma::fft(dsp::rconvolve(v, idx))));
-    res.col(idx++) = arma::square(fft);
+  for (int idx = 0; idx < v.n_elem/2; ++idx) {
+    res.col(idx) = arma::fft(dsp::rconvolve(v, idx));
   }
 
   return res;

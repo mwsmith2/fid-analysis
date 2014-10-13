@@ -148,7 +148,7 @@ vec phase(const vec& wf_re, const vec& wf_im);
 vec envelope(const vec& wf);
 vec envelope(const vec& wf_re, const vec& wf_im);	
 
-arma::mat wvd(const vec& wf);
+arma::cx_mat wvd(const vec& wf);
 
 template <typename T>
 vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {
@@ -168,13 +168,13 @@ template <typename T>
 arma::Col<T> rconvolve(const arma::Col<T>& v, int idx=0) {
 	int ridx = v.n_elem - idx;
 	arma::Col<T> rv(arma::flipud(v));
-	arma::Col<T> res(v.n_elem, arma::fill::zeros);
+	static arma::Col<T> res(v.n_elem, arma::fill::zeros);
 
 	if (idx > ridx) {
-		std::transform(v.begin() + idx, v.end(), rv.begin() + ridx, res.begin(),
+		std::transform(v.begin() + idx - ridx, v.end(), rv.begin(), res.begin(),
 			[](T z1, T z2) { return z1 * std::conj(z2); });
 	} else {
-		std::transform(rv.begin() + ridx, rv.end(), v.begin() + idx, res.begin(),
+		std::transform(rv.begin() + ridx - idx, rv.end(), v.begin(), res.begin(),
 			[](T z2, T z1) { return z1 * std::conj(z2); });
 	}
 	return res;

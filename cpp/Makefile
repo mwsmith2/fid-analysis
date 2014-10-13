@@ -1,6 +1,5 @@
 # Grab the targets and sources as two batches
 SOURCES = $(wildcard src/*.cxx)
-<<<<<<< Updated upstream
 HEADERS = $(wildcard include/*.h)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
