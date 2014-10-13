@@ -13,6 +13,7 @@ Detail: This is a new test program for my FID libraries
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cmath>
 using std::vector;
 using std::cout;
 using std::endl;
@@ -50,8 +51,11 @@ int main(int argc, char** argv)
   }
 
   ideal_fid(wf, tm, ftruth);
+  for (int i = 0; i < wf.size(); ++i) {
+    wf[i] = sin(0.01 * tm[i]);
+  }
 
-  FID my_fid(wf, tm);
+  //  FID my_fid(wf, tm);
 
   auto res = dsp::wvd(wf);
   res.quiet_save("wvd_test.dat", arma::csv_ascii);

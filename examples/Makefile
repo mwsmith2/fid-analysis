@@ -23,7 +23,6 @@ ifeq ($(UNAME_S), Linux)
 	FLAGS = -std=c++0x $(DEBUG)
 endif
 
-FLAGS += -I$(FID_DIR)/include
 LIBS = -lfftw3 -lm -lboost_filesystem -lboost_system -lfid -larmadillo
 
 FLAGS += $(shell root-config --cflags)
