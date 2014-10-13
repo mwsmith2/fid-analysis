@@ -45,7 +45,7 @@ build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $<
 
 $(LIBNAME): $(OBJECTS)
-	$(CXX) -shared -fPIC $+ -o lib/$(LIBNAME) $(LIBS)
+	$(CXX) -shared -fPIC $+ -o $(LIBNAME) $(LIBS)
 
 install:
 	cp $(LIBNAME) $(PREFIX)/lib/$(LIBNAME)
