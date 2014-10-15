@@ -177,27 +177,39 @@ vec dsp::envelope(const vec& wf_re, const vec& wf_im)
 }
 
 
-arma::cx_mat dsp::wvd(const vec& wf)
+arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
 {
+  int M, N;
+  if (upsample) {
+
+    M = 2 * wf.size();
+    N = wf.size();
+
+  } else {
+
+    M = wf.size();
+    N = wf.size();
+  }
+
   // Instiate the return matrix
-  arma::cx_mat res(2*wf.size(), wf.size(), arma::fill::zeros);
+  arma::cx_mat res(M, N, arma::fill::zeros);
 
-  // Artificially double the sampling rate by doubling each sample.
-  vec wf_upsample(wf.size() * 2, 0.0);
+  // Artificially double the sampling rate by repeating each sample.
+  vec wf_re(M, 0.0);
 
-  auto it1 = wf_upsample.begin();
+  auto it1 = wf_re.begin();
   for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
     *(it1++) = *it2;
     *(it1++) = *it2;
   }
 
   // Make the signal harmonic
-  arma::cx_vec v(wf_upsample.size());
+  arma::cx_vec v(wf_re.size());
 
-  auto wf_im = dsp::hilbert(wf_upsample);
+  auto wf_im = dsp::hilbert(wf_re);
 
-  for (uint i = 0; i < wf_upsample.size(); ++i) {
-    v[i] = arma::cx_double(wf_upsample[i], wf_im[i]);
+  for (uint i = 0; i < wf_re.size(); ++i) {
+    v[i] = arma::cx_double(wf_re[i], wf_im[i]);
   }
 
   // Now compute the Wigner-Ville Distribution
@@ -208,4 +220,47 @@ arma::cx_mat dsp::wvd(const vec& wf)
   return res;
 }
 
+arma::mat dsp::wvd(const vec& wf, bool upsample)
+{
+  int M, N;
+  if (upsample) {
+
+    M = 2 * wf.size();
+    N = wf.size();
+
+  } else {
+
+    M = wf.size();
+    N = wf.size();
+  }
+
+  // Instiate the return matrix
+  arma::mat res(M, N, arma::fill::zeros);
+
+  // Artificially double the sampling rate by repeating each sample.
+  vec wf_re(M, 0.0);
+
+  auto it1 = wf_re.begin();
+  for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
+    *(it1++) = *it2;
+    *(it1++) = *it2;
+  }
+
+  // Make the signal harmonic
+  arma::cx_vec v(wf_re.size());
+
+  auto wf_im = dsp::hilbert(wf_re);
+
+  for (uint i = 0; i < wf_re.size(); ++i) {
+    v[i] = arma::cx_double(wf_re[i], wf_im[i]);
+  }
+
+  // Now compute the Wigner-Ville Distribution
+  for (int idx = 0; idx < v.n_elem/2; ++idx) {
+    res.col(idx) = arma::real(arma::fft(dsp::rconvolve(v, idx))) ;
+  }
+
+  return res;
+}
+ 
 } // ::fid

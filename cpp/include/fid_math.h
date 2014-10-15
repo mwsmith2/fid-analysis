@@ -148,7 +148,8 @@ vec phase(const vec& wf_re, const vec& wf_im);
 vec envelope(const vec& wf);
 vec envelope(const vec& wf_re, const vec& wf_im);	
 
-arma::cx_mat wvd(const vec& wf);
+arma::cx_mat wvd_cx(const vec& wf, bool upsample=false);
+arma::mat wvd(const vec& wf, bool upsample=false);
 
 template <typename T>
 vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {
