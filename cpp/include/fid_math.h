@@ -173,10 +173,10 @@ arma::Col<T> rconvolve(const arma::Col<T>& v, int idx=0) {
 
 	if (idx > ridx) {
 		std::transform(v.begin() + idx - ridx, v.end(), rv.begin(), res.begin(),
-			[](T z2, T z1) { return z1 * std::conj(z2); });
+			[](T z1, T z2) { return z1 * std::conj(z2); });
 	} else {
 		std::transform(rv.begin() + ridx - idx, rv.end(), v.begin(), res.begin(),
-			[](T z1, T z2) { return z1 * std::conj(z2); });
+			[](T z2, T z1) { return z1 * std::conj(z2); });
 	}
 	return res;
 } 
