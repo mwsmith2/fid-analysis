@@ -200,20 +200,22 @@ arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
   auto it1 = wf_re.begin();
   for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
     *(it1++) = *it2;
-    *(it1++) = *it2;
+    if (upsample) {
+      *(it1++) = *it2;
+    }
   }
 
   // Make the signal harmonic
-  arma::cx_vec v(wf_re.size());
+  arma::cx_vec v(M);
 
   auto wf_im = dsp::hilbert(wf_re);
 
-  for (uint i = 0; i < wf_re.size(); ++i) {
+  for (uint i = 0; i < M; ++i) {
     v[i] = arma::cx_double(wf_re[i], wf_im[i]);
   }
 
   // Now compute the Wigner-Ville Distribution
-  for (int idx = 0; idx < v.n_elem/2; ++idx) {
+  for (int idx = 0; idx < N; ++idx) {
     res.col(idx) = arma::fft(dsp::rconvolve(v, idx));
   }
 
@@ -243,20 +245,22 @@ arma::mat dsp::wvd(const vec& wf, bool upsample)
   auto it1 = wf_re.begin();
   for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
     *(it1++) = *it2;
-    *(it1++) = *it2;
+    if (upsample) {
+      *(it1++) = *it2;
+    }
   }
 
   // Make the signal harmonic
-  arma::cx_vec v(wf_re.size());
+  arma::cx_vec v(M);
 
   auto wf_im = dsp::hilbert(wf_re);
 
-  for (uint i = 0; i < wf_re.size(); ++i) {
+  for (uint i = 0; i < M; ++i) {
     v[i] = arma::cx_double(wf_re[i], wf_im[i]);
   }
 
   // Now compute the Wigner-Ville Distribution
-  for (int idx = 0; idx < v.n_elem/2; ++idx) {
+  for (int idx = 0; idx < N; ++idx) {
     res.col(idx) = arma::real(arma::fft(dsp::rconvolve(v, idx))) ;
   }
 
