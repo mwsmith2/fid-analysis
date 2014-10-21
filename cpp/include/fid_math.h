@@ -169,7 +169,7 @@ template <typename T>
 arma::Col<T> rconvolve(const arma::Col<T>& v, int idx=0) {
 	int ridx = v.n_elem - idx;
 	arma::Col<T> rv(arma::flipud(v));
-	static arma::Col<T> res(v.n_elem, arma::fill::zeros);
+	arma::Col<T> res(v.n_elem, arma::fill::zeros);
 
 	if (idx > ridx) {
 		std::transform(v.begin() + idx - ridx, v.end(), rv.begin(), res.begin(),
