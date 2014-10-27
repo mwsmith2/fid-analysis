@@ -74,8 +74,6 @@ class FID {
   uint f_wf_;
   uint i_fft_;
   uint f_fft_;
-  double i_tm_;
-  double f_tm_;
   double noise_;
   double mean_;
   double chi2_; // Store the most recent chi2

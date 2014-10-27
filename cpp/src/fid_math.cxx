@@ -207,16 +207,19 @@ arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
 
   // Make the signal harmonic
   arma::cx_vec v(M);
+  arma::vec phase(M);
 
   auto wf_im = dsp::hilbert(wf_re);
 
   for (uint i = 0; i < M; ++i) {
     v[i] = arma::cx_double(wf_re[i], wf_im[i]);
+    phase[i] = (1.0 * i) / M * M_PI;
   }
 
   // Now compute the Wigner-Ville Distribution
   for (int idx = 0; idx < N; ++idx) {
     res.col(idx) = arma::fft(dsp::rconvolve(v, idx));
+    res.col(idx) = res.col(idx) % (arma::cos(phase * idx) + 1j * arma::sin(phase * idx));
   }
 
   return res;
@@ -255,7 +258,7 @@ arma::mat dsp::wvd(const vec& wf, bool upsample)
 
   auto wf_im = dsp::hilbert(wf_re);
 
-  for (uint i = 0; i < M; ++i) {
+  for (int i = 0; i < M; ++i) {
     v[i] = arma::cx_double(wf_re[i], wf_im[i]);
   }
 

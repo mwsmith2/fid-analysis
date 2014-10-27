@@ -8,7 +8,7 @@ email: mwmsith2@uw.edu
 
 notes: 
 
-	This library consists of several frequency exaction and analysis 
+	This library consists of several frequency extraction and analysis 
 	methods for FIDs as well as a class to encapsulate all the ideas.
 
 \*===========================================================================*/

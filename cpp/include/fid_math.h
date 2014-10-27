@@ -81,7 +81,7 @@ inline double stdev(const T& wf) {
 	auto x = std::accumulate(wf.begin(), wf.end(), 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-	return std::sqrt(x);
+	return std::sqrt(x) / std::distance(wf.begin(), wf.end());
 }
 
 // Standard deviation calculation based on start/stop iterators.
@@ -90,7 +90,7 @@ inline double stdev(const T& begin, const T& end) {
 	auto x = std::accumulate(begin, end, 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-	return std::sqrt(x);
+	return std::sqrt(x) / std::distance(begin, end);
 }
 
 // Add white noise to an array.
@@ -172,10 +172,10 @@ arma::Col<T> rconvolve(const arma::Col<T>& v, int idx=0) {
 	arma::Col<T> res(v.n_elem, arma::fill::zeros);
 
 	if (idx > ridx) {
-		std::transform(v.begin() + idx - ridx, v.end(), rv.begin(), res.begin(),
+		std::transform(v.begin() + idx, v.end(), rv.begin(), res.begin(),
 			[](T z1, T z2) { return z1 * std::conj(z2); });
 	} else {
-		std::transform(rv.begin() + ridx - idx, rv.end(), v.begin(), res.begin(),
+		std::transform(rv.begin() + ridx, rv.end(), v.begin(), res.begin(),
 			[](T z2, T z1) { return z1 * std::conj(z2); });
 	}
 	return res;

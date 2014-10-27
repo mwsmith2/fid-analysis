@@ -47,6 +47,7 @@ void FID::FindFidRange()
 {
   // Find the starting and ending points
   double thresh = params::start_thresh * noise_;
+  cout << "threshold: " << thresh << endl;
 
   // Find the first element with magnitude larger than thresh
   auto it_i = std::find_if(wf_.begin(), wf_.end(), 
@@ -111,8 +112,12 @@ void FID::GuessFitParams()
   int max_idx = std::distance(power_.begin(),
     std::max_element(power_.begin(), power_.end()));
 
-  i_fft_ = max_idx - params::fit_width;
-  if (i_fft_ < 0) i_fft_ = 0;
+  if (max_idx - params::fit_width < 0) {
+    i_fft_ = 0;
+
+  } else {
+    i_fft_ = max_idx - params::fit_width;
+  }
 
   f_fft_ = max_idx + params::fit_width;
   if (f_fft_ > power_.size()) f_fft_ = power_.size();
@@ -327,7 +332,8 @@ double FID::CalcPhaseFreq(int poln)
 {
   // 
   gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &phase_[i_wf_]);
-
+  cout << "FID start: " << i_wf_ << endl;
+  cout << "FID stop: " << f_wf_ << endl;
   // Now set up the polynomial phase fit
   char fcn[20];
   sprintf(fcn, "pol%d", poln);

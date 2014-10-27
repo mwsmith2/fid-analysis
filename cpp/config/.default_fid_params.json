@@ -84,9 +84,9 @@
 
 		"params":{
 			"fit_width":20,
-			"zc_width":40,
+			"zc_width":100,
 			"edge_ignore":10,
-			"start_thresh":20.0,
+			"start_thresh":100.0,
 			"zc_alpha":0.5,
 			"max_phase_jump":1.8,
 			"low_pass_freq":100.0,
