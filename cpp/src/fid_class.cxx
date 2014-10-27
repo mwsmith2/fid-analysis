@@ -47,7 +47,6 @@ void FID::FindFidRange()
 {
   // Find the starting and ending points
   double thresh = params::start_thresh * noise_;
-  cout << "threshold: " << thresh << endl;
 
   // Find the first element with magnitude larger than thresh
   auto it_i = std::find_if(wf_.begin(), wf_.end(), 

@@ -65,7 +65,7 @@ vec dsp::hilbert(cvec fft_vec)
 {
 	// Multiply in the -i.
 	for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
-		*it = std::complex<double>(-(*it).imag(), (*it).real());
+		*it = std::complex<double>((*it).imag(), -(*it).real());
 	}
 
 	// Reverse the fft.
