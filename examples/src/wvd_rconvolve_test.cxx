@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 {
   // set precision
   cout.precision(10);
-  cout.setf(std::ios::fixed, std::ios::floatfield);
+  cout.setf(std::ios::fixed, std:: ios::floatfield);
 
   // declare variables
   int fid_length = 5000;
@@ -38,9 +38,9 @@ int main(int argc, char** argv)
   double dt = 0.001;
   double ftruth = 23.0;
 
-  vector<double> wf;
+  vector<double> wf_re;
   vector<double> tm;
-  wf.reserve(fid_length);
+  wf_re.reserve(fid_length);
   tm.reserve(fid_length);
 
   std::ofstream out;
@@ -50,27 +50,31 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
 
-  ideal_fid(wf, tm, ftruth);
-  for (int i = 0; i < wf.size(); ++i) {
-    wf[i] = sin(40 * tm[i]);
+  for (int i = 0; i < fid_length; ++i) {
+    wf_re.push_back(sin(40 * tm[i]));
   }
 
-  out.open("wvd_test_wf.txt");
-  for (auto it = wf.begin(); it != wf.end(); ++it) {
-    out << *it << ", ";
+  auto wf_im = dsp::hilbert(wf_re);
+  arma::cx_vec wf(wf_im.size());
+
+  for (int i = 0; i < wf_re.size(); ++i) {
+    wf[i] = arma::cx_double(wf_re[i], wf_im[i]);
+  }
+  
+
+  auto wf_rc = dsp::rconvolve(wf, 4000);
+
+  out.open("wvd_test_rc_real.txt");
+  for (int i = 0; i < wf_rc.n_elem; ++i) {
+    out << wf_rc[i].real() << ",";
   }
   out.close();
 
-  auto wf_im = dsp::hilbert(wf);
-
-  out.open("wvd_test_wf_im.txt");
-  for (auto it = wf_im.begin(); it != wf_im.end(); ++it) {
-    out << *it << ", ";
+  out.open("wvd_test_rc_imag.txt");
+  for (int i = 0; i < wf_rc.n_elem; ++i) {
+    out << wf_rc[i].imag() << ",";
   }
   out.close();
-
-  auto res = dsp::wvd(wf);
-  res.quiet_save("wvd_test.txt", arma::csv_ascii);
 
   return 0;
 }

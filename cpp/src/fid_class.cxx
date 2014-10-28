@@ -329,10 +329,8 @@ double FID::CalcExponentialFreq()
 
 double FID::CalcPhaseFreq(int poln)
 {
-  // 
   gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &phase_[i_wf_]);
-  cout << "FID start: " << i_wf_ << endl;
-  cout << "FID stop: " << f_wf_ << endl;
+
   // Now set up the polynomial phase fit
   char fcn[20];
   sprintf(fcn, "pol%d", poln);
