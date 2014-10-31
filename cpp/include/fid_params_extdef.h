@@ -2,13 +2,6 @@
 
 namespace fid {
 
-double snr = 300.0;   
-
-// waveform variables
-int num_samples = 10000;
-double start_time = -1.0; 
-double delta_time = 0.001; 
-
 // general fid analysis parameters
 namespace params {
 
@@ -28,6 +21,11 @@ namespace sim {
 
   int seed = 0;   
   double dt_integration = 1.0e-5; 
+  double snr = 300.0;   
+
+  int num_samples = 10000;
+  double start_time = -1.0; 
+  double delta_time = 0.001; 
 
   double freq_ref = 950.0;    
   double freq_larmor = 997.0; 
@@ -40,6 +38,7 @@ namespace sim {
 
   double omega_r = 50.0;  
   double t_pulse = 0.005;  
+
 
 } // ::sim
 

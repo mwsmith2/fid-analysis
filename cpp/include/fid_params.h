@@ -39,12 +39,6 @@ typedef vector<std::complex<double>> cvec;
 
 // constants
 const double kTau = 2 * M_PI;
-extern double snr;   // default signal-to-noise ratio
-
-// waveform variables
-extern double start_time; // start time for the FID
-extern double delta_time; // time spacing for the FID
-extern int num_samples;   // the number of FID samples
 
 // general fid analysis parameters
 namespace params {
@@ -66,8 +60,12 @@ namespace sim {
 
   extern int seed;   // the seed for the random generator
   extern double dt_integration; // step size of time for integration
+  extern double snr;   // default signal-to-noise ratio
 
+  extern double start_time; // start time for the FID
+  extern double delta_time; // time spacing for the FID
   extern int num_samples;    // the number of FID samples
+
   extern double freq_ref;    // reference frequency used to mix down
   extern double freq_larmor; // Larmor frequency to be simulated
   extern double mixdown_phi; // arbitrary phase for mixing freq

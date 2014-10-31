@@ -32,16 +32,20 @@ using std::endl;
 #include "TF1.h"
 
 //--- project includes ------------------------------------------------------//
-#include "fid_params.h"
 #include "fid_class.h"
 #include "fid_sim.h"
 #include "fid_math.h"
+#include "fid_params_extdef.h"
 
 namespace fid
 {
 	// Classes defined in separate headers
 	class FidFactory;
 	class FID;
+
+  // Run this function first thing in any module to load a custom configuration
+  void load_params(string conf_file);
+  void load_params(char *conf_file) { load_params(string(conf_file)); };
 
 	// Declare utility functions.
 	void ideal_fid(vec& wf, vec& tm, double f, double phi=0.0, double snr=100.0, double tau=10.0, double t0=0.0);
