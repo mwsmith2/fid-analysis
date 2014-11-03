@@ -40,6 +40,10 @@ class FID {
   
   // ctor
   FID(const vec& wf, const vec& tm);
+
+  // Diagnostic Function
+  void PrintDiagnosticInfo();
+  void PrintDiagnosticInfo(std::iostream out);
   
   // frequency extraction methods
   double CalcZeroCountFreq();

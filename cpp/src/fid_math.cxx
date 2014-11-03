@@ -141,7 +141,7 @@ vec dsp::phase(const vec& wf_re, const vec& wf_im)
 	// Now unwrap the phase
 	double thresh = params::max_phase_jump;
 	int k = 0; // to track the winding number
-  	for (auto it = phase.begin(); it != phase.end(); ++it) {
+  	for (auto it = phase.begin() + 1; it != phase.end(); ++it) {
 
     	// Add current total
     	*it += k * kTau;
