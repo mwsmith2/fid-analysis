@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   double freq_0 = sim::freq_larmor;
 
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  tm = construct_range(sim::start_time, sim::delta_time, final_time);
+  tm = construct_range(sim::start_time, final_time, sim::delta_time);
 
   // Set up the ROOT tree to hold the results
   TFile pf("sim_fids.root", "recreate");
