@@ -22,6 +22,7 @@ FID::FID(const vec& wf, const vec& tm)
 
 void FID::PrintDiagnosticInfo()
 {
+  cout << endl;
   cout << "Printing Diagostic Information for FID @ " << this << endl;
   cout << "noise level: " << noise_ << endl;
   cout << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
@@ -30,6 +31,7 @@ void FID::PrintDiagnosticInfo()
 
 void FID::PrintDiagnosticInfo(std::iostream out)
 {
+  out << endl;
   out << "Printing Diagostic Information for FID @ " << this << endl;
   out << "noise level: " << noise_ << endl;
   out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;

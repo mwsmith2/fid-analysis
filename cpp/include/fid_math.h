@@ -78,19 +78,25 @@ inline void cross(const vec& u, const vec& v, vec& res)
 // Standard deviation calculation based on whole vector.
 template <typename T>
 inline double stdev(const T& wf) {
-	auto x = std::accumulate(wf.begin(), wf.end(), 0.0, 
+    auto x1 = std::accumulate(wf.begin(), wf.end(), 0.0, 
+        [](double x, double y) { return x + y; });
+
+	auto x2 = std::accumulate(wf.begin(), wf.end(), 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-	return std::sqrt(x) / std::distance(wf.begin(), wf.end());
+	return std::sqrt(x2 - x1*x1) / std::distance(wf.begin(), wf.end());
 }
 
 // Standard deviation calculation based on start/stop iterators.
 template <typename T>
 inline double stdev(const T& begin, const T& end) {
-	auto x = std::accumulate(begin, end, 0.0, 
+    auto x1 = std::accumulate(begin, end, 0.0, 
+        [](double x, double y) { return x + y; });
+
+	auto x2 = std::accumulate(begin, end, 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-	return std::sqrt(x) / std::distance(begin, end);
+	return std::sqrt(x2 - x1*x1) / std::distance(begin, end);
 }
 
 // Add white noise to an array.

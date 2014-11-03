@@ -6,7 +6,7 @@ namespace fid {
 namespace params {
 
   int fit_width = 20;  
-  int zc_width = 40;   
+  int zc_width = 100;   
   int edge_ignore = 10; 
   double start_thresh = 20.0; 
   double max_phase_jump = 0.7; 
