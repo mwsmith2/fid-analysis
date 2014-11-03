@@ -45,7 +45,6 @@ namespace fid
 
   // Run this function first thing in any module to load a custom configuration
   void load_params(string conf_file);
-  void load_params(char *conf_file) { load_params(string(conf_file)); };
 
 	// Declare utility functions.
 	void ideal_fid(vec& wf, vec& tm, double f, double phi=0.0, double snr=100.0, double tau=10.0, double t0=0.0);

@@ -138,6 +138,17 @@ inline vector<T> construct_linspace(const T& i, const T& f, const int& n) {
     return res;
 }
 
+template<typename T>
+inline vector<T> construct_linspace(const vector<T>& vals) {
+    vector<T> res;
+    int n = (int)(vals[2] + 0.5);
+    double d = (vals[1] - vals[0]) / (n - 1);
+    for (int j = 0; j < n; ++j) {
+        res.push_back(vals[0] + j*d);
+    }
+    return res;
+}
+
 namespace dsp
 {
 cvec fft(const vec& wf);
