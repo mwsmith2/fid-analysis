@@ -120,12 +120,22 @@ inline vector<T> construct_range(const T& i, const T& f, const T& d) {
 
 // Construct a range from vector <first, last, step>
 template<typename T>
-inline vector<T> construct_range(const vector<T>& range_vec){
+inline vector<T> construct_range(const vector<T> &range_vec) {
 	vector<T> res;
 	for (T x = range_vec[0]; x <= range_vec[1]; x += range_vec[2]){
 	  res.push_back(x);
 	}
 	return res;
+}
+
+template<typename T>
+inline vector<T> construct_linspace(const T& i, const T& f, const int& n) {
+    vector<T> res;
+    double d = (f - i) / (n - 1);
+    for (int j = 0; j < n; ++j) {
+        res.push_back(i + j*d);
+    }
+    return res;
 }
 
 namespace dsp
