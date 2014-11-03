@@ -5,7 +5,7 @@ OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
 # Versioning info
 MAJOR=0
-MINOR=3
+MINOR=4.0
 SONAME=libfid.so
 LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
 PREFIX=/usr/local
@@ -60,6 +60,6 @@ uninstall:
 reinstall:
 	make uninstall
 	make install
-	
+
 clean:
 	rm -f $(TARGETS) build/* 
