@@ -61,6 +61,7 @@ public:
   // member methods
   void SimulateFid(vec& wf, vec& tm);
   void IdealFid(vec& wf, vec& tm);
+  void PrintDiagnosticInfo();
 
  private:
 
