@@ -205,7 +205,7 @@ void FidFactory::PrintDiagnosticInfo()
 {
   cout << endl;
   cout << "Printing Diagnostic Info for FidFactory @" << this << endl;
-  cout << "The time step, fid length: " << dt_ << ", " <<;
+  cout << "The time step, fid length: " << dt_ << ", ";
   cout << sim::num_samples << endl;
   cout << "The sim length, sim-to-fid: " << sim_length_ << ", ";
   cout << sim_to_fid_ << endl;

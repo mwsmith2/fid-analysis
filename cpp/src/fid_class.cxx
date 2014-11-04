@@ -65,18 +65,53 @@ void FID::FindFidRange()
 {
   // Find the starting and ending points
   double thresh = params::start_thresh * noise_;
+  bool checks_out = false;
 
   // Find the first element with magnitude larger than thresh
-  auto it_i = std::find_if(wf_.begin(), wf_.end(), 
-      [thresh](double x){return std::abs(x) > thresh;});
+  auto it_1 = wf_.begin();
+  while (!checks_out) {
+
+    auto it_i = std::find_if(it_1, wf_.end(), 
+        [thresh](double x){return std::abs(x) > thresh;});
+
+    if (it_i+1 != wf_.end()) {
+
+      checks_out = std::abs(*(it_i+1)) > thresh;
+      it_1 = it_i;
+
+      // Turn the iterator into an index
+      if (checks_out) {
+        i_wf_ = std::distance(wf_.begin(), it_i);
+      }
+
+    } else {
+
+      break;
+    }
+  }
 
   // Find the last element with magnitude larger than thresh
-  auto it_f = std::find_if(wf_.rbegin(), wf_.rend(), 
+  checks_out = false;
+  auto it_2 = wf_.rbegin();
+  while (!checks_out) {
+
+    auto it_f = std::find_if(it_2, wf_.rend(), 
       [thresh](double x){return std::abs(x) > thresh;});
 
-  // Turn the iterators into indexes
-  i_wf_ = std::distance(wf_.begin(), it_i);
-  f_wf_ = std::distance(it_f, wf_.rend());
+    if (it_f+1 != wf_.rend()) {
+      checks_out = std::abs(*(it_f+1)) > thresh;
+      it_2 = it_f;
+
+      // Turn the iterator into an index
+      if (checks_out) {
+        f_wf_ = std::distance(it_f, wf_.rend());
+      }
+
+    } else {
+
+      break;
+    }
+  }
 
   // Mark the signal as bad if it didn't find signal above threshold.
   if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
