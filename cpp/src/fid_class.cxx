@@ -74,10 +74,9 @@ void FID::FindFidRange()
     auto it_i = std::find_if(it_1, wf_.end(), 
         [thresh](double x){return std::abs(x) > thresh;});
 
-    if (it_i+1 != wf_.end()) {
-
+    if (it_i != wf_.end() && it_i+1 != wf_.end()) {
       checks_out = std::abs(*(it_i+1)) > thresh;
-      it_1 = it_i;
+      it_1 = it_i + 1;
 
       // Turn the iterator into an index
       if (checks_out) {
@@ -85,7 +84,7 @@ void FID::FindFidRange()
       }
 
     } else {
-
+        i_wf_ = std::distance(wf_.begin(), wf_.end());
       break;
     }
   }
@@ -98,9 +97,9 @@ void FID::FindFidRange()
     auto it_f = std::find_if(it_2, wf_.rend(), 
       [thresh](double x){return std::abs(x) > thresh;});
 
-    if (it_f+1 != wf_.rend()) {
+    if (it_f != wf_.rend() && it_f+1 != wf_.rend()) {
       checks_out = std::abs(*(it_f+1)) > thresh;
-      it_2 = it_f;
+      it_2 = it_f + 1;
 
       // Turn the iterator into an index
       if (checks_out) {
@@ -109,6 +108,7 @@ void FID::FindFidRange()
 
     } else {
 
+      f_wf_ = std::distance(wf_.rend(), wf_.rend());
       break;
     }
   }
