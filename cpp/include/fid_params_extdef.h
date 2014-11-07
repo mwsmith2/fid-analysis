@@ -20,7 +20,7 @@ namespace params {
 namespace sim {
 
   int seed = 0;   
-  double dt_integration = 1.0e-5; 
+  double dt_integration = 2.0e-5; 
   double snr = 300.0;   
 
   int num_samples = 10000;
