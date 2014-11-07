@@ -10,6 +10,8 @@ FidFactory::FidFactory()
 {
   ti_ = sim::start_time;
   tf_ = ti_ + sim::delta_time * sim::num_samples;
+  cout << "Loading dt_integration: " << sim::dt_integration << endl;
+  cout << "sim::dt_int @ " << &sim::dt_integration << endl;
   dt_ = sim::dt_integration;
 
   sim_to_fid_ = (tf_ - ti_) / (dt_ * sim::num_samples) + 0.5; 

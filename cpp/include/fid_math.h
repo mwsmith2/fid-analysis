@@ -103,14 +103,14 @@ inline double stdev(const T& begin, const T& end) {
 template <typename T>
 void addnoise(vector<T>& wf, T snr, int seed=0) {
   static std::default_random_engine gen(seed);
-  std::normal_distribution<T> nrm(0, sqrt(1.0 / snr));
+  std::normal_distribution<T> nrm;
 
   T max = *std::max_element(wf.begin(), wf.end());
   T min = *std::min_element(wf.begin(), wf.end());
   T scale = max > min ? max : min;
 
   for (auto &x : wf){
-    x += scale * nrm(gen);
+    x += scale * nrm(gen) / sqrt(snr);
   }
 }
 

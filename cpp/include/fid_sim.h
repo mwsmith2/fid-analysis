@@ -5,6 +5,7 @@
 
 author: Matthias W. Smith
 email: mwmsith2@uw.edu
+file:  fid_sim.h
 
 notes:
 
