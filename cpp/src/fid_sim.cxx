@@ -12,12 +12,29 @@ FidFactory::FidFactory()
   tf_ = ti_ + sim::delta_time * sim::num_samples;
   cout << "Loading dt_integration: " << sim::dt_integration << endl;
   cout << "sim::dt_int @ " << &sim::dt_integration << endl;
-  dt_ = sim::dt_integration;
 
-  sim_to_fid_ = (tf_ - ti_) / (dt_ * sim::num_samples) + 0.5; 
+  sim_to_fid_ = (tf_ - ti_) / (sim::dt_integration * sim::num_samples) + 0.5; 
+  if (sim_to_fid_ == 0) {
+    cout << "WARNING: The given integration step was larger than the ";
+    cout << "sampling time, so the sampling time, " << sim::delta_time;
+    cout << ", will be used instead." << endl;
+    sim_to_fid_ = 1;
+    dt_ = sim::delta_time;
+  } else {
+
+    dt_ = sim::delta_time / sim_to_fid_;
+  
+    if (dt_ != sim::dt_integration) {
+      cout << "WARNING: The given integration time step was not an even";
+      cout << " divisor of the sampling rate, so it has been rounded to ";
+      cout << dt_ << endl;
+    }
+  }
+
   sim_length_ = sim_to_fid_ * sim::num_samples;
   printer_idx_ = 0;
 }
+
 
 void FidFactory::SimulateFid(vec& wf, vec& tm)
 {
@@ -139,8 +156,8 @@ void FidFactory::Printer(vec const &s , double t)
 vec FidFactory::LowPassFilter(vec& s)
 {
   // Store the filter statically though this might be a minimal speed boost.
-  static vec filter;
-  static double freq_cut = 0.2 * sim::freq_larmor;
+  vec filter;
+  double freq_cut = 0.2 * sim::freq_larmor;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
   if (filter.size() == 0) {

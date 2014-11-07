@@ -219,7 +219,7 @@ arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
   // Now compute the Wigner-Ville Distribution
   for (int idx = 0; idx < N; ++idx) {
     res.col(idx) = arma::fft(dsp::rconvolve(v, idx));
-    res.col(idx) = res.col(idx) % (arma::cos(phase * idx) + 1j * arma::sin(phase * idx));
+    //    res.col(idx) = res.col(idx) % (arma::cos(phase * idx) + 1j * arma::sin(phase * idx));
   }
 
   return res;
