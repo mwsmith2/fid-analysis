@@ -269,5 +269,80 @@ arma::mat dsp::wvd(const vec& wf, bool upsample)
 
   return res;
 }
+
+vec dsp::savgol3(const vec& wf)
+{
+  vec res(0, wf.size());
+  vec filter = {-2.0, 3.0, 6.0, 7.0, 6.0, 3.0, -2.0};
+  filter = (1.0 / 21.0) * filter;
+
+  if (dsp::convolve(wf, filter, res) == 0) {
+
+    return res;
+
+  } else {
+
+    return wf;
+  }
+}
+
+vec dsp::savgol5(const vec& wf)
+{
+  vec res(0, wf.size());
+  vec filter = {15.0, -55.0, 30.0, 135.0, 179.0, 135.0, 30.0, -55.0, 15.0};
+  filter = (1.0 / 429.0) * filter;
+
+  if (dsp::convolve(wf, filter, res) == 0) {
+
+    return res;
+
+  } else {
+
+    return wf;
+  }
+}
+
+int dsp::convolve(const vec& wf, const vec& filter, vec& res)
+{
+  int k = filter.size();
+  int N = wf.size();
+  res.resize(N);
+
+  // Check to make sure we can do something.
+  if (N < k) {
+    return -1;
+  }
+
+  // First take care of the beginning and end.
+  for (int i = 0; i < k + 1; ++i) {
+    for (int j = i - k/2; j < i + k/2 + 1; ++j) {
+
+      res[i] += wf[abs(j)] * filter[j + k/2];
+      res[N-i] += wf[N-abs(j)] * filter[j + k/2];
+    }
+  }
+
+  // Now the rest of the elements.
+  for (auto it = wf.begin() + k/2; it != wf.end() - k/2; ++it) {
+    double val = std::inner_product(it, it+k, filter.begin(), 0.0);
+    res[std::distance(it, wf.begin())] = val;
+  }
+
+  return 0;
+}
+
+vec dsp::convolve(const vec& wf, const vec& filter)
+{
+  vec res(0.0, wf.size());
+
+  if (dsp::convolve(wf, filter, res) == 0) {
+
+    return res;
+
+  } else {
+
+    return wf;
+  }
+}
  
 } // ::fid
