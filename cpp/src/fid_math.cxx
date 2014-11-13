@@ -315,17 +315,20 @@ int dsp::convolve(const vec& wf, const vec& filter, vec& res)
 
   // First take care of the beginning and end.
   for (int i = 0; i < k + 1; ++i) {
-    for (int j = i - k/2; j < i + k/2 + 1; ++j) {
+    res[i] = 0.0;
+    res[N -1 - i] = 0.0;
 
-      res[i] += wf[abs(j)] * filter[j + k/2];
-      res[N-i] += wf[N-abs(j)] * filter[j + k/2];
+    for (int j = i; j < i + k; ++j) {
+
+      res[i] += wf[abs(j - k/2)] * filter[j - i];
+      res[N - 1 - i] += wf[N - 1 - abs(k/2 - j)] * filter[j - i];
     }
   }
 
   // Now the rest of the elements.
-  for (auto it = wf.begin() + k/2; it != wf.end() - k/2; ++it) {
-    double val = std::inner_product(it, it+k, filter.begin(), 0.0);
-    res[std::distance(it, wf.begin())] = val;
+  for (auto it = wf.begin(); it != wf.end() - k; ++it) {
+    double val = std::inner_product(it, it + k, filter.begin(), 0.0);
+    res[std::distance(wf.begin(), it + k/2)] = val;
   }
 
   return 0;
