@@ -35,7 +35,6 @@ using std::endl;
 #include "fid_class.h"
 #include "fid_sim.h"
 #include "fid_math.h"
-#include "fid_params_extdef.h"
 
 namespace fid
 {

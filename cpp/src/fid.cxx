@@ -1,4 +1,5 @@
 #include "fid.h"
+#include "fid_params_extdef.h"
 
 namespace fid {
 
