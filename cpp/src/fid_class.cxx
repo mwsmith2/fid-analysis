@@ -227,6 +227,7 @@ void FID::FreqFit(TF1& func)
   gr_freq_series_.Fit(&func, "QMRSEX0", "C", freq_[i_fft_], freq_[f_fft_]);
 
   chi2_ = func.GetChisquare();
+  freq_err_ = f_fit_.GetParError(0) / kTau;
 
   res_.resize(0);
   for (uint i = i_fft_; i < f_fft_ + 1; ++i){
@@ -416,6 +417,7 @@ double FID::CalcPhaseFreq(int poln)
   }
 
   chi2_ = f_fit_.GetChisquare();
+  freq_err_ = f_fit_.GetParError(1) / kTau;
   return f_fit_.GetParameter(1) / kTau;
 }
 
@@ -462,6 +464,7 @@ double FID::CalcSinusoidFreq()
   }
 
   chi2_ = f_fit_.GetChisquare();
+  freq_err_ = f_fit_.GetParError(0) / kTau;
   return f_fit_.GetParameter(0) / kTau;
 }
 
