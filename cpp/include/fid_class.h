@@ -67,6 +67,7 @@ class FID {
   const vec& env() const {return env_;};
   const double& chi2() const {return chi2_;};
   const double& freq_err() const {return freq_err_;};
+  const double fid_time() const {return tm_[f_wf_] - tm_[i_wf_];};
   const double snr() const {return max_amp_*max_amp_ / (noise_ * noise_);};
   const TGraph& gr_time_series() const {return gr_time_series_;};
   const TGraph& gr_freq_series() const {return gr_freq_series_;};
