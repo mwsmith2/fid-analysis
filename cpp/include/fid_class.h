@@ -66,6 +66,8 @@ class FID {
   const vec& phase() const {return phase_;}
   const vec& env() const {return env_;};
   const double& chi2() const {return chi2_;};
+  const double& freq_err() const {return freq_err_;};
+  const double snr() const {return max_amp_*max_amp_ / (noise_ * noise_);};
   const TGraph& gr_time_series() const {return gr_time_series_;};
   const TGraph& gr_freq_series() const {return gr_freq_series_;};
   const TF1&    f_fit() const {return f_fit_;};
@@ -79,8 +81,10 @@ class FID {
   uint i_fft_;
   uint f_fft_;
   double noise_;
+  double max_amp_;
   double mean_;
   double chi2_; // Store the most recent chi2
+  double freq_err;
   vec guess_;
   TF1 f_fit_;
   TGraph gr_time_series_;
@@ -97,7 +101,8 @@ class FID {
   vec temp_; // for random transformations
   
   // internal utility functions
-  void CalcNoise();			
+  void CalcNoise();
+  void CalcMaxAmp();			
   void CenterFid();
   void FindFidRange();
   void CalcPowerEnvAndPhase();

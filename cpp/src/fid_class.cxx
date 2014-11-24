@@ -14,6 +14,7 @@ FID::FID(const vec& wf, const vec& tm)
   // Initialize the FID for analysis
   CenterFid();
   CalcNoise();
+  CalcMaxAmp();
   FindFidRange();
   CalcPowerEnvAndPhase();
   CalcFftFreq();
@@ -59,6 +60,16 @@ void FID::CalcNoise()
 
   // Take the smaller of the two.
   noise_ = (tail < head) ? (tail) : (head);
+}
+
+void FID::CalcMaxAmp() 
+{
+  auto mm = std::minmax_element(wf_.begin(), wf_.end());
+  if (abs(*mm.first) > abs(*mm.second)) {
+    max_amp_ = abs(*mm.first);
+  } else {
+    max_amp_ = abs(*mm.second);
+  }
 }
 
 void FID::FindFidRange()
