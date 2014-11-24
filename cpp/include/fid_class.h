@@ -84,7 +84,7 @@ class FID {
   double max_amp_;
   double mean_;
   double chi2_; // Store the most recent chi2
-  double freq_err;
+  double freq_err_;
   vec guess_;
   TF1 f_fit_;
   TGraph gr_time_series_;
