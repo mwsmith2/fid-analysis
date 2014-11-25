@@ -286,8 +286,12 @@ double FID::CalcZeroCountFreq()
 
   frac = std::abs(wf_[f] / (wf_[f-1] - wf_[f]));
   double tf = frac * tm_[f-1] + (1.0 - frac) * tm_[f];
+  double freq = 0.5 * (nzeros - 1) / (tf - ti);
 
-  return 0.5 * (nzeros - 1) / (tf - ti);
+  // todo: Fix this into a better error estimate. 
+  freq_err_ = freq * 1.41 * (tm_[1] - tm_[0]) / (tf - ti);
+
+  return freq;
 }
 
 double FID::CalcCentroidFreq()
@@ -315,6 +319,7 @@ double FID::CalcCentroidFreq()
     pwsum  += power_[i];
   }
 
+  freq_err_ = freq_[1] - freq_[0];
   return pwfreq / pwsum;
 }
 
