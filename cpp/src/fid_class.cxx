@@ -320,7 +320,7 @@ double FID::CalcCentroidFreq()
   }
 
   // Use the width of the peak, the stdev as the error estimator.
-  freq_err_ = fid::stdev()
+  freq_err_ = fid::stdev(power_.begin() + it_i, power_.begin() + it_f);
   return pwfreq / pwsum;
 }
 
