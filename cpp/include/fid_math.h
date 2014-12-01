@@ -84,7 +84,8 @@ inline double stdev(const T& wf) {
 	auto x2 = std::accumulate(wf.begin(), wf.end(), 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-	return std::sqrt(x2 - x1*x1) / std::distance(wf.begin(), wf.end());
+  double N = (double) std::distance(wf.begin(), wf.end());
+	return std::sqrt(x2/N - (x1/N) * (x1/N));
 }
 
 // Standard deviation calculation based on start/stop iterators.
@@ -96,7 +97,8 @@ inline double stdev(const T& begin, const T& end) {
 	auto x2 = std::accumulate(begin, end, 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-	return std::sqrt(x2 - x1*x1) / std::distance(begin, end);
+  double N = (double) std::distance(begin, end);
+  return std::sqrt(x2/N - (x1/N) * (x1/N));
 }
 
 // Add white noise to an array.
