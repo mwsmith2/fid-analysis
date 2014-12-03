@@ -72,6 +72,10 @@ class FID {
   const TGraph& gr_time_series() const {return gr_time_series_;};
   const TGraph& gr_freq_series() const {return gr_freq_series_;};
   const TF1&    f_fit() const {return f_fit_;};
+  const uint& i_wf() { return i_wf_; };
+  const uint& f_wf() { return f_wf_; };
+  const uint& i_fft() { return i_fft_; };
+  const uint& f_fft() { return f_fft_; };
   
  private:
   
