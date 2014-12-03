@@ -288,8 +288,8 @@ double FID::CalcZeroCountFreq()
   double tf = frac * tm_[f-1] + (1.0 - frac) * tm_[f];
   double freq = 0.5 * (nzeros - 1) / (tf - ti);
 
-  // todo: Fix this into a better error estimate. 
-  freq_err_ = freq * 1.41 * (tm_[1] - tm_[0]) / (tf - ti);
+  // Calculate the error as done in the Priegl paper.
+  freq_err_ = freq / ((tm_[f_wf_] - tm_[i_wf_]) * (noise_ * params::start_thresh));
 
   return freq;
 }
@@ -319,7 +319,8 @@ double FID::CalcCentroidFreq()
     pwsum  += power_[i];
   }
 
-  freq_err_ = freq_[1] - freq_[0];
+  // Use the width of the peak, the stdev as the error estimator.
+  freq_err_ = fid::stdev(power_.begin() + it_i, power_.begin() + it_f);
   return pwfreq / pwsum;
 }
 
