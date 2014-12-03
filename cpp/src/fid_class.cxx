@@ -288,8 +288,8 @@ double FID::CalcZeroCountFreq()
   double tf = frac * tm_[f-1] + (1.0 - frac) * tm_[f];
   double freq = 0.5 * (nzeros - 1) / (tf - ti);
 
-  // Calculate the error as done in the Priegl paper.
-  freq_err_ = freq / ((tm_[f_wf_] - tm_[i_wf_]) * (noise_ * params::start_thresh));
+  // todo: Fix this into a better error estimate. 
+  freq_err_ = freq * 1.41 * (tm_[1] - tm_[0]) / (tf - ti);
 
   return freq;
 }
@@ -319,8 +319,7 @@ double FID::CalcCentroidFreq()
     pwsum  += power_[i];
   }
 
-  // Use the width of the peak, the stdev as the error estimator.
-  freq_err_ = fid::stdev(power_.begin() + it_i, power_.begin() + it_f);
+  freq_err_ = freq_[1] - freq_[0];
   return pwfreq / pwsum;
 }
 
@@ -329,12 +328,13 @@ double FID::CalcAnalyticalFreq()
 {
   // @todo check the algebra on this guy
   // Set the fit function
-  std::string num1("[2] * ([0]^2 - 0.5 * [1] * [0] * sin(2 *[4])");
-  std::string num2(" + (0.5 * [1])^2 + x^2 - [0]^2 * sin([4])^2) / ");
-  std::string den1("((0.5 * [1])^2 + 2 * (x^2 - [0]^2) * (x^2 + [0]^2)");
-  std::string den2(" + (x^2 - [0]^2)^2) + [3]");
+  using std::string;
+  string fcn("[2] * ([0]^2 - 0.5 * [1] * [0] * sin(2 *[4])");
+  fcn += string(" + (0.5 * [1])^2 + x^2 - [0]^2 * sin([4])^2) / ");
+  fcn += string("((0.5 * [1])^2 + 2 * (x^2 - [0]^2) * (x^2 + [0]^2)");
+  fcn += string(" + (x^2 - [0]^2)^2) + [3]");
 
-  f_fit_ = TF1("f_fit_", (num1 + num2 + den1 + den2).c_str());
+  f_fit_ = TF1("f_fit_", fcn.c_str(), freq_[i_fft_], freq_[f_fft_]);
 
   // Set the parameter guesses
   for (uint i = 0; i < 5; i++){
@@ -352,7 +352,8 @@ double FID::CalcAnalyticalFreq()
 double FID::CalcLorentzianFreq()
 {
   // Set the fit function
-  f_fit_ = TF1("f_fit_", "[2] / (1 + ((x - [0]) / (0.5 * [1]))^2) + [3]");
+  std::string fcn("[2] / (1 + ((x - [0]) / (0.5 * [1]))^2) + [3]");
+  f_fit_ = TF1("f_fit_", fcn.c_str(), freq_[i_fft_], freq_[f_fft_]);
 
   // Set the parameter guesses
   for (int i = 0; i < 4; i++){
