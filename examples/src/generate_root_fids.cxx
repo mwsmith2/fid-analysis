@@ -1,10 +1,10 @@
 /*===========================================================================*\
 
-Author: Matthias W. Smith
-Email:  mwsmith2@uw.edu
-Date:   11/02/14
+author: Matthias W. Smith
+email:  mwsmith2@uw.edu
+file:   generate_root_fids.cxx
 
-Detail: This is a new test program for my FID libraries 
+notes: This is a new test program for my FID libraries 
 
 \*===========================================================================*/
 

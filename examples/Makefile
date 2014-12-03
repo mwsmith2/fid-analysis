@@ -1,7 +1,6 @@
 # Grab the targets and sources as two batches
 SOURCES = $(wildcard src/*.cxx)
-OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
-TARGETS = $(patsubst src/%.cxx,%,$(SOURCES))
+TARGETS = $(patsubst src/%.cxx,bin/%,$(SOURCES))
 
 # Debugging/profiling flags
 DEBUG = -g -pg
@@ -34,8 +33,8 @@ all: $(TARGETS)
 build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $< 
 
-%: build/%.o
-	$(CXX) $(FLAGS) -o build/$@ $+ $(LIBS)
+bin/%: build/%.o
+	$(CXX) $(FLAGS) -o $@ $+ $(LIBS)
 
 clean:
 	rm -f build/* 
