@@ -96,6 +96,10 @@ int main(int argc, char **argv)
 
   for (int i = 0; i < 1000; ++i) {
     
+    if (i % 250 == 0) {
+      cout << "Processing round " << i << "." << endl;
+    }
+
     // Make ideal FID waveform
     double freq = rand_flat_dist(gen);
     ideal_fid(wf, tm, freq, 0.0, 1000);
@@ -114,11 +118,11 @@ int main(int argc, char **argv)
     myfid_data.freq_ext[idx] = myfid.CalcZeroCountFreq();
     myfid_data.freq_err[idx] = myfid.freq_err();
 
-    idx = 1;
+    idx++;
     myfid_data.freq_ext[idx] = myfid.CalcCentroidFreq();
     myfid_data.freq_err[idx] = myfid.freq_err();
 
-    idx = 2;
+    idx++;
     myfid_data.freq_ext[idx] = myfid.CalcAnalyticalFreq();
     myfid_data.freq_err[idx] = myfid.freq_err();
 
@@ -126,7 +130,7 @@ int main(int argc, char **argv)
       myfid_data.fit[idx][i] = myfid.f_fit().Eval(myfid.freq()[i]);
     }
 
-    idx = 3;
+    idx++;
     myfid_data.freq_ext[idx] = myfid.CalcLorentzianFreq();
     myfid_data.freq_err[idx] = myfid.freq_err();
 
@@ -134,7 +138,7 @@ int main(int argc, char **argv)
       myfid_data.fit[idx][i] = myfid.f_fit().Eval(myfid.freq()[i]);
     }
 
-    idx = 4;
+    idx++;
     myfid_data.freq_ext[idx] = myfid.CalcPhaseFreq();
     myfid_data.freq_err[idx] = myfid.freq_err();
 
@@ -142,7 +146,7 @@ int main(int argc, char **argv)
       myfid_data.fit[idx][i] = myfid.f_fit().Eval(myfid.tm()[i]);
     }
 
-    idx = 5;
+    idx++;
     myfid_data.freq_ext[idx] = myfid.CalcSinusoidFreq();
     myfid_data.freq_err[idx] = myfid.freq_err();
 
