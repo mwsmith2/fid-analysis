@@ -289,7 +289,7 @@ double FID::CalcZeroCountFreq()
   double freq = 0.5 * (nzeros - 1) / (tf - ti);
 
   // todo: Fix this into a better error estimate. 
-  freq_err_ = freq * 1.41 * (tm_[1] - tm_[0]) / (tf - ti);
+  freq_err_ = freq * sqrt(2) * (tm_[1] - tm_[0]) / (tf - ti);
 
   return freq;
 }
@@ -312,14 +312,16 @@ double FID::CalcCentroidFreq()
 
   // Now compute the power weighted average
   double pwfreq = 0.0;
+  double pwfreq2 = 0.0;
   double pwsum = 0.0;
 
   for (int i = it_i; i < it_f; i++){
     pwfreq += power_[i] * freq_[i];
+    pwfreq2 += power_[i] * power_[i] * freq_[i];
     pwsum  += power_[i];
   }
 
-  freq_err_ = freq_[1] - freq_[0];
+  freq_err_ = sqrt(pwfreq2 / pwsum - pow(pwfreq / pwsum, 2.0));
   return pwfreq / pwsum;
 }
 
