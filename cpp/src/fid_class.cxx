@@ -159,7 +159,7 @@ void FID::CalcPowerEnvAndPhase()
 void FID::CalcFftFreq()
 {
   // @todo: consider storing as start, step, stop
-  freq_ = dsp::fftfreq(wf_);
+  freq_ = dsp::fftfreq(tm_);
 }
 
 void FID::GuessFitParams()
@@ -453,10 +453,21 @@ double FID::CalcSinusoidFreq()
   // Guess parameters
   f_fit_.SetParameter(0, kTau * CalcZeroCountFreq());
   f_fit_.SetParameter(1, 1.0);
-  f_fit_.SetParameter(2, phase_[i_wf_]);
+
+  // Need to reduce phase to proper range.
+  auto tmp = fmod(phase_[i_wf_], kTau);
+
+  if (tmp <= 0.0) {
+
+    f_fit_.SetParameter(2, tmp + kTau);
+
+  } else {
+
+    f_fit_.SetParameter(2, tmp);
+  }
 
   f_fit_.SetParLimits(1, 0.9, 1.1); // Should be exactly 1.0
-  f_fit_.SetParLimits(2, -0.5 * kTau, 0.5 * kTau); // it's a phase
+  f_fit_.SetParLimits(2, 0.0, kTau); // it's a phase
 
   // Adjust to ignore the edges
   int i = i_wf_ + params::edge_ignore;
