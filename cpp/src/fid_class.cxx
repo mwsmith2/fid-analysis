@@ -14,10 +14,29 @@ FID::FID(const vec& wf, const vec& tm)
   // Initialize the FID for analysis
   CenterFid();
   CalcNoise();
+  CalcMaxAmp();
   FindFidRange();
   CalcPowerEnvAndPhase();
   CalcFftFreq();
   GuessFitParams();
+}
+
+void FID::PrintDiagnosticInfo()
+{
+  cout << endl;
+  cout << "Printing Diagostic Information for FID @ " << this << endl;
+  cout << "noise level: " << noise_ << endl;
+  cout << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
+  cout << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
+}
+
+void FID::PrintDiagnosticInfo(std::iostream out)
+{
+  out << endl;
+  out << "Printing Diagostic Information for FID @ " << this << endl;
+  out << "noise level: " << noise_ << endl;
+  out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
+  out << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
 }
 
 void FID::CenterFid()
@@ -43,22 +62,67 @@ void FID::CalcNoise()
   noise_ = (tail < head) ? (tail) : (head);
 }
 
+void FID::CalcMaxAmp() 
+{
+  auto mm = std::minmax_element(wf_.begin(), wf_.end());
+  if (abs(*mm.first) > abs(*mm.second)) {
+    max_amp_ = abs(*mm.first);
+  } else {
+    max_amp_ = abs(*mm.second);
+  }
+}
+
 void FID::FindFidRange()
 {
   // Find the starting and ending points
   double thresh = params::start_thresh * noise_;
+  bool checks_out = false;
 
   // Find the first element with magnitude larger than thresh
-  auto it_i = std::find_if(wf_.begin(), wf_.end(), 
-      [thresh](double x){return std::abs(x) > thresh;});
+  auto it_1 = wf_.begin();
+  while (!checks_out) {
+
+    auto it_i = std::find_if(it_1, wf_.end(), 
+        [thresh](double x){return std::abs(x) > thresh;});
+
+    if (it_i != wf_.end() && it_i+1 != wf_.end()) {
+      checks_out = std::abs(*(it_i+1)) > thresh;
+      it_1 = it_i + 1;
+
+      // Turn the iterator into an index
+      if (checks_out) {
+        i_wf_ = std::distance(wf_.begin(), it_i);
+      }
+
+    } else {
+        i_wf_ = std::distance(wf_.begin(), wf_.end());
+      break;
+    }
+  }
 
   // Find the last element with magnitude larger than thresh
-  auto it_f = std::find_if(wf_.rbegin(), wf_.rend(), 
+  checks_out = false;
+  auto it_2 = wf_.rbegin();
+  while (!checks_out) {
+
+    auto it_f = std::find_if(it_2, wf_.rend(), 
       [thresh](double x){return std::abs(x) > thresh;});
 
-  // Turn the iterators into indexes
-  i_wf_ = std::distance(wf_.begin(), it_i);
-  f_wf_ = std::distance(it_f, wf_.rend());
+    if (it_f != wf_.rend() && it_f+1 != wf_.rend()) {
+      checks_out = std::abs(*(it_f+1)) > thresh;
+      it_2 = it_f + 1;
+
+      // Turn the iterator into an index
+      if (checks_out) {
+        f_wf_ = std::distance(it_f, wf_.rend());
+      }
+
+    } else {
+
+      f_wf_ = std::distance(wf_.rend(), wf_.rend());
+      break;
+    }
+  }
 
   // Mark the signal as bad if it didn't find signal above threshold.
   if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
@@ -95,7 +159,7 @@ void FID::CalcPowerEnvAndPhase()
 void FID::CalcFftFreq()
 {
   // @todo: consider storing as start, step, stop
-  freq_ = dsp::fftfreq(wf_);
+  freq_ = dsp::fftfreq(tm_);
 }
 
 void FID::GuessFitParams()
@@ -111,8 +175,12 @@ void FID::GuessFitParams()
   int max_idx = std::distance(power_.begin(),
     std::max_element(power_.begin(), power_.end()));
 
-  i_fft_ = max_idx - params::fit_width;
-  if (i_fft_ < 0) i_fft_ = 0;
+  if (max_idx - params::fit_width < 0) {
+    i_fft_ = 0;
+
+  } else {
+    i_fft_ = max_idx - params::fit_width;
+  }
 
   f_fft_ = max_idx + params::fit_width;
   if (f_fft_ > power_.size()) f_fft_ = power_.size();
@@ -159,6 +227,7 @@ void FID::FreqFit(TF1& func)
   gr_freq_series_.Fit(&func, "QMRSEX0", "C", freq_[i_fft_], freq_[f_fft_]);
 
   chi2_ = func.GetChisquare();
+  freq_err_ = f_fit_.GetParError(0) / kTau;
 
   res_.resize(0);
   for (uint i = i_fft_; i < f_fft_ + 1; ++i){
@@ -217,8 +286,12 @@ double FID::CalcZeroCountFreq()
 
   frac = std::abs(wf_[f] / (wf_[f-1] - wf_[f]));
   double tf = frac * tm_[f-1] + (1.0 - frac) * tm_[f];
+  double freq = 0.5 * (nzeros - 1) / (tf - ti);
 
-  return 0.5 * (nzeros - 1) / (tf - ti);
+  // todo: Fix this into a better error estimate. 
+  freq_err_ = freq * sqrt(2) * (tm_[1] - tm_[0]) / (tf - ti);
+
+  return freq;
 }
 
 double FID::CalcCentroidFreq()
@@ -239,13 +312,16 @@ double FID::CalcCentroidFreq()
 
   // Now compute the power weighted average
   double pwfreq = 0.0;
+  double pwfreq2 = 0.0;
   double pwsum = 0.0;
 
   for (int i = it_i; i < it_f; i++){
     pwfreq += power_[i] * freq_[i];
+    pwfreq2 += power_[i] * power_[i] * freq_[i];
     pwsum  += power_[i];
   }
 
+  freq_err_ = sqrt(pwfreq2 / pwsum - pow(pwfreq / pwsum, 2.0));
   return pwfreq / pwsum;
 }
 
@@ -254,12 +330,13 @@ double FID::CalcAnalyticalFreq()
 {
   // @todo check the algebra on this guy
   // Set the fit function
-  std::string num1("[2] * ([0]^2 - 0.5 * [1] * [0] * sin(2 *[4])");
-  std::string num2(" + (0.5 * [1])^2 + x^2 - [0]^2 * sin([4])^2) / ");
-  std::string den1("((0.5 * [1])^2 + 2 * (x^2 - [0]^2) * (x^2 + [0]^2)");
-  std::string den2(" + (x^2 - [0]^2)^2) + [3]");
+  using std::string;
+  string fcn("[2] * ([0]^2 - 0.5 * [1] * [0] * sin(2 *[4])");
+  fcn += string(" + (0.5 * [1])^2 + x^2 - [0]^2 * sin([4])^2) / ");
+  fcn += string("((0.5 * [1])^2 + 2 * (x^2 - [0]^2) * (x^2 + [0]^2)");
+  fcn += string(" + (x^2 - [0]^2)^2) + [3]");
 
-  f_fit_ = TF1("f_fit_", (num1 + num2 + den1 + den2).c_str());
+  f_fit_ = TF1("f_fit_", fcn.c_str(), freq_[i_fft_], freq_[f_fft_]);
 
   // Set the parameter guesses
   for (uint i = 0; i < 5; i++){
@@ -277,7 +354,8 @@ double FID::CalcAnalyticalFreq()
 double FID::CalcLorentzianFreq()
 {
   // Set the fit function
-  f_fit_ = TF1("f_fit_", "[2] / (1 + ((x - [0]) / (0.5 * [1]))^2) + [3]");
+  std::string fcn("[2] / (1 + ((x - [0]) / (0.5 * [1]))^2) + [3]");
+  f_fit_ = TF1("f_fit_", fcn.c_str(), freq_[i_fft_], freq_[f_fft_]);
 
   // Set the parameter guesses
   for (int i = 0; i < 4; i++){
@@ -325,7 +403,6 @@ double FID::CalcExponentialFreq()
 
 double FID::CalcPhaseFreq(int poln)
 {
-  // 
   gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &phase_[i_wf_]);
 
   // Now set up the polynomial phase fit
@@ -349,6 +426,7 @@ double FID::CalcPhaseFreq(int poln)
   }
 
   chi2_ = f_fit_.GetChisquare();
+  freq_err_ = f_fit_.GetParError(1) / kTau;
   return f_fit_.GetParameter(1) / kTau;
 }
 
@@ -377,10 +455,21 @@ double FID::CalcSinusoidFreq()
   // Guess parameters
   f_fit_.SetParameter(0, kTau * CalcZeroCountFreq());
   f_fit_.SetParameter(1, 1.0);
-  f_fit_.SetParameter(2, phase_[i_wf_]);
+
+  // Need to reduce phase to proper range.
+  auto tmp = fmod(phase_[i_wf_], kTau);
+
+  if (tmp <= 0.0) {
+
+    f_fit_.SetParameter(2, tmp + kTau);
+
+  } else {
+
+    f_fit_.SetParameter(2, tmp);
+  }
 
   f_fit_.SetParLimits(1, 0.9, 1.1); // Should be exactly 1.0
-  f_fit_.SetParLimits(2, -0.5 * kTau, 0.5 * kTau); // it's a phase
+  f_fit_.SetParLimits(2, 0.0, kTau); // it's a phase
 
   // Adjust to ignore the edges
   int i = i_wf_ + params::edge_ignore;
@@ -395,6 +484,7 @@ double FID::CalcSinusoidFreq()
   }
 
   chi2_ = f_fit_.GetChisquare();
+  freq_err_ = f_fit_.GetParError(0) / kTau;
   return f_fit_.GetParameter(0) / kTau;
 }
 

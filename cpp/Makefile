@@ -5,7 +5,7 @@ OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
 # Versioning info
 MAJOR=0
-MINOR=3
+MINOR=4.1
 SONAME=libfid.so
 LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
 PREFIX=/usr/local
@@ -50,14 +50,16 @@ $(LIBNAME): $(OBJECTS)
 install:
 	cp $(LIBNAME) $(PREFIX)/lib/$(LIBNAME)
 	cp $(HEADERS) $(PREFIX)/include/
-	cp -r config $(PREFIX)/opt/fid
 	ln -s $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME)
 	$(LDCONFIG)
 
 uninstall:
 	rm -f $(PREFIX)/lib/$(SONAME)*
-	rm -rf $(PREFIX)/opt/fid/
 	rm -f $(patsubst include/%,$(PREFIX)/include/%,$(HEADERS))
+
+reinstall:
+	make uninstall
+	make install
 
 clean:
 	rm -f $(TARGETS) build/* 

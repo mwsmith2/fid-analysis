@@ -5,6 +5,7 @@
 
 author: Matthias W. Smith
 email: mwmsith2@uw.edu
+file:  fid_sim.h
 
 notes:
 
@@ -61,6 +62,7 @@ public:
   // member methods
   void SimulateFid(vec& wf, vec& tm);
   void IdealFid(vec& wf, vec& tm);
+  void PrintDiagnosticInfo();
 
  private:
 

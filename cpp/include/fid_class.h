@@ -40,6 +40,10 @@ class FID {
   
   // ctor
   FID(const vec& wf, const vec& tm);
+
+  // Diagnostic Function
+  void PrintDiagnosticInfo();
+  void PrintDiagnosticInfo(std::iostream out);
   
   // frequency extraction methods
   double CalcZeroCountFreq();
@@ -62,9 +66,16 @@ class FID {
   const vec& phase() const {return phase_;}
   const vec& env() const {return env_;};
   const double& chi2() const {return chi2_;};
+  const double& freq_err() const {return freq_err_;};
+  const double fid_time() const {return tm_[f_wf_] - tm_[i_wf_];};
+  const double snr() const {return max_amp_*max_amp_ / (noise_ * noise_);};
   const TGraph& gr_time_series() const {return gr_time_series_;};
   const TGraph& gr_freq_series() const {return gr_freq_series_;};
   const TF1&    f_fit() const {return f_fit_;};
+  const uint& i_wf() { return i_wf_; };
+  const uint& f_wf() { return f_wf_; };
+  const uint& i_fft() { return i_fft_; };
+  const uint& f_fft() { return f_fft_; };
   
  private:
   
@@ -74,11 +85,11 @@ class FID {
   uint f_wf_;
   uint i_fft_;
   uint f_fft_;
-  double i_tm_;
-  double f_tm_;
   double noise_;
+  double max_amp_;
   double mean_;
   double chi2_; // Store the most recent chi2
+  double freq_err_;
   vec guess_;
   TF1 f_fit_;
   TGraph gr_time_series_;
@@ -95,7 +106,8 @@ class FID {
   vec temp_; // for random transformations
   
   // internal utility functions
-  void CalcNoise();			
+  void CalcNoise();
+  void CalcMaxAmp();			
   void CenterFid();
   void FindFidRange();
   void CalcPowerEnvAndPhase();

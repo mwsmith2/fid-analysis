@@ -8,7 +8,7 @@ email: mwmsith2@uw.edu
 
 notes: 
 
-	This library consists of several frequency exaction and analysis 
+	This library consists of several frequency extraction and analysis 
 	methods for FIDs as well as a class to encapsulate all the ideas.
 
 \*===========================================================================*/
@@ -32,7 +32,6 @@ using std::endl;
 #include "TF1.h"
 
 //--- project includes ------------------------------------------------------//
-#include "fid_params.h"
 #include "fid_class.h"
 #include "fid_sim.h"
 #include "fid_math.h"
@@ -42,6 +41,9 @@ namespace fid
 	// Classes defined in separate headers
 	class FidFactory;
 	class FID;
+
+  // Run this function first thing in any module to load a custom configuration
+  void load_params(string conf_file);
 
 	// Declare utility functions.
 	void ideal_fid(vec& wf, vec& tm, double f, double phi=0.0, double snr=100.0, double tau=10.0, double t0=0.0);
