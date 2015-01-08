@@ -21,24 +21,6 @@ FID::FID(const vec& wf, const vec& tm)
   GuessFitParams();
 }
 
-void FID::PrintDiagnosticInfo()
-{
-  cout << endl;
-  cout << "Printing Diagostic Information for FID @ " << this << endl;
-  cout << "noise level: " << noise_ << endl;
-  cout << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
-  cout << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
-}
-
-void FID::PrintDiagnosticInfo(std::iostream out)
-{
-  out << endl;
-  out << "Printing Diagostic Information for FID @ " << this << endl;
-  out << "noise level: " << noise_ << endl;
-  out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
-  out << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
-}
-
 void FID::CenterFid()
 {
   int w = params::zc_width;
@@ -486,6 +468,24 @@ double FID::CalcSinusoidFreq()
   chi2_ = f_fit_.GetChisquare();
   freq_err_ = f_fit_.GetParError(0) / kTau;
   return f_fit_.GetParameter(0) / kTau;
+}
+
+void FID::PrintDiagnosticInfo()
+{
+  cout << endl;
+  cout << "Printing Diagostic Information for FID @ " << this << endl;
+  cout << "noise level: " << noise_ << endl;
+  cout << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
+  cout << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
+}
+
+void FID::PrintDiagnosticInfo(std::iostream out)
+{
+  out << endl;
+  out << "Printing Diagostic Information for FID @ " << this << endl;
+  out << "noise level: " << noise_ << endl;
+  out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
+  out << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
 }
 
 } // fid
