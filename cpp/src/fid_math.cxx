@@ -202,4 +202,124 @@ arma::mat dsp::wvd(const vec& wf)
   return res;
 }
 
+arma::cx_mat dsp::auto_correlation(const vec& wf)
+{
+  arma::mat real_ACF(wf.size(),wf.size(), arma::fill::zeros);
+  arma::mat im_ACF(wf.size(), wf.size(), arma::fill::zeros);
+  
+  arma::cx_vec analytic_wf(wf.size());
+  
+  auto wf_im = dsp::hilbert(wf);
+
+  for (int i=0; i<wf.size(); ++i) {
+    analytic_wf[i] = arma::cx_double(wf[i], wf_im[i]);
+  }
+
+  int tao = 0;
+  for (auto it = wf.begin(); it !=wf.end(); ++it) {
+    arma::cx_vec auto_corr = dsp::rconvolve(analytic_wf, tao);
+    // im_wvd.col(tao++) = imag(fft_ACF);
+    // real_wvd.col(tao++) = real(fft_ACF);
+    real_ACF.col(tao) = arma::real(auto_corr);
+    im_ACF.col(tao++) = arma::imag(auto_corr);
+  }
+  arma::cx_mat ACF(real_ACF,im_ACF);
+    
+  return ACF;
+    
+}
+
+arma::cx_mat dsp::complex_wvd(const vec& wf)
+{
+  arma::cx_mat cx_wvd(wf.size(), wf.size(), arma::fill::zeros);
+
+  arma::cx_vec analytic_wf(wf.size());
+  
+  auto wf_im = dsp::hilbert(wf);
+
+  for (int i=0; i<wf.size(); ++i) {
+    analytic_wf[i] = arma::cx_double(wf[i], wf_im[i]);
+  }
+
+  int tao = 0;
+  for (auto it = wf.begin(); it !=wf.end(); ++it) {
+    // arma::cx_vec fft(arma::fft(dsp::rconvolve(analytic_wf, tao)));
+    cx_wvd.col(tao++) = analytic_wf;
+  }
+
+  return cx_wvd;
+}
+
+std::pair<arma::cx_mat, arma::cx_mat> dsp::wvd_associates(const vec& wf)
+{
+  arma::cx_mat cx_wvd(2*wf.size(), wf.size(), arma::fill::zeros);
+  arma::cx_mat ACF(2*wf.size(), wf.size(), arma::fill::zeros);
+  
+  vec wf_upsample(2*wf.size());
+  arma::cx_vec v(4*wf.size());
+
+  auto it1 = wf_upsample.begin();
+  for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
+    *(it1++) = *it2;
+    *(it1++) = *it2;
+  }
+
+  auto wf_im = dsp::hilbert(wf_upsample);
+  
+  for (uint i = 0; i < 4*wf.size(); ++i) {
+    v[i] = arma::cx_double(wf_upsample[i], wf_im[i]);
+    if (i >= 2*wf.size()){
+      v[i] = arma::cx_double(wf_upsample[i-2*wf.size()], wf_im[i-2*wf.size()]);
+    }
+  }
+
+  int tao = 0;
+  arma::cx_vec fft_i(wf.size());
+  for (auto it = wf.begin(); it !=wf.end(); ++it) {
+    // arma::cx_vec auto_corr = dsp::rconvolve_periodic(v, tao);
+    ACF.col(tao) = dsp::rconvolve_periodic(v,tao);
+    cx_wvd.col(tao++)= arma::fft(ACF.col(tao), v.n_elem/2);
+    /* fft_i.zeros();
+    for (int k=0; k<wf.size(); k++){
+      fft_i[k] =arma::cx_double(fft[k].real(), fft[k].imag());
+    }
+    cx_wvd.col(tao) = fft_i;*/
+  }
+
+  return std::make_pair(ACF, cx_wvd);
+}
+
+std::pair<arma::cx_mat, arma::cx_mat> dsp::wvd_dsr(const vec& wf)
+{
+   // Instiate the return matrix
+  arma::cx_mat res(2*wf.size(), wf.size(), arma::fill::zeros);
+  arma::cx_mat acf(2*wf.size(), wf.size(), arma::fill::zeros);
+
+  // Artificially double the sampling rate by doubling each sample.
+  vec wf_upsample(wf.size() * 2, 0.0);
+
+  auto it1 = wf_upsample.begin();
+  for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
+    *(it1++) = *it2;
+    *(it1++) = *it2;
+  }
+
+  // Make the signal harmonic
+  arma::cx_vec v(wf_upsample.size());
+
+  auto wf_im = dsp::hilbert(wf_upsample);
+
+  for (uint i = 0; i < wf_upsample.size(); ++i) {
+    v[i] = arma::cx_double(wf_upsample[i], wf_im[i]);
+  }
+
+  // Now compute the Wigner-Ville Distribution
+  for (int idx = 0; idx < v.n_elem/2; ++idx) {
+    acf.col(idx) = dsp::rconvolve(v, idx);
+    res.col(idx) = arma::fft(acf.col(idx));
+  }
+
+  return std::make_pair(acf, res);
+}
+
 } // ::fid

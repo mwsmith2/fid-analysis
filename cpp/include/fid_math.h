@@ -149,6 +149,10 @@ vec envelope(const vec& wf);
 vec envelope(const vec& wf_re, const vec& wf_im);	
 
 arma::mat wvd(const vec& wf);
+arma::cx_mat auto_correlation(const vec& wf);
+arma::cx_mat complex_wvd(const vec& wf); 
+std::pair<arma::cx_mat, arma::cx_mat> wvd_associates(const vec& wf);
+std::pair<arma::cx_mat, arma::cx_mat> wvd_dsr(const vec& wf);
 
 template <typename T>
 vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {
@@ -166,19 +170,39 @@ vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {
 
 template <typename T>
 arma::Col<T> rconvolve(const arma::Col<T>& v, int idx=0) {
-	int ridx = v.n_elem - idx;
-	arma::Col<T> rv(arma::flipud(v));
-	arma::Col<T> res(v.n_elem, arma::fill::zeros);
+  int ridx = v.n_elem - idx;
+  arma::Col<T> rv(arma::flipud(arma::conj(v)));
+  arma::Col<T> res(v.n_elem, arma::fill::zeros);
 
-	if (idx > ridx) {
-		std::transform(v.begin() + idx, v.end(), rv.begin() + ridx, res.begin(),
-			[](T z1, T z2) { return z1 * std::conj(z2); });
-	} else {
-		std::transform(rv.begin() + ridx, rv.end(), v.begin() + idx, res.begin(),
-			[](T z2, T z1) { return z1 * std::conj(z2); });
-	}
-	return res;
+  if (idx > ridx) {
+    std::transform(v.begin() + idx - ridx, v.end(), rv.begin(), res.begin(),
+		   [](T z1, T z2) { return z1 * z2; });
+  } else {
+    std::transform(rv.begin() + ridx - idx, rv.end(), v.begin(), res.begin(),
+		   [](T z2, T z1) { return z1 * z2; });
+  }
+  return res;
 } 
+
+template <typename T>
+arma::Col<T> rconvolve_periodic(const arma::Col<T>& v, int idx=0){
+  arma::Col<T> acf_positive_half(v.n_elem/4, arma::fill::zeros);
+  // arma::Col<T> conj_v=arma::conj(v);
+  arma::Col<T> conj_rev_v=arma::flipud(arma::conj(v));
+  arma::Col<T> acf(v.n_elem/2, arma::fill::zeros);
+  std::transform(v.begin() + idx, v.begin() + idx + v.n_rows/2,
+		 conj_rev_v.begin()+v.n_rows/2-idx, acf.begin(),
+		 [](T z1, T z2) { return z1*z2; });
+
+  /* arma::Col<T> acf(v.n_elem/2, arma::fill::zeros);
+  for (int i=0; i < v.n_rows/2; i++){
+    acf[i]=acf_positive_half[v.n_rows/2-i];
+    if (i>=v.n_rows/4) acf[i]= acf_positive_half[i];
+    }*/
+        
+  return acf;
+
+}
 
 } // ::dsp
 
