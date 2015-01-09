@@ -23,6 +23,7 @@ notes:
 #include <cmath>
 
 //--- other includes --------------------------------------------------------//
+#include <boost/algorithm/string.hpp>
 #include <fftw3.h>
 #include "TGraph.h"
 #include "TF1.h"
@@ -46,8 +47,8 @@ class FID {
 
   // Simplified frequency extraction
   double GetFreq();
-  double GetFreq(string method_name);
-  double GetFreq(Method m);
+  double GetFreq(const string& method_name);
+  double GetFreq(const Method m);
   double GetFreqError();
   
   // specific frequency extraction methods
@@ -93,7 +94,7 @@ class FID {
   
  private:
   
-  // Member Variables
+  // Private Member Variables
   bool isgood_;
   uint i_wf_; // start and stop of relevant data
   uint f_wf_;
@@ -122,7 +123,7 @@ class FID {
   vec fftfreq_;
   vec temp_; // for random transformations
 
-  // Member Functions  
+  // Private Member Functions  
   // init function to be called after wf_ and tm_ are set.
   void Init();
 
@@ -135,6 +136,7 @@ class FID {
   void CalcFftFreq();
   void GuessFitParams();
   void FreqFit(TF1& func);
+  Method ParseMethod(const string& m);
   
 }; // FID
  

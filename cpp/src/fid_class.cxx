@@ -4,7 +4,7 @@ namespace fid {
 
 FID::FID(const string& fid_file)
 {
-  // Copy the waveform and time to member vectors
+  // Read and store the waveform and time from a .fid file.
   read_fid_file(fid_file, wf_, tm_);
 
   Init();
@@ -13,7 +13,7 @@ FID::FID(const string& fid_file)
 
 FID::FID(const vec& wf, const vec& tm)
 {
-  // Copy the waveform and time to member vectors
+  // Copy the waveform and time to member vectors.
   wf_ = wf;
   tm_ = tm;
 
@@ -22,7 +22,7 @@ FID::FID(const vec& wf, const vec& tm)
 
 FID::FID(const vec& wf)
 {
-  // Copy the waveform and time to member vectors
+  // Copy the waveform and construct a generic time range.
   wf_ = wf;
   tm_ = construct_range(0.0, (double)wf_.size(), 1.0);
 
@@ -54,6 +54,25 @@ void FID::Init()
 double FID::GetFreq()
 {
   return freq_;
+}
+
+double FID::GetFreq(const string& method_name)
+{
+  return GetFreq(ParseMethod(method_name));
+}
+
+double FID::GetFreq(const Method m)
+{
+  // Recalculate if necessary
+  if (freq_method_ != m) {
+
+    freq_method_ = m;
+    return CalcFreq();
+
+  } else {
+
+    return freq_;
+  }
 }
 
 // Calculate the frequency using the current Method
@@ -591,6 +610,65 @@ void FID::PrintDiagnosticInfo(std::iostream out)
   out << "noise level: " << noise_ << endl;
   out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
   out << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
+}
+
+Method FID::ParseMethod(const string& m)
+{
+  // Test each case iteratively, Zero count first.
+  string str1("ZEROCOUNT");
+  string str2("ZC");
+
+  if (boost::iequals(m, str1) || boost::iequals(m , str2)) {
+    return Method::ZC;
+  }
+
+  str1 = string("CENTROID");
+  str2 = string("CN");
+
+  if (boost::iequals(m, str1) || boost::iequals(m , str2)) {
+    return Method::CN;
+  }
+
+  str1 = string("ANALYTICAL");
+  str2 = string("AN");
+
+  if (boost::iequals(m, str1) || boost::iequals(m , str2)) {
+    return Method::AN;
+  }
+
+  str1 = string("LORENTZIAN");
+  str2 = string("LZ");
+
+  if (boost::iequals(m, str1) || boost::iequals(m , str2)) {
+    return Method::LZ;
+  }
+
+  str1 = string("EXPONENTIAL");
+  str2 = string("EX");
+
+  if (boost::iequals(m, str1) || boost::iequals(m , str2)) {
+    return Method::EX;
+  }
+
+  str1 = string("PHASE");
+  str2 = string("PH");
+
+  if (boost::iequals(m, str1) || boost::iequals(m , str2)) {
+    return Method::PH;
+  }
+
+  str1 = string("SINUSOID");
+  str2 = string("SN");
+
+  if (boost::iequals(m, str1) || boost::iequals(m , str2)) {
+    return Method::SN;
+  }
+
+  // If the method hasn't matched yet, use the current method and warn them.
+  cout << "Warning: The method string used could not be matched.";
+  cout << " Method not changed." << endl;
+
+  return freq_method_;
 }
 
 } // fid
