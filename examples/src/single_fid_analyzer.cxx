@@ -2,16 +2,19 @@
 
 author: Matthias W. Smith
 email:  mwsmith2@uw.edu
-date:   15/04/14
+date:   2015/01/09
+file:   single_fid_analyzer.cxx
 
-notes: This program extracts the frequency of a single fid file and produces plots of the FID, envelope function and fits.
+notes: This program extracts the frequency of a single fid file and 
+      produces plots of the FID, envelope function and fits. The analysis
+      is extensive testing all available methods.
 
 usage:
 
 ./single_fid_analyzer <fid_data> [<output_dir>]
 
 The parameters in brackets are optional.  The default output is 
-data/single_fid.
+data/ and the directory will be created if not present.
 
 \*===========================================================================*/
 
@@ -24,86 +27,71 @@ data/single_fid.
 
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
-#include "fid_class.h"
-#include "fid_params.h"
 
 using namespace fid;
-using namespace fid::sweep;
 
 int main(int argc, char **argv)
 {
-  // initialize the configurable parameters
-  load_params(argc, argv);
-
-  // filenames
-  string data_file;
-  string out_file;
-  string out_dir;
-  string fig_dir;
-
-  // get fid data file
+  // Make sure a data file was specified and get the file handle.
   assert(argc > 1);
-  data_file = string(argv[1]);
+  string data_file(argv[1]);
 
-  // now get optional output file
+  // Now check for an optional output directory.
+  string out_dir;
+
   if (argc > 2){
 
     out_dir = string(argv[2]);
 
   } else {
 
-    out_dir = string("data/single_fid/");
-
+    out_dir = string("data/");
   }
 
-  out_file = out_dir + string("single_fid_data.csv");
-  fig_dir = out_dir + string("fig/");
+  // Create an output file handle.
+  string out_file(out_dir + string("single_fid_data.csv"));
 
-  // open the output file  
+  // Make a string to hold the location of the figure output directory.
+  string fig_dir(out_dir + string("fig/"));
+
+  // Make certain that the directory exists by creating it.
+  boost::filesystem::path dir(fig_dir);
+  boost::filesystem::create_directories(dir);
+
+  // Read the FID data and create FID object.
+  FID my_fid(data_file);
+
+  // Open the output filestream.
   ofstream out;
   out.precision(10);
   out.open(out_file);
 
-  // make certain that the directory exists by creating it
-  boost::filesystem::path dir(fig_dir);
-  boost::filesystem::create_directories(dir);
-
-  // some necessary parameters
-  vec wf;
-  vec tm;
-
-  // read the FID data and create FID object
-  read_fid_file(data_file, wf, tm);
-  FID my_fid(wf, tm);
-
-  // test all methods and save the frequency results
+  // Test all methods and save the frequency results
   calc_freq_write_csv(my_fid, out);
 
-  out.close();
-
-  // now make some fit plots
+  // Make plots of the fits and residuals.
   string title("FID Fit");
-  my_fid.CalcAnalyticalFreq();
+  my_fid.GetFreq("analytical");
   draw_fid_freq_fit(my_fid, fig_dir + string("analytical_fit.pdf"), title);
   draw_fid_freq_res(my_fid, fig_dir + string("analytical_res.pdf"), title);  
 
-  my_fid.CalcLorentzianFreq();
+  my_fid.GetFreq("lorentzian");
   draw_fid_freq_fit(my_fid, fig_dir + string("lorentzian_fit.pdf"), title);
   draw_fid_freq_res(my_fid, fig_dir + string("lorentzian_res.pdf"), title);  
 
-  my_fid.CalcExponentialFreq();
+  my_fid.GetFreq("exponential");
   draw_fid_freq_fit(my_fid, fig_dir + string("exponential_fit.pdf"), title);
   draw_fid_freq_res(my_fid, fig_dir + string("exponential_res.pdf"), title);  
 
-  my_fid.CalcPhaseFreq();
+  my_fid.GetFreq("phase");
   draw_fid_time_fit(my_fid, fig_dir + string("lin_phase_fit.pdf"), title);
   draw_fid_time_res(my_fid, fig_dir + string("lin_phase_res.pdf"), title);  
 
-  my_fid.CalcSinusoidFreq();
+  my_fid.GetFreq("sinusoid");
   draw_fid_time_fit(my_fid, fig_dir + string("sinusoid_fit.pdf"), title);
   draw_fid_time_res(my_fid, fig_dir + string("sinusoid_res.pdf"), title);  
 
-  // todo residuals
+  // Close the output filestream
   out.close();
   return 0;
 }

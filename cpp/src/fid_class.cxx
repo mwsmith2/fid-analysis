@@ -686,8 +686,8 @@ Method FID::ParseMethod(const string& m)
   }
 
   // If the method hasn't matched yet, use the current method and warn them.
-  cout << "Warning: The method string used could not be matched.";
-  cout << " Method not changed." << endl;
+  cout << "Warning: The method string used could not be matched. " << endl;
+  cout << "Method not changed." << endl;
 
   return freq_method_;
 }

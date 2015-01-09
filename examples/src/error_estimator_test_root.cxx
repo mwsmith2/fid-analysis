@@ -127,7 +127,7 @@ int main(int argc, char **argv)
     myfid_data.freq_err[idx] = myfid.freq_err();
 
     for (int i = myfid.i_fft(); i < myfid.f_fft(); ++i) {
-      myfid_data.fit[idx][i] = myfid.f_fit().Eval(myfid.freq()[i]);
+      myfid_data.fit[idx][i] = myfid.f_fit().Eval(myfid.fftfreq()[i]);
     }
 
     idx++;
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
     myfid_data.freq_err[idx] = myfid.freq_err();
 
     for (int i = myfid.i_fft(); i < myfid.f_fft(); ++i) {
-      myfid_data.fit[idx][i] = myfid.f_fit().Eval(myfid.freq()[i]);
+      myfid_data.fit[idx][i] = myfid.f_fit().Eval(myfid.fftfreq()[i]);
     }
 
     idx++;

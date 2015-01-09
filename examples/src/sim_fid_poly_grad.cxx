@@ -2,7 +2,7 @@
 
 Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
-Date:   2014/05/18
+Date:   2015/01/08
 
 Detail: The program is meant to test the effects of field gradients
         on the FID frequency extraction.  The sweep parameters are
@@ -23,12 +23,13 @@ Detail: The program is meant to test the effects of field gradients
 #include "fid.h"
 
 using namespace fid;
-using namespace fid::sweep;
 
 int main(int argc, char **argv)
 {
   // initialize the configurable parameters
-  load_params(argc, argv);
+  char str[60];
+  int npoints = 21;
+  int num_fids = 100;
 
   // some necessary parameters
   vec wf;
@@ -37,15 +38,13 @@ int main(int argc, char **argv)
   vec grad_0;
   vec gradient;
 
-  construct_time_vector(len_fids, i_time, d_time, tm);
-  grads = construct_range(grad_range);
+  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
+  tm = construct_range(sim::start_time, final_time, sim::delta_time);
 
   // Make FidFactory
   GradientFidFactory gff;
 
   // construct a normalized, centered polynomial gradient
-  char str[60];
-  int npoints = 21;
   sprintf(str, "pol%d", grad::poln_order);
   TF1 f1("f1", str);
 
