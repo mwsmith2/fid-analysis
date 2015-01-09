@@ -75,6 +75,11 @@ double FID::GetFreq(const Method m)
   }
 }
 
+double FID::GetFreqError()
+{
+  return freq_err_;
+}
+
 // Calculate the frequency using the current Method
 double FID::CalcFreq()
 {
