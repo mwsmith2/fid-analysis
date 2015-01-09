@@ -2,11 +2,38 @@
 
 namespace fid {
 
+FID::FID(const string& fid_file)
+{
+  // Copy the waveform and time to member vectors
+  read_fid_file(fid_file, wf_, tm_);
+
+  Init();
+}
+
+
 FID::FID(const vec& wf, const vec& tm)
 {
   // Copy the waveform and time to member vectors
   wf_ = wf;
   tm_ = tm;
+
+  Init();
+}
+
+FID::FID(const vec& wf)
+{
+  // Copy the waveform and time to member vectors
+  wf_ = wf;
+  tm_ = construct_range(0.0, (double)wf_.size(), 1.0);
+
+  Init();
+}
+
+
+void FID::Init()
+{
+  // Grab the default method
+  freq_method_ = params::freq_method;
 
   // Resize the temp array (maybe others?)
   temp_.reserve(wf_.size());
@@ -19,6 +46,64 @@ FID::FID(const vec& wf, const vec& tm)
   CalcPowerEnvAndPhase();
   CalcFftFreq();
   GuessFitParams();
+
+  // Go ahead and do the default frequency extraction
+  CalcFreq();
+}
+
+double FID::GetFreq()
+{
+  return freq_;
+}
+
+// Calculate the frequency using the current Method
+double FID::CalcFreq()
+{
+  switch(freq_method_) {
+
+    case ZC:
+    case ZEROCOUNT:
+      CalcZeroCountFreq();
+      break;
+
+    case CN:
+    case CENTROID:
+      CalcCentroidFreq();
+      break;
+
+    case AN:
+    case ANALYTICAL:
+      CalcAnalyticalFreq();
+      break;
+
+    case LZ:
+    case LORENTZIAN:
+      CalcLorentzianFreq();
+      break;
+
+    case EX:
+    case EXPONENTIAL:
+      CalcExponentialFreq();
+      break;
+
+    case PH:
+    case PHASE:
+      CalcPhaseFreq();
+      break;
+
+    case SN:
+    case SINUSOID:
+      CalcSinusoidFreq();
+      break;
+
+    default:
+      // Reset the Method to a valid one.
+      freq_method_ = params::freq_method;
+      CalcPhaseFreq();
+      break;
+  }
+
+  return freq_;
 }
 
 void FID::CenterFid()
@@ -141,7 +226,7 @@ void FID::CalcPowerEnvAndPhase()
 void FID::CalcFftFreq()
 {
   // @todo: consider storing as start, step, stop
-  freq_ = dsp::fftfreq(tm_);
+  fftfreq_ = dsp::fftfreq(tm_);
 }
 
 void FID::GuessFitParams()
@@ -169,7 +254,7 @@ void FID::GuessFitParams()
 
   auto it_pi = power_.begin() + i_fft_; // to shorten subsequent lines
   auto it_pf = power_.begin() + f_fft_;
-  auto it_fi = freq_.begin() + i_fft_;
+  auto it_fi = fftfreq_.begin() + i_fft_;
 
   // Compute some moments
   f_mean = std::inner_product(it_pi, it_pf, it_fi, 0.0);
@@ -204,16 +289,16 @@ void FID::GuessFitParams()
 void FID::FreqFit(TF1& func)
 {
   // Make a TGraph to fit
-  gr_freq_series_ = TGraph(f_fft_ - i_fft_, &freq_[i_fft_], &power_[i_fft_]);
+  gr_freq_series_ = TGraph(f_fft_ - i_fft_, &fftfreq_[i_fft_], &power_[i_fft_]);
 
-  gr_freq_series_.Fit(&func, "QMRSEX0", "C", freq_[i_fft_], freq_[f_fft_]);
+  gr_freq_series_.Fit(&func, "QMRSEX0", "C", fftfreq_[i_fft_], fftfreq_[f_fft_]);
 
   chi2_ = func.GetChisquare();
   freq_err_ = f_fit_.GetParError(0) / kTau;
 
   res_.resize(0);
   for (uint i = i_fft_; i < f_fft_ + 1; ++i){
-    res_.push_back(power_[i] - func.Eval(freq_[i]));
+    res_.push_back(power_[i] - func.Eval(fftfreq_[i]));
   }
 
   return;
@@ -268,12 +353,12 @@ double FID::CalcZeroCountFreq()
 
   frac = std::abs(wf_[f] / (wf_[f-1] - wf_[f]));
   double tf = frac * tm_[f-1] + (1.0 - frac) * tm_[f];
-  double freq = 0.5 * (nzeros - 1) / (tf - ti);
 
+  freq_ = 0.5 * (nzeros - 1) / (tf - ti);
   // todo: Fix this into a better error estimate. 
-  freq_err_ = freq * sqrt(2) * (tm_[1] - tm_[0]) / (tf - ti);
+  freq_err_ = freq_ * sqrt(2) * (tm_[1] - tm_[0]) / (tf - ti);
 
-  return freq;
+  return freq_;
 }
 
 double FID::CalcCentroidFreq()
@@ -298,13 +383,15 @@ double FID::CalcCentroidFreq()
   double pwsum = 0.0;
 
   for (int i = it_i; i < it_f; i++){
-    pwfreq += power_[i] * freq_[i];
-    pwfreq2 += power_[i] * power_[i] * freq_[i];
+    pwfreq += power_[i] * fftfreq_[i];
+    pwfreq2 += power_[i] * power_[i] * fftfreq_[i];
     pwsum  += power_[i];
   }
 
   freq_err_ = sqrt(pwfreq2 / pwsum - pow(pwfreq / pwsum, 2.0));
-  return pwfreq / pwsum;
+  freq_ = pwfreq / pwsum;
+
+  return freq_;
 }
 
 
@@ -318,7 +405,7 @@ double FID::CalcAnalyticalFreq()
   fcn += string("((0.5 * [1])^2 + 2 * (x^2 - [0]^2) * (x^2 + [0]^2)");
   fcn += string(" + (x^2 - [0]^2)^2) + [3]");
 
-  f_fit_ = TF1("f_fit_", fcn.c_str(), freq_[i_fft_], freq_[f_fft_]);
+  f_fit_ = TF1("f_fit_", fcn.c_str(), fftfreq_[i_fft_], fftfreq_[f_fft_]);
 
   // Set the parameter guesses
   for (uint i = 0; i < 5; i++){
@@ -329,7 +416,10 @@ double FID::CalcAnalyticalFreq()
   f_fit_.SetParLimits(4, 0.0, kTau);
 
   FreqFit(f_fit_);
-  return f_fit_.GetParameter(0);
+
+  freq_ = f_fit_.GetParameter(0);
+
+  return freq_;
 }
 
 
@@ -337,7 +427,7 @@ double FID::CalcLorentzianFreq()
 {
   // Set the fit function
   std::string fcn("[2] / (1 + ((x - [0]) / (0.5 * [1]))^2) + [3]");
-  f_fit_ = TF1("f_fit_", fcn.c_str(), freq_[i_fft_], freq_[f_fft_]);
+  f_fit_ = TF1("f_fit_", fcn.c_str(), fftfreq_[i_fft_], fftfreq_[f_fft_]);
 
   // Set the parameter guesses
   for (int i = 0; i < 4; i++){
@@ -345,7 +435,10 @@ double FID::CalcLorentzianFreq()
   }
 
   FreqFit(f_fit_);
-  return f_fit_.GetParameter(0);
+
+  freq_ = f_fit_.GetParameter(0);
+
+  return freq_;
 }
 
 
@@ -362,7 +455,10 @@ double FID::CalcSoftLorentzianFreq()
   f_fit_.SetParLimits(4, 1.0, 3.0);
 
   FreqFit(f_fit_);
-  return f_fit_.GetParameter(0);
+
+  freq_ = f_fit_.GetParameter(0);
+
+  return freq_;
 }
 
 
@@ -379,7 +475,10 @@ double FID::CalcExponentialFreq()
   f_fit_.SetParameter(1, 0.5 * guess_[1] / std::log(2));
 
   FreqFit(f_fit_);
-  return f_fit_.GetParameter(0); 
+
+  freq_ = f_fit_.GetParameter(0);
+
+  return freq_;
 }
 
 
@@ -407,9 +506,11 @@ double FID::CalcPhaseFreq(int poln)
     res_.push_back(wf_[i] - f_fit_.Eval(tm_[i]));
   }
 
-  chi2_ = f_fit_.GetChisquare();
+  freq_ = f_fit_.GetParameter(1) / kTau;
   freq_err_ = f_fit_.GetParError(1) / kTau;
-  return f_fit_.GetParameter(1) / kTau;
+  chi2_ = f_fit_.GetChisquare();
+
+  return freq_;
 }
 
 double FID::CalcPhaseDerivFreq(int poln)
@@ -418,7 +519,9 @@ double FID::CalcPhaseDerivFreq(int poln)
   CalcPhaseFreq(poln);
 
   // Find the initial phase by looking at the function's derivative
-  return f_fit_.Derivative(tm_[i_wf_]) / kTau;
+  freq_ = f_fit_.Derivative(tm_[i_wf_]) / kTau;
+
+  return freq_;
 } 
 
 
@@ -465,9 +568,11 @@ double FID::CalcSinusoidFreq()
     res_.push_back(wf_[i] - f_fit_.Eval(tm_[i]));
   }
 
-  chi2_ = f_fit_.GetChisquare();
+  freq_ = f_fit_.GetParameter(0) / kTau;
   freq_err_ = f_fit_.GetParError(0) / kTau;
-  return f_fit_.GetParameter(0) / kTau;
+  chi2_ = f_fit_.GetChisquare();
+
+  return freq_;
 }
 
 void FID::PrintDiagnosticInfo()
