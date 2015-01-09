@@ -37,6 +37,16 @@ using std::string;
 typedef vector<double> vec;
 typedef vector<std::complex<double>> cvec;
 
+// Enumerate the different methods of frequency extraction
+enum Method { ZC, CN, AN, LZ, EX, PH, SN,
+              ZEROCOUNT, 
+              CENTROID, 
+              ANALYTICAL, 
+              LORENTZIAN, 
+              EXPONENTIAL, 
+              PHASE,
+              SINUSOID };
+
 // constants
 const double kTau = 2 * M_PI;
 
@@ -52,6 +62,7 @@ namespace params {
   extern double low_pass_freq; // low pass frequency used by FID
   extern double centroid_thresh; // threshold of values included in centroid
   extern double hyst_thresh; // hysteris threshold used for zero counting
+  extern Method freq_method;
 
 } // ::params
 

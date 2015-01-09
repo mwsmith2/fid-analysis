@@ -13,6 +13,7 @@ namespace params {
   double low_pass_freq = 500.0; 
   double centroid_thresh = 0.01; 
   double hyst_thresh = 0.3;
+  Method freq_method = PH;
 
 } // ::params
 

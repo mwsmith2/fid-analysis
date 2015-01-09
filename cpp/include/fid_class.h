@@ -23,6 +23,7 @@ notes:
 #include <cmath>
 
 //--- other includes --------------------------------------------------------//
+#include <boost/algorithm/string.hpp>
 #include <fftw3.h>
 #include "TGraph.h"
 #include "TF1.h"
@@ -30,6 +31,7 @@ notes:
 //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
 #include "fid_math.h"
+#include "fid_utils.h"
 
 namespace fid
 {
@@ -38,14 +40,49 @@ class FID {
 
  public:
   
-  // ctor
+  // ctors
+  FID(const string& fid_file);
+  FID(const char* fid_file);
   FID(const vec& wf, const vec& tm);
+  FID(const vec& wf);
 
-  // Diagnostic Function
+  // Simplified frequency extraction
+  double GetFreq();
+  double GetFreq(const string& method_name);
+  double GetFreq(const char* method_name);
+  double GetFreq(const Method m);
+  double GetFreqError();
+  
+  // specific frequency extraction methods
+  double CalcFreq();
+  
+  // diagnostic function
   void PrintDiagnosticInfo();
   void PrintDiagnosticInfo(std::iostream out);
-  
-  // frequency extraction methods
+
+  // accessors
+  const bool& isgood() const { return isgood_; };
+  const vec& wf() const { return wf_; };
+  const vec& tm() const { return tm_; };
+  const vec& res() const { return res_; };
+  const vec& power() const { return power_; };
+  const vec& fftfreq() const { return fftfreq_; };
+  const vec& phase() const { return phase_ ;}
+  const vec& env() const { return env_; };
+  const double& freq() const {  return freq_;  }
+  const double& freq_err() const { return freq_err_; };
+  const double& chi2() const { return chi2_; };
+  const double fid_time() const { return tm_[f_wf_] - tm_[i_wf_]; };
+  const double snr() const { return max_amp_ * max_amp_ / (noise_ * noise_); };
+  const TGraph& gr_time_series() const { return gr_time_series_; };
+  const TGraph& gr_freq_series() const { return gr_freq_series_; };
+  const TF1&    f_fit() const { return f_fit_; };
+  const uint& i_wf() { return i_wf_; };
+  const uint& f_wf() { return f_wf_; };
+  const uint& i_fft() { return i_fft_; };
+  const uint& f_fft() { return f_fft_; };
+
+  // More specific use functions.
   double CalcZeroCountFreq();
   double CalcCentroidFreq();
   double CalcAnalyticalFreq();
@@ -55,31 +92,11 @@ class FID {
   double CalcPhaseFreq(int poln=1);
   double CalcPhaseDerivFreq(int poln=1);
   double CalcSinusoidFreq();
-  
-  // accessors
-  const bool& isgood() const {return isgood_;};
-  const vec& wf() const {return wf_;};
-  const vec& tm() const {return tm_;};
-  const vec& res() const {return res_;};
-  const vec& power() const {return power_;};
-  const vec& freq() const {return freq_;};
-  const vec& phase() const {return phase_;}
-  const vec& env() const {return env_;};
-  const double& chi2() const {return chi2_;};
-  const double& freq_err() const {return freq_err_;};
-  const double fid_time() const {return tm_[f_wf_] - tm_[i_wf_];};
-  const double snr() const {return max_amp_*max_amp_ / (noise_ * noise_);};
-  const TGraph& gr_time_series() const {return gr_time_series_;};
-  const TGraph& gr_freq_series() const {return gr_freq_series_;};
-  const TF1&    f_fit() const {return f_fit_;};
-  const uint& i_wf() { return i_wf_; };
-  const uint& f_wf() { return f_wf_; };
-  const uint& i_fft() { return i_fft_; };
-  const uint& f_fft() { return f_fft_; };
+
   
  private:
   
-  // Member Variables
+  // Private Member Variables
   bool isgood_;
   uint i_wf_; // start and stop of relevant data
   uint f_wf_;
@@ -89,7 +106,10 @@ class FID {
   double max_amp_;
   double mean_;
   double chi2_; // Store the most recent chi2
+  double freq_;
   double freq_err_;
+  Method freq_method_;
+
   vec guess_;
   TF1 f_fit_;
   TGraph gr_time_series_;
@@ -102,9 +122,13 @@ class FID {
   vec power_;
   vec env_;
   vec phase_;
-  vec freq_;
+  vec fftfreq_;
   vec temp_; // for random transformations
-  
+
+  // Private Member Functions  
+  // init function to be called after wf_ and tm_ are set.
+  void Init();
+
   // internal utility functions
   void CalcNoise();
   void CalcMaxAmp();			
@@ -114,6 +138,7 @@ class FID {
   void CalcFftFreq();
   void GuessFitParams();
   void FreqFit(TF1& func);
+  Method ParseMethod(const string& m);
   
 }; // FID
  
