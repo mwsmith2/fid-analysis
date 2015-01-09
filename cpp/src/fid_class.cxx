@@ -272,7 +272,7 @@ void FID::CalcFftFreq()
 void FID::GuessFitParams()
 {
   // Guess the general fit parameters
-  guess_.assign(5, 0.0);
+  guess_.assign(6, 0.0);
 
   double f_mean;
   double f_mean2;
@@ -282,12 +282,8 @@ void FID::GuessFitParams()
   int max_idx = std::distance(power_.begin(),
     std::max_element(power_.begin(), power_.end()));
 
-  if (max_idx - params::fit_width < 0) {
-    i_fft_ = 0;
-
-  } else {
-    i_fft_ = max_idx - params::fit_width;
-  }
+  i_fft_ = max_idx - params::fit_width;
+  if (max_idx - params::fit_width < 0) i_fft_ = 0;  
 
   f_fft_ = max_idx + params::fit_width;
   if (f_fft_ > power_.size()) f_fft_ = power_.size();
