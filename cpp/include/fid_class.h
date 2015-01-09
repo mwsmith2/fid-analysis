@@ -42,12 +42,14 @@ class FID {
   
   // ctors
   FID(const string& fid_file);
+  FID(const char* fid_file);
   FID(const vec& wf, const vec& tm);
   FID(const vec& wf);
 
   // Simplified frequency extraction
   double GetFreq();
   double GetFreq(const string& method_name);
+  double GetFreq(const char* method_name);
   double GetFreq(const Method m);
   double GetFreqError();
   

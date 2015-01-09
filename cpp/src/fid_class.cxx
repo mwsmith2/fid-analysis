@@ -10,6 +10,17 @@ FID::FID(const string& fid_file)
   Init();
 }
 
+FID::FID(const char* fid_file)
+{
+  // Convert the char pointer toa string.
+  string fid_string(fid_file);
+
+  // Read and store the waveform and time from a .fid file.
+  read_fid_file(fid_string, wf_, tm_);
+
+  Init();
+}
+
 
 FID::FID(const vec& wf, const vec& tm)
 {
@@ -59,6 +70,11 @@ double FID::GetFreq()
 double FID::GetFreq(const string& method_name)
 {
   return GetFreq(ParseMethod(method_name));
+}
+
+double FID::GetFreq(const char* method_name)
+{
+  return GetFreq((string(method_name)));
 }
 
 double FID::GetFreq(const Method m)
