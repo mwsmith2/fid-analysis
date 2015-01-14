@@ -58,35 +58,51 @@ vec dsp::hilbert(const vec& wf)
 {
 	// Return the call to the fft version.
 	auto fft_vec = dsp::fft(wf);
-	return dsp::hilbert(fft_vec);
-}
 
-vec dsp::hilbert(cvec fft_vec)
-{
-	// Multiply in the -i.
-	for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
-		*it = std::complex<double>((*it).imag(), -(*it).real());
-	}
+  // Multiply in the -i.
+  for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
+    *it = std::complex<double>((*it).imag(), -(*it).real());
+  }
 
-	// Reverse the fft.
-	return ifft(fft_vec);
+  // Reverse the fft.
+  return ifft(fft_vec);
 }
 
 vec dsp::psd(const vec& wf)
 {
-	return dsp::psd(dsp::fft(wf));
+  // Perform fft on the original data.
+	auto fft_vec = dsp::fft(wf);
+
+  // Get the norm of the fft as that is the power.
+	return dsp::norm(fft_vec);
 }
 
-vec dsp::psd(const cvec& fft_vec)
+vec dsp::norm(const vec& wf)
 {
-	// Instatiate the power vector and fill it with the magnitude of fft_vec.
-	vec power(fft_vec.size(), 0.0);
+  // Allocate the memory
+  vec res;
+  res.reserve(wf.size());
 
-	for (uint i = 0; i < fft_vec.size(); ++i) {
-		power[i] = std::norm(fft_vec[i]);
-	}
+  // Iterate and push back the norm.
+  for (auto it = wf.begin(); it < wf.end(); ++it) {
+    res.push_back(std::norm(*it));
+  }
 
-	return power;
+  return res;
+}
+
+vec dsp::norm(const cvec& wf)
+{
+  // Allocate the memory
+  vec res;
+  res.reserve(wf.size());
+
+  // Iterate and push back the norm.
+  for (auto it = wf.begin(); it < wf.end(); ++it) {
+    res.push_back(std::norm(*it));
+  }
+
+  return res;
 }
 
 // Helper function to get frequencies for FFT
@@ -175,7 +191,6 @@ vec dsp::envelope(const vec& wf_re, const vec& wf_im)
 
 	return env;
 }
-
 
 arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
 {

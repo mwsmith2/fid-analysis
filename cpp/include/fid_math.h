@@ -163,10 +163,10 @@ cvec fft(const vec& wf);
 vec ifft(const cvec& fft_vec);
 
 vec hilbert(const vec& wf);
-vec hilbert(cvec fft_vec);
-
 vec psd(const vec& wf);
-vec psd(const cvec& fft);
+
+vec norm(const vec& wf);
+vec norm(const cvec& wf);
 
 vec fftfreq(const vec& tm);
 vec fftfreq(const int N, const double dt);

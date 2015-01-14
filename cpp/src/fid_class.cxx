@@ -250,7 +250,7 @@ void FID::CalcPowerEnvAndPhase()
   auto fid_fft = dsp::fft(wf_);
 
   // Now get the imaginary harmonic complement to the waveform.
-  auto wf_im = dsp::hilbert(fid_fft);
+  auto wf_im = dsp::hilbert(wf_);
 
   // Optional lowpass filter. 
 //  double df = (wf.size() - 1) / (wf.size() * (tm_[wf.size() - 1] - tm_[0]));
@@ -258,7 +258,7 @@ void FID::CalcPowerEnvAndPhase()
 //  
 
   // Now we can get power, envelope and phase.
-  power_ = dsp::psd(fid_fft);
+  power_ = dsp::norm(fid_fft);
   phase_ = dsp::phase(wf_, wf_im);
   env_ = dsp::envelope(wf_, wf_im);
 }
