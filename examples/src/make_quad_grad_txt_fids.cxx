@@ -42,7 +42,7 @@ int main(int argc, char **argv)
   grads = construct_range(grad_min, grad_max, dgrad);
 
   // Make FidFactory
-  GradientFidFactory gff;
+  FidFactory ff;
   construct_quadratic_gradient(20, grad_0);
 
   // csv output
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
       gradient.push_back(val * g);
     }
 
-    gff.ConstructFid(gradient, wf);
+    ff.GradientFid(gradient, wf);
 
     for (int i = 0; i < tm.size(); ++i){
 

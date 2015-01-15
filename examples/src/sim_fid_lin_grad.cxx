@@ -40,7 +40,7 @@ int main(int argc, char **argv)
   construct_linear_gradient(20, grad_0);
 
   // Make FidFactory
-  GradientFidFactory gff;
+  FidFactory ff;
 
   // csv output
   std::ofstream out;
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
         gradient.push_back(val * g);
       }
 
-      gff.ConstructFid(gradient, wf);
+      ff.GradientFid(gradient, wf);
       FID my_fid(wf, tm);
 
       calc_freq_write_csv(my_fid, out);

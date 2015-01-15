@@ -33,8 +33,58 @@ FidFactory::FidFactory()
 
   sim_length_ = sim_to_fid_ * sim::num_samples;
   printer_idx_ = 0;
+
+  // open the default root file
+  pf_fid_ = new TFile(grad::root_file.c_str());
+
+  if (pf_fid_)
+  pt_fid_ = (TTree *)pf_fid_->Get("t");
+  
+  wf_.resize(sim::num_samples);
+  pt_fid_->SetBranchAddress(grad::fid_branch.c_str(), &wf_[0]);
+  pt_fid_->GetEntry(0);
+
+  num_sim_fids_ = pt_fid_->GetEntries();
+  d_grad_ = (grad::max - grad::min) / num_sim_fids_;
+  zero_idx_ = -1 * grad::min / d_grad_ + 0.5;
 }
 
+FidFactory::~FidFactory()
+{
+  // closing the TFile will take care of the TTree pointer
+  pf_fid_->Close();
+  delete pf_fid_;
+}
+
+// Create an idealized FID with current Simulation parameters
+void FidFactory::IdealFid(vec& wf, vec& tm)
+{
+  wf.reserve(tm.size());
+  wf.resize(0);
+
+  // Define the waveform
+  double temp;
+  double w = kTau * (sim::freq_larmor - sim::freq_ref);
+  double phi = sim::mixdown_phi;
+  double tau = 1.0 / sim::gamma_1;
+
+  for (auto it = tm.begin(); it != tm.end(); ++it){
+
+    if (*it >= sim::t_pulse){
+
+      temp = std::exp(-(*it - sim::t_pulse) * tau);
+      temp *= std::sin((*it) * w + phi);
+      wf.push_back(temp);
+
+    } else {
+
+      wf.push_back(0.0);
+
+    }
+  } 
+
+  addnoise(wf, sim::snr);
+}
 
 void FidFactory::SimulateFid(vec& wf, vec& tm)
 {
@@ -64,6 +114,34 @@ void FidFactory::SimulateFid(vec& wf, vec& tm)
     tm.push_back(time_vec_[i * sim_to_fid_]);
     wf.push_back(spin_vec_[i * sim_to_fid_]);
   }
+}
+
+void FidFactory::GradientFid(const vec& gradient, vec& wf)
+{
+  // Find the appropriate FIDs and sum them
+  wf.assign(sim::num_samples, 0.0);
+
+  for (auto val : gradient){
+
+    pt_fid_->GetEntry(GetTreeIndex(val));
+
+    for (uint i = 0; i < wf.size(); i++){
+      wf[i] += wf_[i] / gradient.size();
+    }
+  }
+}
+
+void FidFactory::PrintDiagnosticInfo()
+{
+  using std::cout;
+  using std::endl;
+
+  cout << endl;
+  cout << "Printing Diagnostic Info for FidFactory @" << this << endl;
+  cout << "The time step, fid length: " << dt_ << ", ";
+  cout << sim::num_samples << endl;
+  cout << "The sim length, sim-to-fid: " << sim_length_ << ", ";
+  cout << sim_to_fid_ << endl;
 }
 
 void FidFactory::Bloch(vec const &s, vec &dsdt, double t)
@@ -190,87 +268,7 @@ vec FidFactory::LowPassFilter(vec& s)
   return arma::conv_to<vec>::from(arma::real(arma::ifft(fft)));
 }
 
-// Create an idealized FID with current Simulation parameters
-void FidFactory::IdealFid(vec& wf, vec& tm)
-{
-  wf.reserve(tm.size());
-  wf.resize(0);
-
-  // Define the waveform
-  double temp;
-  double w = kTau * (sim::freq_larmor - sim::freq_ref);
-  double phi = sim::mixdown_phi;
-  double tau = 1.0 / sim::gamma_1;
-
-  for (auto it = tm.begin(); it != tm.end(); ++it){
-
-    if (*it >= sim::t_pulse){
-
-      temp = std::exp(-(*it - sim::t_pulse) * tau);
-      temp *= std::sin((*it) * w + phi);
-      wf.push_back(temp);
-
-    } else {
-
-      wf.push_back(0.0);
-
-    }
-  } 
-
-  addnoise(wf, sim::snr);
-}
-
-void FidFactory::PrintDiagnosticInfo()
-{
-  cout << endl;
-  cout << "Printing Diagnostic Info for FidFactory @" << this << endl;
-  cout << "The time step, fid length: " << dt_ << ", ";
-  cout << sim::num_samples << endl;
-  cout << "The sim length, sim-to-fid: " << sim_length_ << ", ";
-  cout << sim_to_fid_ << endl;
-}
-
-//---------------------------------------------------------------------------//
-//--- Gradient FID Factory --------------------------------------------------//
-//---------------------------------------------------------------------------//
-GradientFidFactory::GradientFidFactory()
-{
-  // open the default root file
-  pf_fid_ = new TFile(grad::root_file.c_str());
-  pt_fid_ = (TTree *)pf_fid_->Get("t");
-  
-  wf_.resize(sim::num_samples);
-  pt_fid_->SetBranchAddress(grad::fid_branch.c_str(), &wf_[0]);
-  pt_fid_->GetEntry(0);
-
-  num_sim_fids_ = pt_fid_->GetEntries();
-  d_grad_ = (grad::max - grad::min) / num_sim_fids_;
-  zero_idx_ = -1 * grad::min / d_grad_ + 0.5;
-}
-
-GradientFidFactory::~GradientFidFactory()
-{
-  // closing the TFile will take care of the TTree pointer
-  pf_fid_->Close();
-  delete pf_fid_;
-}
-
-void GradientFidFactory::ConstructFid(const vec& gradient, vec& wf)
-{
-  // Find the appropriate FIDs and sum them
-  wf.assign(sim::num_samples, 0.0);
-
-  for (auto val : gradient){
-
-    pt_fid_->GetEntry(GetTreeIndex(val));
-
-    for (uint i = 0; i < wf.size(); i++){
-      wf[i] += wf_[i] / gradient.size();
-    }
-  }
-}
-
-int GradientFidFactory::GetTreeIndex(double grad_strength)
+int FidFactory::GetTreeIndex(double grad_strength)
 {
   return (int)(std::nearbyint(grad_strength / d_grad_ + zero_idx_) + 0.5);
 }

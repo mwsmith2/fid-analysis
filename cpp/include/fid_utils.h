@@ -22,6 +22,8 @@ notes:
 #include <numeric>
 #include <random>
 #include <cmath>
+
+using std::ofstream;  
 using std::vector;
 using std::cout;
 using std::endl;

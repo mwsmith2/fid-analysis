@@ -41,11 +41,6 @@ notes:
 
 //--- namespaces ------------------------------------------------------------//
 
-using std::cout;
-using std::endl;
-using std::ofstream;
-using std::string;
-using std::vector;
 using namespace std::chrono;
 using namespace boost::numeric::odeint;
 using namespace boost::property_tree;
@@ -59,9 +54,13 @@ public:
   // ctors
   FidFactory();
 
+  // dtors
+  ~FidFactory();
+
   // member methods
-  void SimulateFid(vec& wf, vec& tm);
   void IdealFid(vec& wf, vec& tm);
+  void SimulateFid(vec& wf, vec& tm);
+  void GradientFid(const vec& gradient, vec& wf);
   void PrintDiagnosticInfo();
 
  private:
@@ -81,7 +80,7 @@ public:
   vec gradient_;
   
   // Low pass filter to extract mixed down signal.
-  vector<double> LowPassFilter(vector<double>& s);
+  vec LowPassFilter(vec& s);
 
   // Function which returns time dependent Bfield.
   vec Bfield(const double& t);
@@ -92,23 +91,6 @@ public:
   // The integration monitor function
   void Printer(vec const &s , double t);
 
-}; // FidFactory
-
-class GradientFidFactory
-{
- public:
-
-  // ctor
-  GradientFidFactory();
-
-  // dtor
-  ~GradientFidFactory();
-
-  // member methods
-  void ConstructFid(const vec& gradient, vec& wf);
-
- private:
-
   int num_sim_fids_;
   int zero_idx_;
   double d_grad_;
@@ -118,7 +100,7 @@ class GradientFidFactory
   vector<Double_t> wf_;
 
   int GetTreeIndex(double grad_strength);
-};
+}; // FidFactory
 
 } // ::fid
 

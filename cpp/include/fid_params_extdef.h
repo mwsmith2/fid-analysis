@@ -45,7 +45,7 @@ namespace sim {
 
 namespace grad {
 
-  string root_file = "runtime/sim_fids.root";
+  string root_file = "~/.fid/sim_fids.root";
   string fid_branch = "fid";
   double min = -2000;
   double max = 2000;

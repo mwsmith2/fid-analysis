@@ -42,7 +42,7 @@ int main(int argc, char **argv)
   tm = construct_range(sim::start_time, final_time, sim::delta_time);
 
   // Make FidFactory
-  GradientFidFactory gff;
+  FidFactory ff;
 
   // construct a normalized, centered polynomial gradient
   sprintf(str, "pol%d", grad::poln_order);
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
         gradient.push_back(val * g);
       }
 
-      gff.ConstructFid(gradient, wf);
+      ff.GradientFid(gradient, wf);
       FID my_fid(wf, tm);
 
       calc_freq_write_csv(my_fid, out);
