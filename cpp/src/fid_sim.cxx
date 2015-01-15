@@ -37,16 +37,17 @@ FidFactory::FidFactory()
   // open the default root file
   pf_fid_ = new TFile(grad::root_file.c_str());
 
-  if (pf_fid_)
-  pt_fid_ = (TTree *)pf_fid_->Get("t");
+  if (pf_fid_->IsOpen()) {
+    pt_fid_ = (TTree *)pf_fid_->Get("t");
   
-  wf_.resize(sim::num_samples);
-  pt_fid_->SetBranchAddress(grad::fid_branch.c_str(), &wf_[0]);
-  pt_fid_->GetEntry(0);
+    wf_.resize(sim::num_samples);
+    pt_fid_->SetBranchAddress(grad::fid_branch.c_str(), &wf_[0]);
+    pt_fid_->GetEntry(0);
 
-  num_sim_fids_ = pt_fid_->GetEntries();
-  d_grad_ = (grad::max - grad::min) / num_sim_fids_;
-  zero_idx_ = -1 * grad::min / d_grad_ + 0.5;
+    num_sim_fids_ = pt_fid_->GetEntries();
+    d_grad_ = (grad::max - grad::min) / num_sim_fids_;
+    zero_idx_ = -1 * grad::min / d_grad_ + 0.5;
+  }
 }
 
 FidFactory::~FidFactory()
@@ -118,6 +119,11 @@ void FidFactory::SimulateFid(vec& wf, vec& tm)
 
 void FidFactory::GradientFid(const vec& gradient, vec& wf)
 {
+  if (!pf_fid_->IsOpen()) {
+    std::cout << "No ROOT file loaded.  Cannot make gradient FIDs." << std::endl;
+    return;
+  }
+
   // Find the appropriate FIDs and sum them
   wf.assign(sim::num_samples, 0.0);
 
