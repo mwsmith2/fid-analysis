@@ -85,6 +85,8 @@ void FidFactory::IdealFid(vec& wf, vec& tm)
   } 
 
   addnoise(wf, sim::snr);
+
+  floor(wf);
 }
 
 void FidFactory::SimulateFid(vec& wf, vec& tm)
@@ -115,6 +117,8 @@ void FidFactory::SimulateFid(vec& wf, vec& tm)
     tm.push_back(time_vec_[i * sim_to_fid_]);
     wf.push_back(spin_vec_[i * sim_to_fid_]);
   }
+
+  floor(wf);
 }
 
 void FidFactory::GradientFid(const vec& gradient, vec& wf)
@@ -135,6 +139,8 @@ void FidFactory::GradientFid(const vec& gradient, vec& wf)
       wf[i] += wf_[i] / gradient.size();
     }
   }
+
+  floor(wf);
 }
 
 void FidFactory::PrintDiagnosticInfo()

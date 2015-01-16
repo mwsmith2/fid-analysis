@@ -68,6 +68,14 @@ inline vector<T>& operator*(T c, vector<T>& a)
   return a;
 }
 
+template <typename T>
+inline void floor(vector<T>& v) 
+{
+  for (auto it = v.begin(); it != v.end(); ++it) {
+    *it = std::floor(*it);
+  }
+}
+
 inline void cross(const vec& u, const vec& v, vec& res)
 {
     res[0] = u[1] * v[2] - u[2] * v[1];
