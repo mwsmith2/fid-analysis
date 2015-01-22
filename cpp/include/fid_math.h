@@ -115,12 +115,28 @@ void addnoise(vector<T>& wf, T snr, int seed=0) {
   static std::default_random_engine gen(seed);
   std::normal_distribution<T> nrm;
 
-  T max = *std::max_element(wf.begin(), wf.end());
-  T min = *std::min_element(wf.begin(), wf.end());
+  T mean = 0.0;
+  T min = 0.0;
+  T max = 0.0;
+  for (auto it = wf.begin(); it != wf.end(); ++it) {
+    
+    if (*it > max) { 
+      max = *it;
+    } else {
+      min = *it;
+    }
+    mean += *it;
+  }
+
+  // normalize to mean
+  mean /= wf.size();
+  max -= mean;
+  min = std::abs(min - mean);
+
   T scale = max > min ? max : min;
 
   for (auto &x : wf){
-    x += scale * nrm(gen) / sqrt(snr);
+    x += nrm(gen) * (scale / sqrt(snr));
   }
 }
 
