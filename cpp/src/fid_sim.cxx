@@ -58,7 +58,7 @@ FidFactory::~FidFactory()
 }
 
 // Create an idealized FID with current Simulation parameters
-void FidFactory::IdealFid(vec& wf, vec& tm)
+void FidFactory::IdealFid(vec& wf, vec& tm, bool withnoise)
 {
   wf.reserve(tm.size());
   wf.resize(0);
@@ -68,28 +68,30 @@ void FidFactory::IdealFid(vec& wf, vec& tm)
   double w = kTau * (sim::freq_larmor - sim::freq_ref);
   double phi = sim::mixdown_phi;
   double tau = 1.0 / sim::gamma_1;
+  double amp = sim::amplitude;
+  double base = sim::baseline;
 
   for (auto it = tm.begin(); it != tm.end(); ++it){
 
     if (*it >= sim::t_pulse){
 
-      temp = std::exp(-(*it - sim::t_pulse) * tau);
+      temp = amp * std::exp(-(*it - sim::t_pulse) * tau);
       temp *= std::sin((*it) * w + phi);
-      wf.push_back(temp);
+      wf.push_back(temp + base);
 
     } else {
 
-      wf.push_back(0.0);
+      wf.push_back(base);
 
     }
   } 
 
-  addnoise(wf, sim::snr);
+  if (withnoise) addnoise(wf, sim::snr);
 
   floor(wf);
 }
 
-void FidFactory::SimulateFid(vec& wf, vec& tm)
+void FidFactory::SimulateFid(vec& wf, vec& tm, bool withnoise)
 {
   // make sure memory is allocated for the final FIDs
   tm.reserve(sim::num_samples);
@@ -115,13 +117,15 @@ void FidFactory::SimulateFid(vec& wf, vec& tm)
 
   for (int i = 0; i < sim::num_samples; ++i) {
     tm.push_back(time_vec_[i * sim_to_fid_]);
-    wf.push_back(spin_vec_[i * sim_to_fid_]);
+    wf.push_back(spin_vec_[i * sim_to_fid_] + sim::baseline);
   }
+
+  if (withnoise) addnoise(wf, sim::snr);
 
   floor(wf);
 }
 
-void FidFactory::GradientFid(const vec& gradient, vec& wf)
+void FidFactory::GradientFid(const vec& gradient, vec& wf, bool withnoise)
 {
   if (!pf_fid_->IsOpen()) {
     std::cout << "No ROOT file loaded.  Cannot make gradient FIDs." << std::endl;
@@ -129,7 +133,7 @@ void FidFactory::GradientFid(const vec& gradient, vec& wf)
   }
 
   // Find the appropriate FIDs and sum them
-  wf.assign(sim::num_samples, 0.0);
+  wf.assign(sim::num_samples, sim::baseline);
 
   for (auto val : gradient){
 
@@ -139,6 +143,8 @@ void FidFactory::GradientFid(const vec& gradient, vec& wf)
       wf[i] += wf_[i] / gradient.size();
     }
   }
+
+  if (withnoise) addnoise(wf, sim::snr);
 
   floor(wf);
 }

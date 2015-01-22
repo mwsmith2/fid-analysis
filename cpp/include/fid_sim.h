@@ -58,9 +58,9 @@ public:
   ~FidFactory();
 
   // member methods
-  void IdealFid(vec& wf, vec& tm);
-  void SimulateFid(vec& wf, vec& tm);
-  void GradientFid(const vec& gradient, vec& wf);
+  void IdealFid(vec& wf, vec& tm, bool withnoise=false);
+  void SimulateFid(vec& wf, vec& tm, bool withnoise=false);
+  void GradientFid(const vec& gradient, vec& wf, bool withnoise=false);
   void PrintDiagnosticInfo();
 
  private:

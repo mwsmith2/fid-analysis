@@ -72,6 +72,8 @@ namespace sim {
   extern int seed;   // the seed for the random generator
   extern double dt_integration; // step size of time for integration
   extern double snr;   // default signal-to-noise ratio
+  extern double amplitude; // the generic amplitude of FID oscillations
+  extern double baseline;  // the baseline offset for the FID waveform
 
   extern double start_time; // start time for the FID
   extern double delta_time; // time spacing for the FID
