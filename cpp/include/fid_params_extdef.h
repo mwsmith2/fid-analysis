@@ -21,10 +21,10 @@ namespace params {
 namespace sim {
 
   int seed = 0;   
-  double dt_integration = 2.0e-5; 
-  double snr = 300.0;   
-  double amplitude = 2000;
-  double baseline = 21000;
+  double dt_integration = 2.0e-5;
+  double snr = 90000.0;   
+  double amplitude = 2000.0;
+  double baseline = 21000.0;
 
   int num_samples = 10000;
   double start_time = -1.0; 

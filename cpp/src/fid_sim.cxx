@@ -75,7 +75,7 @@ void FidFactory::IdealFid(vec& wf, vec& tm, bool withnoise)
 
     if (*it >= sim::t_pulse){
 
-      temp = amp * std::exp(-(*it - sim::t_pulse) * tau);
+      temp = amp * std::exp(-(*it - sim::t_pulse) / tau);
       temp *= std::sin((*it) * w + phi);
       wf.push_back(temp + base);
 
