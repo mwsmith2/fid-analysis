@@ -232,7 +232,7 @@ void FidFactory::Printer(vec const &s , double t)
   if (t < ti_ + dt_) printer_idx_ = 0;
 
   // Record spin in the y-direction and mix down
-  spin_vec_[printer_idx_] = s[1] * cos_cache_[printer_idx_]; 
+  spin_vec_[printer_idx_] = sim::amplitude * s[1] * cos_cache_[printer_idx_]; 
 
   // Record the time and increment printer_idx_
   time_vec_[printer_idx_++] = t;
@@ -251,9 +251,9 @@ void FidFactory::Printer(vec const &s , double t)
 // Low pass filter to suppress the higher frequency introducing in mixing down.
 vec FidFactory::LowPassFilter(vec& s)
 {
-  // Store the filter statically though this might be a minimal speed boost.
+  // Allocate the filter and set the central frequency.
   vec filter;
-  double freq_cut = 0.2 * sim::freq_larmor;
+  double freq_cut = 0.5 * sim::freq_larmor;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
   if (filter.size() == 0) {

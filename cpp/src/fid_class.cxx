@@ -159,11 +159,12 @@ void FID::CenterFid()
 void FID::CalcNoise()
 { 
   // Grab a new handle to the noise window width for aesthetics.
-  int w = params::zc_width;
+  int i = params::edge_ignore;
+  int f = params::zc_width + i;
 
   // Find the noise level in the head and tail.
-  double head = stdev(wf_.begin(), wf_.begin() + w);
-  double tail = stdev(wf_.rbegin(), wf_.rbegin() + w);
+  double head = stdev(wf_.begin() + i, wf_.begin() + f);
+  double tail = stdev(wf_.rbegin() + i, wf_.rbegin() + f);
 
   // Take the smaller of the two.
   noise_ = (tail < head) ? (tail) : (head);
@@ -186,7 +187,7 @@ void FID::FindFidRange()
   bool checks_out = false;
 
   // Find the first element with magnitude larger than thresh
-  auto it_1 = wf_.begin();
+  auto it_1 = wf_.begin() + params::edge_ignore;
   while (!checks_out) {
 
     auto it_i = std::find_if(it_1, wf_.end(), 
