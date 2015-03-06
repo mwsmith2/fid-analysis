@@ -13,18 +13,6 @@ about: This header file holds the projects parameter namespace.  These
 
 \*---------------------------------------------------------------------------*/
 
-//--- std includes ----------------------------------------------------------//
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cmath>
-#include <complex>
-
-//--- other includes --------------------------------------------------------//
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
-
 namespace fid {
 
 // Enumerate the different methods of frequency extraction

@@ -14,17 +14,16 @@ notes:
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
-#include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <numeric>
 #include <random>
+#include <complex>
 #include <cmath>
 
 //--- other includes --------------------------------------------------------//
 #include <boost/algorithm/string.hpp>
-#include <fftw3.h>
+#include <armadillo>
 #include "TGraph.h"
 #include "TF1.h"
 
@@ -77,10 +76,10 @@ class FID {
   const TGraph& gr_time_series() const { return gr_time_series_; };
   const TGraph& gr_freq_series() const { return gr_freq_series_; };
   const TF1&    f_fit() const { return f_fit_; };
-  const uint& i_wf() { return i_wf_; };
-  const uint& f_wf() { return f_wf_; };
-  const uint& i_fft() { return i_fft_; };
-  const uint& f_fft() { return f_fft_; };
+  const unsigned int& i_wf() { return i_wf_; };
+  const unsigned int& f_wf() { return f_wf_; };
+  const unsigned int& i_fft() { return i_fft_; };
+  const unsigned int& f_fft() { return f_fft_; };
 
   // More specific use functions.
   double CalcZeroCountFreq();
@@ -98,10 +97,10 @@ class FID {
   
   // Private Member Variables
   bool isgood_;
-  uint i_wf_; // start and stop of relevant data
-  uint f_wf_;
-  uint i_fft_;
-  uint f_fft_;
+  unsigned int i_wf_; // start and stop of relevant data
+  unsigned int f_wf_;
+  unsigned int i_fft_;
+  unsigned int f_fft_;
   double noise_;
   double max_amp_;
   double mean_;

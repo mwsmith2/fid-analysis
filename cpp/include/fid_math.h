@@ -14,14 +14,12 @@ notes:
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
-#include <iostream>
-#include <fstream>
-#include <string>
 #include <vector>
-#include <algorithm>
+#include <functional>
 #include <numeric>
 #include <random>
-#include <cmath> 
+#include <complex>
+#include <ctgmath>
 
 //--- other includes --------------------------------------------------------//
 #include <armadillo>

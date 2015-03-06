@@ -334,7 +334,7 @@ void FID::FreqFit(TF1& func)
   freq_err_ = f_fit_.GetParError(0) / kTau;
 
   res_.resize(0);
-  for (uint i = i_fft_; i < f_fft_ + 1; ++i){
+  for (unsigned int i = i_fft_; i < f_fft_ + 1; ++i){
     res_.push_back(power_[i] - func.Eval(fftfreq_[i]));
   }
 
@@ -362,7 +362,7 @@ double FID::CalcZeroCountFreq()
   int f_zero = -1;
 
   // iterate over vector
-  for (uint i = i_wf_; i < (f_wf_ - i_wf_); i++){
+  for (unsigned int i = i_wf_; i < (f_wf_ - i_wf_); i++){
 
     // hysteresis check
     if (hyst){
@@ -445,7 +445,7 @@ double FID::CalcAnalyticalFreq()
   f_fit_ = TF1("f_fit_", fcn.c_str(), fftfreq_[i_fft_], fftfreq_[f_fft_]);
 
   // Set the parameter guesses
-  for (uint i = 0; i < 5; i++){
+  for (unsigned int i = 0; i < 5; i++){
     f_fit_.SetParameter(i, guess_[i]);
   }
 
@@ -539,7 +539,7 @@ double FID::CalcPhaseFreq(int poln)
   gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
 
   res_.resize(0);
-  for (uint i = i_fft_; i < f_fft_ + 1; ++i){
+  for (unsigned int i = i_fft_; i < f_fft_ + 1; ++i){
     res_.push_back(wf_[i] - f_fit_.Eval(tm_[i]));
   }
 
@@ -601,7 +601,7 @@ double FID::CalcSinusoidFreq()
   gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
 
   res_.resize(0);
-  for (uint i = i_fft_; i < f_fft_ + 1; ++i){
+  for (unsigned int i = i_fft_; i < f_fft_ + 1; ++i){
     res_.push_back(wf_[i] - f_fit_.Eval(tm_[i]));
   }
 

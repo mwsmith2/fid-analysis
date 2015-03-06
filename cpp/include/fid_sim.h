@@ -15,27 +15,19 @@ notes:
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
-#include <fstream>
-#include <string>
 #include <vector>
-#include <chrono>
-#include <thread>
-#include <algorithm>
+#include <iostream>
+#include <numeric>
 #include <random>
-#include <cmath>
-#include <functional>
+#include <complex>
 
-//--- other includes --------------------------------------------------------//
+// //--- other includes --------------------------------------------------------//
 #include <boost/numeric/odeint.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
 #include <armadillo>
 #include "TFile.h"
 #include "TTree.h"
 
-//--- project includes ------------------------------------------------------//
+// //--- project includes ------------------------------------------------------//
 #include "fid_params.h"
 #include "fid_math.h"
 

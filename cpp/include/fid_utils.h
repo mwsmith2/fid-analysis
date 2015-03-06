@@ -14,24 +14,18 @@ notes:
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
-#include <iostream>
-#include <fstream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <numeric>
 #include <random>
-#include <cmath>
 
 //--- other includes --------------------------------------------------------//
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include "TGraph.h"
 #include "TCanvas.h"
-#include "TF1.h"
 
 //--- project includes ------------------------------------------------------//
 #include "fid_class.h"
-#include "fid_sim.h"
-#include "fid_math.h"
 
 namespace fid
 {

@@ -54,7 +54,7 @@ void load_params(std::string conf_file)
 
   try {
     std::vector<double> tmp;
-    BOOST_FOREACH(ptree::value_type &v, pt.get_child("grad.poln_coefs")){
+    for (auto &v : pt.get_child("grad.poln_coefs")){
       tmp.push_back(v.second.get_value<double>());
     }
     grad::poln_coefs = tmp;
