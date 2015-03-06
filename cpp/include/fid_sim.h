@@ -41,10 +41,6 @@ notes:
 
 //--- namespaces ------------------------------------------------------------//
 
-using namespace std::chrono;
-using namespace boost::numeric::odeint;
-using namespace boost::property_tree;
-
 namespace fid {
 
 class FidFactory
@@ -58,9 +54,18 @@ public:
   ~FidFactory();
 
   // member methods
-  void IdealFid(vec& wf, vec& tm, bool withnoise=false);
-  void SimulateFid(vec& wf, vec& tm, bool withnoise=false);
-  void GradientFid(const vec& gradient, vec& wf, bool withnoise=false);
+  void IdealFid(std::vector<double>& wf, 
+                std::vector<double>& tm, 
+                bool withnoise=false);
+
+  void SimulateFid(std::vector<double>& wf, 
+                   std::vector<double>& tm, 
+                   bool withnoise=false);
+
+  void GradientFid(const std::vector<double>& gradient, 
+                   std::vector<double>& wf, 
+                   bool withnoise=false);
+
   void PrintDiagnosticInfo();
 
  private:
@@ -72,24 +77,24 @@ public:
   int sim_length_;
   int printer_idx_;
 
-  vec s_;
-  vec spin_vec_;
-  vec time_vec_;
-  vec spin_sum_;
-  vec cos_cache_;
-  vec gradient_;
+  std::vector<double> s_;
+  std::vector<double> spin_vec_;
+  std::vector<double> time_vec_;
+  std::vector<double> spin_sum_;
+  std::vector<double> cos_cache_;
+  std::vector<double> gradient_;
   
   // Low pass filter to extract mixed down signal.
-  vec LowPassFilter(vec& s);
+  std::vector<double> LowPassFilter(std::vector<double>& s);
 
   // Function which returns time dependent Bfield.
-  vec Bfield(const double& t);
+  std::vector<double> Bfield(const double& t);
 
   // The time evolution equation for the fields.
-  void Bloch(vec const &s, vec &dsdt, double t);
+  void Bloch(std::vector<double> const &s, std::vector<double> &dsdt, double t);
 
   // The integration monitor function
-  void Printer(vec const &s , double t);
+  void Printer(std::vector<double> const &s , double t);
 
   int num_sim_fids_;
   int zero_idx_;
@@ -97,7 +102,7 @@ public:
 
   TFile *pf_fid_;
   TTree *pt_fid_;
-  vector<Double_t> wf_;
+  std::vector<Double_t> wf_;
 
   int GetTreeIndex(double grad_strength);
 }; // FidFactory

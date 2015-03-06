@@ -27,16 +27,6 @@ about: This header file holds the projects parameter namespace.  These
 
 namespace fid {
 
-// using directives
-using std::cout;
-using std::vector;
-using std::endl;
-using std::string;
-
-// typedefs
-typedef vector<double> vec;
-typedef vector<std::complex<double>> cvec;
-
 // Enumerate the different methods of frequency extraction
 enum Method { ZC, CN, AN, LZ, EX, PH, SN,
               ZEROCOUNT, 
@@ -82,7 +72,7 @@ namespace sim {
   extern double freq_ref;    // reference frequency used to mix down
   extern double freq_larmor; // Larmor frequency to be simulated
   extern double mixdown_phi; // arbitrary phase for mixing freq
-  extern vec spin_0;         // the initial spin vector
+  extern std::vector<double> spin_0; // the initial spin vector
 
   extern double gamma_1;  // relaxation time gamma_1
   extern double gamma_2;  // relaxation time gamma_2
@@ -98,12 +88,12 @@ namespace sim {
 
 namespace grad {
 
-  extern string root_file;
-  extern string fid_branch;
+  extern std::string root_file;
+  extern std::string fid_branch;
   extern double min;
   extern double max;
   extern int poln_order;
-  extern vec poln_coefs;
+  extern std::vector<double> poln_coefs;
 }
 
 } // ::fid

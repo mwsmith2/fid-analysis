@@ -2,7 +2,7 @@
 
 namespace fid {
 
-FID::FID(const string& fid_file)
+FID::FID(const std::string& fid_file)
 {
   // Read and store the waveform and time from a .fid file.
   read_fid_file(fid_file, wf_, tm_);
@@ -13,7 +13,7 @@ FID::FID(const string& fid_file)
 FID::FID(const char* fid_file)
 {
   // Convert the char pointer toa string.
-  string fid_string(fid_file);
+  std::string fid_string(fid_file);
 
   // Read and store the waveform and time from a .fid file.
   read_fid_file(fid_string, wf_, tm_);
@@ -22,7 +22,7 @@ FID::FID(const char* fid_file)
 }
 
 
-FID::FID(const vec& wf, const vec& tm)
+FID::FID(const std::vector<double>& wf, const std::vector<double>& tm)
 {
   // Copy the waveform and time to member vectors.
   wf_ = wf;
@@ -31,7 +31,7 @@ FID::FID(const vec& wf, const vec& tm)
   Init();
 }
 
-FID::FID(const vec& wf)
+FID::FID(const std::vector<double>& wf)
 {
   // Copy the waveform and construct a generic time range.
   wf_ = wf;
@@ -67,14 +67,14 @@ double FID::GetFreq()
   return freq_;
 }
 
-double FID::GetFreq(const string& method_name)
+double FID::GetFreq(const std::string& method_name)
 {
   return GetFreq(ParseMethod(method_name));
 }
 
 double FID::GetFreq(const char* method_name)
 {
-  return GetFreq((string(method_name)));
+  return GetFreq((std::string(method_name)));
 }
 
 double FID::GetFreq(const Method m)
@@ -614,24 +614,34 @@ double FID::CalcSinusoidFreq()
 
 void FID::PrintDiagnosticInfo()
 {
-  cout << endl;
+  using std::cout;
+  using std::endl;
+
+  cout << std::string(80, '<') << endl;
   cout << "Printing Diagostic Information for FID @ " << this << endl;
   cout << "noise level: " << noise_ << endl;
   cout << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
   cout << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
+  cout << std::string(80, '>') << endl;
 }
 
 void FID::PrintDiagnosticInfo(std::iostream out)
 {
-  out << endl;
+  using std::cout;
+  using std::endl;
+
+  out << std::string(80, '<') << endl;
   out << "Printing Diagostic Information for FID @ " << this << endl;
   out << "noise level: " << noise_ << endl;
   out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
   out << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
+  out << std::string(80, '>') << endl;
 }
 
-Method FID::ParseMethod(const string& m)
+Method FID::ParseMethod(const std::string& m)
 {
+  using std::string;
+
   // Test each case iteratively, Zero count first.
   string str1("ZEROCOUNT");
   string str2("ZC");
@@ -683,8 +693,8 @@ Method FID::ParseMethod(const string& m)
   }
 
   // If the method hasn't matched yet, use the current method and warn them.
-  cout << "Warning: The method string used could not be matched. " << endl;
-  cout << "Method not changed." << endl;
+  std::cout << "Warning: Method string not matched. " << std::endl;
+  std::cout << "Method not changed." << std::endl;
 
   return freq_method_;
 }

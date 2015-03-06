@@ -22,9 +22,6 @@ notes:
 #include <numeric>
 #include <random>
 #include <cmath> 
-using std::vector;
-using std::cout;
-using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include <armadillo>
@@ -39,7 +36,7 @@ namespace fid
 
 // A template function to handle vector addition.
 template <typename T>
-inline vector<T>& operator+(vector<T>& a, vector<T>& b)
+inline std::vector<T>& operator+(std::vector<T>& a, std::vector<T>& b)
 {
   assert(a.size() == b.size());
 
@@ -49,7 +46,7 @@ inline vector<T>& operator+(vector<T>& a, vector<T>& b)
 
 // A template function to handle vector subtraction.
 template <typename T>
-inline vector<T>& operator-(vector<T>& a, vector<T>& b)
+inline std::vector<T>& operator-(std::vector<T>& a, std::vector<T>& b)
 {
   assert(a.size() == b.size());
 
@@ -59,7 +56,7 @@ inline vector<T>& operator-(vector<T>& a, vector<T>& b)
 
 // A template function to handle vector multiplying with a scalar.
 template <typename T>
-inline vector<T>& operator*(T c, vector<T>& a)
+inline std::vector<T>& operator*(T c, std::vector<T>& a)
 {
   for (auto it = a.begin(); it != a.end(); ++it){
     *it = c * (*it);
@@ -69,14 +66,17 @@ inline vector<T>& operator*(T c, vector<T>& a)
 }
 
 template <typename T>
-inline void floor(vector<T>& v) 
+inline void floor(std::vector<T>& v) 
 {
   for (auto it = v.begin(); it != v.end(); ++it) {
     *it = std::floor(*it);
   }
 }
 
-inline void cross(const vec& u, const vec& v, vec& res)
+template <typename T>
+inline void cross(const std::vector<T>& u, 
+                  const std::vector<T>& v, 
+                  std::vector<T>& res)
 {
     res[0] = u[1] * v[2] - u[2] * v[1];
     res[1] = u[2] * v[0] - u[0] * v[2];
@@ -111,7 +111,7 @@ inline double stdev(const T& begin, const T& end) {
 
 // Add white noise to an array.
 template <typename T>
-void addnoise(vector<T>& wf, T snr, int seed=0) {
+void addnoise(std::vector<T>& wf, T snr, int seed=0) {
   static std::default_random_engine gen(seed);
   std::normal_distribution<T> nrm;
 
@@ -142,8 +142,8 @@ void addnoise(vector<T>& wf, T snr, int seed=0) {
 
 // Construct a range from params first, step, last
 template<typename T>
-inline vector<T> construct_range(const T& i, const T& f, const T& d) {
-	vector<T> res;
+inline std::vector<T> construct_range(const T& i, const T& f, const T& d) {
+	std::vector<T> res;
 	for (T x = i; x <= f; x += d){
 	  res.push_back(x);
 	}
@@ -152,8 +152,8 @@ inline vector<T> construct_range(const T& i, const T& f, const T& d) {
 
 // Construct a range from vector <first, last, step>
 template<typename T>
-inline vector<T> construct_range(const vector<T> &range_vec) {
-	vector<T> res;
+inline std::vector<T> construct_range(const std::vector<T> &range_vec) {
+	std::vector<T> res;
 	for (T x = range_vec[0]; x <= range_vec[1]; x += range_vec[2]){
 	  res.push_back(x);
 	}
@@ -161,8 +161,8 @@ inline vector<T> construct_range(const vector<T> &range_vec) {
 }
 
 template<typename T>
-inline vector<T> construct_linspace(const T& i, const T& f, const int& n) {
-    vector<T> res;
+inline std::vector<T> construct_linspace(const T& i, const T& f, const int& n) {
+    std::vector<T> res;
     double d = (f - i) / (n - 1);
     for (int j = 0; j < n; ++j) {
         res.push_back(i + j*d);
@@ -171,8 +171,8 @@ inline vector<T> construct_linspace(const T& i, const T& f, const int& n) {
 }
 
 template<typename T>
-inline vector<T> construct_linspace(const vector<T>& vals) {
-    vector<T> res;
+inline std::vector<T> construct_linspace(const std::vector<T>& vals) {
+    std::vector<T> res;
     int n = (int)(vals[2] + 0.5);
     double d = (vals[1] - vals[0]) / (n - 1);
     for (int j = 0; j < n; ++j) {
@@ -183,37 +183,42 @@ inline vector<T> construct_linspace(const vector<T>& vals) {
 
 namespace dsp
 {
-cvec fft(const vec& wf);
-vec ifft(const cvec& fft_vec);
+std::vector<std::complex<double>> fft(const std::vector<double>& wf);
+std::vector<double> ifft(const std::vector<std::complex<double>>& fft_vec);
 
-vec hilbert(const vec& wf);
-vec psd(const vec& wf);
+std::vector<double> hilbert(const std::vector<double>& wf);
+std::vector<double> psd(const std::vector<double>& wf);
 
-vec norm(const vec& wf);
-vec norm(const cvec& wf);
+std::vector<double> norm(const std::vector<double>& wf);
+std::vector<double> norm(const std::vector<std::complex<double>>& wf);
 
-vec fftfreq(const vec& tm);
-vec fftfreq(const int N, const double dt);
+std::vector<double> fftfreq(const std::vector<double>& tm);
+std::vector<double> fftfreq(const int N, const double dt);
 
-vec phase(const vec& wf);
-vec phase(const vec& wf_re, const vec& wf_im);
+std::vector<double> phase(const std::vector<double>& wf);
+std::vector<double> phase(const std::vector<double>& wf_re, 
+                          const std::vector<double>& wf_im);
 
-vec envelope(const vec& wf);
-vec envelope(const vec& wf_re, const vec& wf_im);	
+std::vector<double> envelope(const std::vector<double>& wf);
+std::vector<double> envelope(const std::vector<double>& wf_re, 
+                             const std::vector<double>& wf_im);	
 
-arma::cx_mat wvd_cx(const vec& wf, bool upsample=false);
-arma::mat wvd(const vec& wf, bool upsample=false);
+arma::cx_mat wvd_cx(const std::vector<double>& wf, bool upsample=false);
+arma::mat wvd(const std::vector<double>& wf, bool upsample=false);
 
-vec savgol3(const vec& wf);
-vec savgol5(const vec& wf);
-vec convolve(const vec& wf, const vec& filter);
-int convolve(const vec& wf, const vec& filter, vec& res);
+std::vector<double> savgol3(const std::vector<double>& wf);
+std::vector<double> savgol5(const std::vector<double>& wf);
+std::vector<double> convolve(const std::vector<double>& wf, 
+                             const std::vector<double>& filter);
+int convolve(const std::vector<double>& wf, 
+             const std::vector<double>& filter, 
+             std::vector<double>& res);
 
 template <typename T>
-vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {
+std::vector<T> lowpass(const std::vector<T>& wf, double cut_idx=-1, int n=3) {
 	// A simple Butterworth n-order filter.
 	if (cut_idx == -1) cut_idx = wf.size() / 2;
-	vector<T> filtered_wf = wf;
+	std::vector<T> filtered_wf = wf;
 
 	std::transform(wf.begin(), wf.end(), filtered_wf.begin(), // lambda filter
 				  [cut_idx, n](double x) { 

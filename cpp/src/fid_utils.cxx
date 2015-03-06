@@ -3,7 +3,7 @@
 
 namespace fid {
 
-void load_params(string conf_file)
+void load_params(std::string conf_file)
 {
   // using directives
   using boost::property_tree::ptree;
@@ -46,14 +46,14 @@ void load_params(string conf_file)
   t_pulse = pt.get<double>("sim.t_pulse", t_pulse);
 
   // gradient fid file parameters
-  grad::root_file = pt.get<string>("grad.root_file", grad::root_file);
-  grad::fid_branch = pt.get<string>("grad.fid_branch", grad::fid_branch);
+  grad::root_file = pt.get<std::string>("grad.root_file", grad::root_file);
+  grad::fid_branch = pt.get<std::string>("grad.fid_branch", grad::fid_branch);
   grad::min = pt.get<double>("grad.min", grad::min);
   grad::max = pt.get<double>("grad.max", grad::max);
   grad::poln_order = pt.get<double>("grad.poln_order", grad::poln_order);
 
   try {
-    vec tmp;
+    std::vector<double> tmp;
     BOOST_FOREACH(ptree::value_type &v, pt.get_child("grad.poln_coefs")){
       tmp.push_back(v.second.get_value<double>());
     }
@@ -64,7 +64,7 @@ void load_params(string conf_file)
 } // load_params
 
 // Generate an ideal FID
-void ideal_fid(vec& wf, vec& tm, double f, double phi, 
+void ideal_fid(std::vector<double>& wf, std::vector<double>& tm, double f, double phi, 
 	double snr, double tau, double t0){
 
 	wf.reserve(tm.size());
@@ -96,7 +96,7 @@ void ideal_fid(vec& wf, vec& tm, double f, double phi,
 	return;
 }
 
-void construct_time_vector(uint num_times, double t0, double dt, vec &tm)
+void construct_time_vector(uint num_times, double t0, double dt, std::vector<double> &tm)
 {
   if (tm.size() != num_times){
     tm.resize(num_times);
@@ -108,7 +108,7 @@ void construct_time_vector(uint num_times, double t0, double dt, vec &tm)
 }
 
 
-void construct_quadratic_gradient(int num_points, vec &grad)
+void construct_quadratic_gradient(int num_points, std::vector<double> &grad)
 {
   // construct a normalized, centered quadratic gradient
 
@@ -131,7 +131,7 @@ void construct_quadratic_gradient(int num_points, vec &grad)
 }
 
 
-void construct_linear_gradient(int num_points, vec &grad)
+void construct_linear_gradient(int num_points, std::vector<double> &grad)
 {
   // construct a normalized, centered linear gradient
 
@@ -154,10 +154,10 @@ void construct_linear_gradient(int num_points, vec &grad)
 }
 
 
-void draw_graph(TGraph gr, string fname, string title)
+void draw_graph(TGraph gr, std::string fname, std::string title)
 {
   // Set up the graph
-  string new_title(title);
+  std::string new_title(title);
   new_title.append("; time [ms]; amplitude [a.u.]");
   gr.SetTitle(new_title.c_str());
 
@@ -169,7 +169,7 @@ void draw_graph(TGraph gr, string fname, string title)
   c1.Print(fname.c_str());
 }
 
-void draw_graph(const vec &wf, const vec &tm, string fname, string title)
+void draw_graph(const std::vector<double> &wf, const std::vector<double> &tm, std::string fname, std::string title)
 {
   // Create a graph
   TGraph gr(wf.size(), &tm[0], &wf[0]);
@@ -178,17 +178,17 @@ void draw_graph(const vec &wf, const vec &tm, string fname, string title)
 }
 
 
-void draw_fid(const FID &my_fid, string fname, string title)
+void draw_fid(const FID &my_fid, std::string fname, std::string title)
 {
   // Get the data vectors
-  vec wf = my_fid.wf();
-  vec tm = my_fid.tm();
+  std::vector<double> wf = my_fid.wf();
+  std::vector<double> tm = my_fid.tm();
 
   draw_graph(wf, tm, fname, title);
 }
 
 
-void draw_fid_time_fit(const FID &my_fid, string fname, string title)
+void draw_fid_time_fit(const FID &my_fid, std::string fname, std::string title)
 {
   // Copy the graph
   TGraph gr = my_fid.gr_time_series();
@@ -196,17 +196,17 @@ void draw_fid_time_fit(const FID &my_fid, string fname, string title)
 }
 
 
-void draw_fid_freq_fit(const FID &my_fid, string fname, string title)
+void draw_fid_freq_fit(const FID &my_fid, std::string fname, std::string title)
 {
   // Copy the graph
   TGraph gr = my_fid.gr_freq_series();
   draw_graph(gr, fname, title);
 }
 
-void draw_fid_time_res(const FID &my_fid, string fname, string title)
+void draw_fid_time_res(const FID &my_fid, std::string fname, std::string title)
 {
   // Copy the residuals
-  vec res = my_fid.res();
+  std::vector<double> res = my_fid.res();
 
   // Copy the time series graph
   TGraph gr_fit = my_fid.gr_time_series();
@@ -224,10 +224,10 @@ void draw_fid_time_res(const FID &my_fid, string fname, string title)
 }
 
 
-void draw_fid_freq_res(const FID &my_fid, string fname, string title)
+void draw_fid_freq_res(const FID &my_fid, std::string fname, std::string title)
 {
   // Copy the residuals
-  vec res = my_fid.res();
+  std::vector<double> res = my_fid.res();
 
   // Copy the frequency series graph
   TGraph gr_fit = my_fid.gr_freq_series();
@@ -244,7 +244,7 @@ void draw_fid_freq_res(const FID &my_fid, string fname, string title)
   draw_graph(gr, fname, title);
 }
 
-void calc_freq_write_csv(FID& my_fid, ofstream& out)
+void calc_freq_write_csv(FID& my_fid, std::ofstream& out)
 {
   // Test all the frequency extraction methods and write the results
   out << my_fid.CalcZeroCountFreq() << ", " << 0.0 << ", ";
@@ -254,10 +254,10 @@ void calc_freq_write_csv(FID& my_fid, ofstream& out)
   out << my_fid.CalcSoftLorentzianFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcExponentialFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcPhaseFreq() << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << endl;;
+  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << std::endl;
 }
 
-void calc_phase_freq_write_csv(FID& my_fid, ofstream& out)
+void calc_phase_freq_write_csv(FID& my_fid, std::ofstream& out)
 {
   // Test all the frequency extraction methods using the phase
   out << my_fid.CalcPhaseFreq() << ", " << my_fid.chi2() << ", ";
@@ -266,10 +266,10 @@ void calc_phase_freq_write_csv(FID& my_fid, ofstream& out)
   out << my_fid.CalcPhaseDerivFreq() << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcPhaseDerivFreq(2) << ", " << my_fid.chi2() << ", ";
   out << my_fid.CalcPhaseDerivFreq(3) << ", " << my_fid.chi2() << ", ";
-  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << endl;
+  out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << std::endl;
 }
 
-void read_fid_file(string fname, vec &wf, vec &tm)
+void read_fid_file(std::string fname, std::vector<double> &wf, std::vector<double> &tm)
 {
   // open the file first
   std::ifstream in(fname);

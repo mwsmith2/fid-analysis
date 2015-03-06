@@ -33,7 +33,7 @@ namespace sim {
   double freq_ref = 950.0;    
   double freq_larmor = 997.0; 
   double mixdown_phi = 950.0; 
-  vec spin_0 = {0.0, 0.0, 1.0};         
+  std::vector<double> spin_0 = {0.0, 0.0, 1.0};         
 
   double gamma_1 = 0.05;  
   double gamma_2 = 0.05;  
@@ -47,12 +47,12 @@ namespace sim {
 
 namespace grad {
 
-  string root_file = "~/.fid/sim_fids.root";
-  string fid_branch = "fid";
+  std::string root_file = "~/.fid/sim_fids.root";
+  std::string fid_branch = "fid";
   double min = -2000;
   double max = 2000;
   int poln_order = 2;
-  vec poln_coefs = {0.0, 0.0, 1.0, 0.0};
+  std::vector<double> poln_coefs = {0.0, 0.0, 1.0, 0.0};
 }
 
 } // ::fid

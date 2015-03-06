@@ -8,6 +8,9 @@ namespace fid {
 
 FidFactory::FidFactory()
 {
+  using std::cout;
+  using std::endl;
+
   ti_ = sim::start_time;
   tf_ = ti_ + sim::delta_time * sim::num_samples;
   cout << "Loading dt_integration: " << sim::dt_integration << endl;
@@ -58,7 +61,7 @@ FidFactory::~FidFactory()
 }
 
 // Create an idealized FID with current Simulation parameters
-void FidFactory::IdealFid(vec& wf, vec& tm, bool withnoise)
+void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm, bool withnoise)
 {
   wf.reserve(tm.size());
   wf.resize(0);
@@ -91,19 +94,20 @@ void FidFactory::IdealFid(vec& wf, vec& tm, bool withnoise)
   floor(wf);
 }
 
-void FidFactory::SimulateFid(vec& wf, vec& tm, bool withnoise)
+void FidFactory::SimulateFid(std::vector<double>& wf, std::vector<double>& tm, bool withnoise)
 {
+  using namespace boost::numeric::odeint;
+  using std::bind;
+  using std::ref;
+  namespace pl = std::placeholders;
+
   // make sure memory is allocated for the final FIDs
   tm.reserve(sim::num_samples);
   wf.reserve(sim::num_samples);
   s_ = sim::spin_0; // The starting spin vector
 
   // Bind the member function and make a reference so it isn't copied.
-  using std::bind;
-  using std::ref;
-  namespace pl = std::placeholders;
-
-  integrate_const(runge_kutta4<vec>(), 
+  integrate_const(runge_kutta4<std::vector<double>>(), 
                   bind(&FidFactory::Bloch, ref(*this), pl::_1, pl::_2, pl::_3), 
                   s_, 
                   ti_, 
@@ -125,7 +129,7 @@ void FidFactory::SimulateFid(vec& wf, vec& tm, bool withnoise)
   floor(wf);
 }
 
-void FidFactory::GradientFid(const vec& gradient, vec& wf, bool withnoise)
+void FidFactory::GradientFid(const std::vector<double>& gradient, std::vector<double>& wf, bool withnoise)
 {
   if (!pf_fid_->IsOpen()) {
     std::cout << "No ROOT file loaded.  Cannot make gradient FIDs." << std::endl;
@@ -133,15 +137,21 @@ void FidFactory::GradientFid(const vec& gradient, vec& wf, bool withnoise)
   }
 
   // Find the appropriate FIDs and sum them
-  wf.assign(sim::num_samples, sim::baseline);
+  wf.assign(sim::num_samples, 0.0);
 
-  for (auto val : gradient){
+  for (auto& g : gradient){
 
-    pt_fid_->GetEntry(GetTreeIndex(val));
+    pt_fid_->GetEntry(GetTreeIndex(g));
 
     for (uint i = 0; i < wf.size(); i++){
-      wf[i] += wf_[i] / gradient.size();
+      wf[i] += wf_[i];
     }
+  }
+
+  double amp = sim::amplitude / gradient.size();
+
+  for (auto& val : wf) {
+    val = val * amp + sim::baseline;
   }
 
   if (withnoise) addnoise(wf, sim::snr);
@@ -162,12 +172,12 @@ void FidFactory::PrintDiagnosticInfo()
   cout << sim_to_fid_ << endl;
 }
 
-void FidFactory::Bloch(vec const &s, vec &dsdt, double t)
+void FidFactory::Bloch(std::vector<double> const &s, std::vector<double> &dsdt, double t)
 {
   // Again static to save time on memory allocations.
-  static vec b = {{0., 0., 0.}};   // Bfield
-  static vec s1 = {{0., 0., 0.}};  // Cross product piece of spin
-  static vec s2 = {{0., 0., 0.}};  // Relaxation piece of spin
+  static std::vector<double> b = {{0., 0., 0.}};   // Bfield
+  static std::vector<double> s1 = {{0., 0., 0.}};  // Cross product piece of spin
+  static std::vector<double> s2 = {{0., 0., 0.}};  // Relaxation piece of spin
 
   // Update the Bfield.
   b = Bfield(t);
@@ -184,11 +194,11 @@ void FidFactory::Bloch(vec const &s, vec &dsdt, double t)
   dsdt = s1 - s2;
 }
 
-vec FidFactory::Bfield(const double& t)
+std::vector<double> FidFactory::Bfield(const double& t)
 {
   // Made static to save on memory calls.
-  static vec a = {0., 0., 0.}; // holds constant external field
-  static vec b = {0., 0., 0.}; // for time dependent B field
+  static std::vector<double> a = {0., 0., 0.}; // holds constant external field
+  static std::vector<double> b = {0., 0., 0.}; // for time dependent B field
 
   // Return static external field if after the pulsed field.
   if (t >= sim::t_pulse){
@@ -212,7 +222,7 @@ vec FidFactory::Bfield(const double& t)
 }
 
 // Printer function is called to do stuff each step of integration.
-void FidFactory::Printer(vec const &s , double t)
+void FidFactory::Printer(std::vector<double> const &s , double t)
 {
   // Cache the cosine function for mixing later.
   if (cos_cache_.size() == 0){
@@ -249,10 +259,10 @@ void FidFactory::Printer(vec const &s , double t)
 }
 
 // Low pass filter to suppress the higher frequency introducing in mixing down.
-vec FidFactory::LowPassFilter(vec& s)
+std::vector<double> FidFactory::LowPassFilter(std::vector<double>& s)
 {
   // Allocate the filter and set the central frequency.
-  vec filter;
+  std::vector<double> filter;
   double freq_cut = 0.5 * sim::freq_larmor;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
@@ -283,7 +293,7 @@ vec FidFactory::LowPassFilter(vec& s)
   fft = fft % v2;
 
   // This confusing oneliner, get the inverse FFT and converts to a std::vector
-  return arma::conv_to<vec>::from(arma::real(arma::ifft(fft)));
+  return arma::conv_to<std::vector<double>>::from(arma::real(arma::ifft(fft)));
 }
 
 int FidFactory::GetTreeIndex(double grad_strength)

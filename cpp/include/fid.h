@@ -4,12 +4,12 @@
 /*===========================================================================*\
 
 author: Matthias W. Smith
-email: mwmsith2@uw.edu
+email: mwsmith2@uw.edu
+file: fid.h
 
 notes: 
 
-	This library consists of several frequency extraction and analysis 
-	methods for FIDs as well as a class to encapsulate all the ideas.
+    A utility include file that grabs all of the library.
 
 \*===========================================================================*/
 

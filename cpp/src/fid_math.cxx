@@ -3,7 +3,7 @@
 namespace fid 
 {
 
-cvec dsp::fft(const vec &wf)
+std::vector<std::complex<double>> dsp::fft(const std::vector<double> &wf)
 {
   // Grab some useful constants.
   int N = wf.size();  
@@ -11,7 +11,7 @@ cvec dsp::fft(const vec &wf)
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
-  cvec fft_vec(n, 0.0);
+  std::vector<std::complex<double>> fft_vec(n, 0.0);
   auto wf_vec = wf; // copy waveform since fftw destroys it
 
   // Plan and execute the fft.
@@ -28,7 +28,7 @@ cvec dsp::fft(const vec &wf)
   return fft_vec;
 }
 
-vec dsp::ifft(const cvec& fft)
+std::vector<double> dsp::ifft(const std::vector<std::complex<double>>& fft)
 {
   // Grab some useful constants.
   int n = fft.size();
@@ -36,7 +36,7 @@ vec dsp::ifft(const cvec& fft)
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
-  vec ifft_vec(N, 0.0);
+  std::vector<double> ifft_vec(N, 0.0);
   fftw_complex *fft_ptr = new fftw_complex[n];
   memcpy(fft_ptr, &fft[0], sizeof(fftw_complex) * n);
 
@@ -54,7 +54,7 @@ vec dsp::ifft(const cvec& fft)
   return ifft_vec;
 }
 
-vec dsp::hilbert(const vec& wf)
+std::vector<double> dsp::hilbert(const std::vector<double>& wf)
 {
 	// Return the call to the fft version.
 	auto fft_vec = dsp::fft(wf);
@@ -68,7 +68,7 @@ vec dsp::hilbert(const vec& wf)
   return ifft(fft_vec);
 }
 
-vec dsp::psd(const vec& wf)
+std::vector<double> dsp::psd(const std::vector<double>& wf)
 {
   // Perform fft on the original data.
 	auto fft_vec = dsp::fft(wf);
@@ -77,10 +77,10 @@ vec dsp::psd(const vec& wf)
 	return dsp::norm(fft_vec);
 }
 
-vec dsp::norm(const vec& wf)
+std::vector<double> dsp::norm(const std::vector<double>& wf)
 {
   // Allocate the memory
-  vec res;
+  std::vector<double> res;
   res.reserve(wf.size());
 
   // Iterate and push back the norm.
@@ -91,10 +91,10 @@ vec dsp::norm(const vec& wf)
   return res;
 }
 
-vec dsp::norm(const cvec& wf)
+std::vector<double> dsp::norm(const std::vector<std::complex<double>>& wf)
 {
   // Allocate the memory
-  vec res;
+  std::vector<double> res;
   res.reserve(wf.size());
 
   // Iterate and push back the norm.
@@ -106,7 +106,7 @@ vec dsp::norm(const cvec& wf)
 }
 
 // Helper function to get frequencies for FFT
-vec dsp::fftfreq(const vec& tm) 
+std::vector<double> dsp::fftfreq(const std::vector<double>& tm) 
 {
 	int N = tm.size();
 	double dt = (tm[N-1] - tm[0]) / (N - 1); // sampling rate
@@ -114,10 +114,10 @@ vec dsp::fftfreq(const vec& tm)
 	return dsp::fftfreq(N, dt);
 }
 
-vec dsp::fftfreq(const int N, const double dt)
+std::vector<double> dsp::fftfreq(const int N, const double dt)
 {
 	// Instantiate return vector.
-	vec freq;
+	std::vector<double> freq;
 
 	// Handle both even and odd cases properly.
 	if (N % 2 == 0) {
@@ -141,14 +141,14 @@ vec dsp::fftfreq(const int N, const double dt)
 }
 
 // Calculates the phase by assuming the real signal is harmonic.
-vec dsp::phase(const vec& wf)
+std::vector<double> dsp::phase(const std::vector<double>& wf)
 {
 	return dsp::phase(wf, dsp::hilbert(wf));
 }
 
-vec dsp::phase(const vec& wf_re, const vec& wf_im)
+std::vector<double> dsp::phase(const std::vector<double>& wf_re, const std::vector<double>& wf_im)
 {
-	vec phase(wf_re.size(), 0.0);
+	std::vector<double> phase(wf_re.size(), 0.0);
 
 	// Calculate the modulo-ed phase
   	std::transform(wf_re.begin(), wf_re.end(), wf_im.begin(), phase.begin(),
@@ -176,15 +176,15 @@ vec dsp::phase(const vec& wf_re, const vec& wf_im)
     return phase;
 }
 
-vec dsp::envelope(const vec& wf)
+std::vector<double> dsp::envelope(const std::vector<double>& wf)
 {
 	return dsp::envelope(wf, dsp::hilbert(wf));
 }
 
-vec dsp::envelope(const vec& wf_re, const vec& wf_im)
+std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::vector<double>& wf_im)
 {
  	// Set the envelope function
-	vec env(wf_re.size(), 0.0);
+	std::vector<double> env(wf_re.size(), 0.0);
 
 	std::transform(wf_re.begin(), wf_re.end(), wf_im.begin(), env.begin(),
     			   [](double r, double i) { return std::sqrt(r*r + i*i); });
@@ -192,7 +192,7 @@ vec dsp::envelope(const vec& wf_re, const vec& wf_im)
 	return env;
 }
 
-arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
+arma::cx_mat dsp::wvd_cx(const std::vector<double>& wf, bool upsample)
 {
   int M, N;
   if (upsample) {
@@ -210,7 +210,7 @@ arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
   arma::cx_mat res(M, N, arma::fill::zeros);
 
   // Artificially double the sampling rate by repeating each sample.
-  vec wf_re(M, 0.0);
+  std::vector<double> wf_re(M, 0.0);
 
   auto it1 = wf_re.begin();
   for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
@@ -240,7 +240,7 @@ arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
   return res;
 }
 
-arma::mat dsp::wvd(const vec& wf, bool upsample)
+arma::mat dsp::wvd(const std::vector<double>& wf, bool upsample)
 {
   int M, N;
   if (upsample) {
@@ -258,7 +258,7 @@ arma::mat dsp::wvd(const vec& wf, bool upsample)
   arma::mat res(M, N, arma::fill::zeros);
 
   // Artificially double the sampling rate by repeating each sample.
-  vec wf_re(M, 0.0);
+  std::vector<double> wf_re(M, 0.0);
 
   auto it1 = wf_re.begin();
   for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
@@ -285,10 +285,10 @@ arma::mat dsp::wvd(const vec& wf, bool upsample)
   return res;
 }
 
-vec dsp::savgol3(const vec& wf)
+std::vector<double> dsp::savgol3(const std::vector<double>& wf)
 {
-  vec res(0, wf.size());
-  vec filter = {-2.0, 3.0, 6.0, 7.0, 6.0, 3.0, -2.0};
+  std::vector<double> res(0, wf.size());
+  std::vector<double> filter = {-2.0, 3.0, 6.0, 7.0, 6.0, 3.0, -2.0};
   filter = (1.0 / 21.0) * filter;
 
   if (dsp::convolve(wf, filter, res) == 0) {
@@ -301,10 +301,10 @@ vec dsp::savgol3(const vec& wf)
   }
 }
 
-vec dsp::savgol5(const vec& wf)
+std::vector<double> dsp::savgol5(const std::vector<double>& wf)
 {
-  vec res(0, wf.size());
-  vec filter = {15.0, -55.0, 30.0, 135.0, 179.0, 135.0, 30.0, -55.0, 15.0};
+  std::vector<double> res(0, wf.size());
+  std::vector<double> filter = {15.0, -55.0, 30.0, 135.0, 179.0, 135.0, 30.0, -55.0, 15.0};
   filter = (1.0 / 429.0) * filter;
 
   if (dsp::convolve(wf, filter, res) == 0) {
@@ -317,7 +317,7 @@ vec dsp::savgol5(const vec& wf)
   }
 }
 
-int dsp::convolve(const vec& wf, const vec& filter, vec& res)
+int dsp::convolve(const std::vector<double>& wf, const std::vector<double>& filter, std::vector<double>& res)
 {
   int k = filter.size();
   int N = wf.size();
@@ -349,9 +349,9 @@ int dsp::convolve(const vec& wf, const vec& filter, vec& res)
   return 0;
 }
 
-vec dsp::convolve(const vec& wf, const vec& filter)
+std::vector<double> dsp::convolve(const std::vector<double>& wf, const std::vector<double>& filter)
 {
-  vec res(0.0, wf.size());
+  std::vector<double> res(0.0, wf.size());
 
   if (dsp::convolve(wf, filter, res) == 0) {
 

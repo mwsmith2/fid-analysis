@@ -41,14 +41,14 @@ class FID {
  public:
   
   // ctors
-  FID(const string& fid_file);
+  FID(const std::string& fid_file);
   FID(const char* fid_file);
-  FID(const vec& wf, const vec& tm);
-  FID(const vec& wf);
+  FID(const std::vector<double>& wf, const std::vector<double>& tm);
+  FID(const std::vector<double>& wf);
 
   // Simplified frequency extraction
   double GetFreq();
-  double GetFreq(const string& method_name);
+  double GetFreq(const std::string& method_name);
   double GetFreq(const char* method_name);
   double GetFreq(const Method m);
   double GetFreqError();
@@ -62,18 +62,18 @@ class FID {
 
   // accessors
   const bool& isgood() const { return isgood_; };
-  const vec& wf() const { return wf_; };
-  const vec& tm() const { return tm_; };
-  const vec& res() const { return res_; };
-  const vec& power() const { return power_; };
-  const vec& fftfreq() const { return fftfreq_; };
-  const vec& phase() const { return phase_ ;}
-  const vec& env() const { return env_; };
+  const std::vector<double>& wf() const { return wf_; };
+  const std::vector<double>& tm() const { return tm_; };
+  const std::vector<double>& res() const { return res_; };
+  const std::vector<double>& power() const { return power_; };
+  const std::vector<double>& fftfreq() const { return fftfreq_; };
+  const std::vector<double>& phase() const { return phase_ ;}
+  const std::vector<double>& env() const { return env_; };
   const double& freq() const {  return freq_;  }
   const double& freq_err() const { return freq_err_; };
   const double& chi2() const { return chi2_; };
   const double fid_time() const { return tm_[f_wf_] - tm_[i_wf_]; };
-  const double snr() const { return max_amp_ * max_amp_ / (noise_ * noise_); };
+  const double snr() const { return pow(max_amp_ / noise_, 2); };
   const TGraph& gr_time_series() const { return gr_time_series_; };
   const TGraph& gr_freq_series() const { return gr_freq_series_; };
   const TF1&    f_fit() const { return f_fit_; };
@@ -110,20 +110,20 @@ class FID {
   double freq_err_;
   Method freq_method_;
 
-  vec guess_;
+  std::vector<double> guess_;
   TF1 f_fit_;
   TGraph gr_time_series_;
   TGraph gr_freq_series_;
   
   // bigger data arrays
-  vec wf_;
-  vec tm_;
-  vec res_;
-  vec power_;
-  vec env_;
-  vec phase_;
-  vec fftfreq_;
-  vec temp_; // for random transformations
+  std::vector<double> wf_;
+  std::vector<double> tm_;
+  std::vector<double> res_;
+  std::vector<double> power_;
+  std::vector<double> env_;
+  std::vector<double> phase_;
+  std::vector<double> fftfreq_;
+  std::vector<double> temp_; // for random transformations
 
   // Private Member Functions  
   // init function to be called after wf_ and tm_ are set.
@@ -138,7 +138,7 @@ class FID {
   void CalcFftFreq();
   void GuessFitParams();
   void FreqFit(TF1& func);
-  Method ParseMethod(const string& m);
+  Method ParseMethod(const std::string& m);
   
 }; // FID
  
