@@ -35,8 +35,8 @@ int main(int argc, char **argv)
   cout.precision(12);
 
   // some necessary parameters
-  vec wf;
-  vec tm;
+  std::vector<double> wf;
+  std::vector<double> tm;
 
   // Create random number engine/distribution.
   std::default_random_engine gen;

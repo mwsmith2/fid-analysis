@@ -13,7 +13,11 @@ Detail: The program is meant to test the effects of field gradients
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
+#include <iostream>
 #include <fstream>
+#include <string>        
+using std::cout;
+using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -32,11 +36,11 @@ int main(int argc, char **argv)
   int num_fids = 100;
 
   // some necessary parameters
-  vec wf;
-  vec tm;
-  vec grads;
-  vec grad_0;
-  vec gradient;
+  std::vector<double> wf;
+  std::vector<double> tm;
+  std::vector<double> grads;
+  std::vector<double> grad_0;
+  std::vector<double> gradient;
 
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
   tm = construct_range(sim::start_time, final_time, sim::delta_time);
@@ -99,7 +103,7 @@ int main(int argc, char **argv)
 
       if (i == 0){
         sprintf(str, "data/fig/fid_pol%d_grad_%03dppb.pdf", grad::poln_order, (int)g);
-        draw_fid(my_fid, str, string("Test FID")); 
+        draw_fid(my_fid, str, std::string("Test FID")); 
       }
     }
   } // grad

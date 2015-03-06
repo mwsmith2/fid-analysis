@@ -10,8 +10,12 @@ Detail: The program is meant to generate a set of example gradient FIDs in
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
-#include <fstream>
 #include <iostream>        
+#include <fstream>
+#include <vector>
+#include <string>
+using std::cout;
+using std::endl;        
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -30,11 +34,11 @@ int main(int argc, char **argv)
   char str[60];
 
   // some necessary parameters
-  vec wf;
-  vec tm;
-  vec grads;
-  vec grad_0;
-  vec gradient;
+  std::vector<double> wf;
+  std::vector<double> tm;
+  std::vector<double> grads;
+  std::vector<double> grad_0;
+  std::vector<double> gradient;
 
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
   tm = construct_range(sim::start_time, final_time, sim::delta_time);

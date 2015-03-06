@@ -17,9 +17,12 @@ error_estimator_data.csv.
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
+#include <iostream>
 #include <fstream>
 #include <random>
 #include <string>
+using std::cout;
+using std::endl;
 using std::string;
 using std::to_string;
 
@@ -84,8 +87,8 @@ int main(int argc, char **argv)
   pt.Branch("fid_data", &myfid_data, br_vars.c_str());
 
   // some necessary parameters
-  vec wf;
-  vec tm;
+  std::vector<double> wf;
+  std::vector<double> tm;
 
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
   tm = construct_range(sim::start_time, final_time, sim::delta_time);

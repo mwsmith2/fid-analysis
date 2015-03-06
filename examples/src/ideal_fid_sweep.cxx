@@ -9,7 +9,12 @@ Detail: This is a new test program for my FID libraries
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
+#include <iostream>
 #include <fstream>
+#include <vector>
+#include <string>
+using std::cout;
+using std::endl;
 
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
@@ -19,28 +24,28 @@ using namespace fid;
 int main(int argc, char **argv)
 {
   // run parameters 
-  string data_file = "data/ideal_fid_sweep_data.csv";
-  string sim_conf_file = "runtime/sim_params.json";
+  std::string data_file = "data/ideal_fid_sweep_data.csv";
+  std::string sim_conf_file = "runtime/sim_params.json";
   int num_fids = 100;
 
   // initialize the configurable parameters
   if (argc > 1) load_params(argv[1]);
 
   // some necessary parameters
-  vec wf;
-  vec tm;
+  std::vector<double> wf;
+  std::vector<double> tm;
 
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
   tm = construct_range(sim::start_time, sim::delta_time, final_time);
 
-  ofstream out;
+  std::ofstream out;
   out.precision(10);
   out.open(data_file);
 
-  vec freqs;
-  vec phases;
-  vec snrs;
-  vec vals;
+  std::vector<double> freqs;
+  std::vector<double> phases;
+  std::vector<double> snrs;
+  std::vector<double> vals;
 
   // Get the range to sweep over.
   boost::property_tree::ptree conf;

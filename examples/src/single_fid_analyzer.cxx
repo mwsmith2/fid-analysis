@@ -21,6 +21,7 @@ data/ and the directory will be created if not present.
 //--- std includes ----------------------------------------------------------//
 #include <fstream>
 #include <cassert>
+using std::string;
 
 //--- other includes --------------------------------------------------------//
 #include <boost/filesystem.hpp>
@@ -62,7 +63,7 @@ int main(int argc, char **argv)
   FID my_fid(data_file);
 
   // Open the output filestream.
-  ofstream out;
+  std::ofstream out;
   out.precision(10);
   out.open(out_file);
 

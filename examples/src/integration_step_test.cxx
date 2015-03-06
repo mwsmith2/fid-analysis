@@ -9,8 +9,11 @@ about: This is a new test program for my FID libraries
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
-#include <fstream>
 #include <iostream>
+#include <fstream>
+#include <vector>
+using std::cout;
+using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -28,8 +31,8 @@ int main(int argc, char **argv)
   if (argc > 1) load_params(argv[1]);
 
   // some necessary parameters
-  vec wf;
-  vec tm;
+  std::vector<double> wf;
+  std::vector<double> tm;
   wf.reserve(sim::num_samples);
   tm.reserve(sim::num_samples);
   double dt;
@@ -46,7 +49,7 @@ int main(int argc, char **argv)
   pt.Branch("fid", &wf[0], TString::Format("fid[%d]/D", sim::num_samples));
   pt.Branch("tm", &tm[0], TString::Format("time[%d]/D", sim::num_samples));
 
-  vec stepsizes;
+  std::vector<double> stepsizes;
   for (int i = 4; i <= 6; ++i) {
     stepsizes.push_back(10.0 * pow(10, -i));
     stepsizes.push_back(5.0 * pow(10, -i));

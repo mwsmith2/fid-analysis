@@ -17,8 +17,13 @@ error_estimator_data.csv.
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
+#include <iostream>
 #include <fstream>
+#include <vector>
 #include <random>
+using std::cout;
+using std::endl;
+using std::string;
 
 //--- other includes --------------------------------------------------------//
 #include <boost/filesystem.hpp>
@@ -47,13 +52,13 @@ int main(int argc, char **argv)
   }
 
   // open the output file
-  ofstream out;
+  std::ofstream out;
   out.precision(12);
   out.open(out_file);
 
   // some necessary parameters
-  vec wf;
-  vec tm;
+  std::vector<double> wf;
+  std::vector<double> tm;
 
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
   tm = construct_range(sim::start_time, final_time, sim::delta_time);

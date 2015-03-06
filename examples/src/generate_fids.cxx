@@ -9,9 +9,13 @@ about: This is a new test program for my FID libraries
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
+#include <iostream>
 #include <fstream>
+#include <string>
 #include <vector>
 #include <map>
+using std::cout;
+using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -30,14 +34,14 @@ int main(int argc, char **argv)
   if (argc > 1) load_params(argv[1]); 
 
   // some necessary parameters
-  vec wf;
+  std::vector<double> wf;
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  vec tm(construct_range(sim::start_time, sim::delta_time, final_time));
+  std::vector<double> tm(construct_range(sim::start_time, sim::delta_time, final_time));
 
-  vec freqs;
-  vec phases;
-  vec snrs;
-  vec vals;
+  std::vector<double> freqs;
+  std::vector<double> phases;
+  std::vector<double> snrs;
+  std::vector<double> vals;
 
   boost::property_tree::ptree conf;
   boost::property_tree::ptree pt;
@@ -107,7 +111,9 @@ int main(int argc, char **argv)
         ff.SimulateFid(wf, tm);
 
         FID my_fid(wf, tm);
-        draw_fid(my_fid, string("data/fig/test.pdf"), string("Test FID"));
+        draw_fid(my_fid, 
+                 std::string("data/fig/test.pdf"), 
+                 std::string("Test FID"));
 
       } // snr
 

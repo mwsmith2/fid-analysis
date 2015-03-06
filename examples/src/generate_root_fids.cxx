@@ -11,6 +11,9 @@ notes: This is a new test program for my FID libraries
 //--- std includes ----------------------------------------------------------//
 #include <fstream>
 #include <iostream>
+#include <vector>
+using std::cout;
+using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -28,8 +31,8 @@ int main(int argc, char **argv)
   if (argc > 1) load_params(argv[1]);
 
   // some necessary parameters
-  vec wf;
-  vec tm;
+  std::vector<double> wf;
+  std::vector<double> tm;
   wf.reserve(sim::num_samples);
   tm.reserve(sim::num_samples);
   double delta_b;

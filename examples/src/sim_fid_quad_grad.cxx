@@ -13,7 +13,11 @@ Detail: The program is meant to test the effects of field gradients
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
+#include <iostream>
 #include <fstream>
+#include <string>        
+using std::cout;
+using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -34,13 +38,13 @@ int main(int argc, char **argv)
   double dgrad = 1.0;
 
   // allocate some necessary parameters
-  vec wf;
+  std::vector<double> wf;
 
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  vec tm = construct_range(sim::start_time, final_time, sim::delta_time);
+  std::vector<double> tm = construct_range(sim::start_time, final_time, sim::delta_time);
 
-  vec grads = construct_range(grad_min, grad_max, dgrad);
-  vec grad_0;
+  std::vector<double> grads = construct_range(grad_min, grad_max, dgrad);
+  std::vector<double> grad_0;
   construct_quadratic_gradient(20, grad_0);
 
   // Make FidFactory
@@ -59,7 +63,7 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < num_fids; ++i){
 
-      vec gradient;
+      std::vector<double> gradient;
 
       for (auto val : grad_0){
         gradient.push_back(val * g);
@@ -73,7 +77,7 @@ int main(int argc, char **argv)
       if (i == 0){
         static char str[60];
         sprintf(str, "data/fig/fid_quad_grad_%03dppb.pdf", (int)g);
-        draw_fid(my_fid, str, string("Test FID")); 
+        draw_fid(my_fid, str, std::string("Test FID")); 
       }
     }
   } // grad
