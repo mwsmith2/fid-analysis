@@ -20,6 +20,7 @@ notes:
 #include <random>
 #include <complex>
 #include <ctgmath>
+#include <cmath>
 
 //--- other includes --------------------------------------------------------//
 #include <armadillo>
@@ -109,15 +110,15 @@ inline double stdev(const T& begin, const T& end) {
 
 // Add white noise to an array.
 template <typename T>
-void addnoise(std::vector<T>& wf, T snr, int seed=0) {
-  static std::default_random_engine gen(seed);
+void addnoise(std::vector<T>& wf, T snr) {
+  static std::default_random_engine gen(clock());
   std::normal_distribution<T> nrm;
 
   T mean = 0.0;
   T min = 0.0;
   T max = 0.0;
   for (auto it = wf.begin(); it != wf.end(); ++it) {
-    
+
     if (*it > max) { 
       max = *it;
     } else {
@@ -131,10 +132,11 @@ void addnoise(std::vector<T>& wf, T snr, int seed=0) {
   max -= mean;
   min = std::abs(min - mean);
 
-  T scale = max > min ? max : min;
+  T amp = max > min ? max : min;
+  T scale = tmp / sqrt(snr);
 
   for (auto &x : wf){
-    x += nrm(gen) * (scale / sqrt(snr));
+    x += nrm(gen) * scale;
   }
 }
 
