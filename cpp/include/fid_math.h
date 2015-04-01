@@ -133,7 +133,7 @@ void addnoise(std::vector<T>& wf, T snr) {
   min = std::abs(min - mean);
 
   T amp = max > min ? max : min;
-  T scale = tmp / sqrt(snr);
+  T scale = amp / sqrt(snr);
 
   for (auto &x : wf){
     x += nrm(gen) * scale;
