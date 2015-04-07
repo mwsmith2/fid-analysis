@@ -23,26 +23,28 @@ Detail: The program is meant to test the effects of field gradients
 #include "fid.h"
 
 using namespace fid;
-using namespace fid::sweep;
 
 int main(int argc, char **argv)
 {
   // initialize the configurable parameters
-  load_params(argc, argv);
+  int num_fids = 100;
 
-  // some necessary parameters
+  double grad_min = 0;
+  double grad_max = 100;
+  double dgrad = 1.0;
+
+  // allocate some necessary parameters
   vec wf;
-  vec tm;
-  vec grads;
-  vec grad_0;
-  vec gradient;
 
-  construct_time_vector(len_fids, i_time, d_time, tm);
-  grads = construct_range(grad_range);
+  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
+  vec tm = construct_range(sim::start_time, final_time, sim::delta_time);
+
+  vec grads = construct_range(grad_min, grad_max, dgrad);
+  vec grad_0;
+  construct_quadratic_gradient(20, grad_0);
 
   // Make FidFactory
   GradientFidFactory gff;
-  construct_quadratic_gradient(20, grad_0);
 
   // csv output
   std::ofstream out;
@@ -57,7 +59,7 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < num_fids; ++i){
 
-      gradient.resize(0);
+      vec gradient;
 
       for (auto val : grad_0){
         gradient.push_back(val * g);

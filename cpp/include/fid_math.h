@@ -21,7 +21,7 @@ notes:
 #include <algorithm>
 #include <numeric>
 #include <random>
-#include <cmath>
+#include <cmath> 
 using std::vector;
 using std::cout;
 using std::endl;
@@ -78,33 +78,41 @@ inline void cross(const vec& u, const vec& v, vec& res)
 // Standard deviation calculation based on whole vector.
 template <typename T>
 inline double stdev(const T& wf) {
-	auto x = std::accumulate(wf.begin(), wf.end(), 0.0, 
+    auto x1 = std::accumulate(wf.begin(), wf.end(), 0.0, 
+        [](double x, double y) { return x + y; });
+
+	auto x2 = std::accumulate(wf.begin(), wf.end(), 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-	return std::sqrt(x);
+  double N = (double) std::distance(wf.begin(), wf.end());
+	return std::sqrt(x2/N - (x1/N) * (x1/N));
 }
 
 // Standard deviation calculation based on start/stop iterators.
 template <typename T>
 inline double stdev(const T& begin, const T& end) {
-	auto x = std::accumulate(begin, end, 0.0, 
+    auto x1 = std::accumulate(begin, end, 0.0, 
+        [](double x, double y) { return x + y; });
+
+	auto x2 = std::accumulate(begin, end, 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-	return std::sqrt(x);
+  double N = (double) std::distance(begin, end);
+  return std::sqrt(x2/N - (x1/N) * (x1/N));
 }
 
 // Add white noise to an array.
 template <typename T>
 void addnoise(vector<T>& wf, T snr, int seed=0) {
   static std::default_random_engine gen(seed);
-  static std::normal_distribution<T> nrm(0, snr);
+  std::normal_distribution<T> nrm;
 
   T max = *std::max_element(wf.begin(), wf.end());
   T min = *std::min_element(wf.begin(), wf.end());
   T scale = max > min ? max : min;
 
   for (auto &x : wf){
-    x += scale * nrm(gen);
+    x += scale * nrm(gen) / sqrt(snr);
   }
 }
 
@@ -120,12 +128,33 @@ inline vector<T> construct_range(const T& i, const T& f, const T& d) {
 
 // Construct a range from vector <first, last, step>
 template<typename T>
-inline vector<T> construct_range(const vector<T>& range_vec){
+inline vector<T> construct_range(const vector<T> &range_vec) {
 	vector<T> res;
 	for (T x = range_vec[0]; x <= range_vec[1]; x += range_vec[2]){
 	  res.push_back(x);
 	}
 	return res;
+}
+
+template<typename T>
+inline vector<T> construct_linspace(const T& i, const T& f, const int& n) {
+    vector<T> res;
+    double d = (f - i) / (n - 1);
+    for (int j = 0; j < n; ++j) {
+        res.push_back(i + j*d);
+    }
+    return res;
+}
+
+template<typename T>
+inline vector<T> construct_linspace(const vector<T>& vals) {
+    vector<T> res;
+    int n = (int)(vals[2] + 0.5);
+    double d = (vals[1] - vals[0]) / (n - 1);
+    for (int j = 0; j < n; ++j) {
+        res.push_back(vals[0] + j*d);
+    }
+    return res;
 }
 
 namespace dsp
@@ -148,11 +177,18 @@ vec phase(const vec& wf_re, const vec& wf_im);
 vec envelope(const vec& wf);
 vec envelope(const vec& wf_re, const vec& wf_im);	
 
-arma::mat wvd(const vec& wf);
+//arma::mat wvd(const vec& wf);
 arma::cx_mat auto_correlation(const vec& wf);
 arma::cx_mat complex_wvd(const vec& wf); 
 std::pair<arma::cx_mat, arma::cx_mat> wvd_associates(const vec& wf);
 std::pair<arma::cx_mat, arma::cx_mat> wvd_dsr(const vec& wf);
+arma::cx_mat wvd_cx(const vec& wf, bool upsample=false);
+arma::mat wvd(const vec& wf, bool upsample=false);
+
+vec savgol3(const vec& wf);
+vec savgol5(const vec& wf);
+vec convolve(const vec& wf, const vec& filter);
+int convolve(const vec& wf, const vec& filter, vec& res);
 
 template <typename T>
 vector<T> lowpass(const vector<T>& wf, double cut_idx=-1, int n=3) {

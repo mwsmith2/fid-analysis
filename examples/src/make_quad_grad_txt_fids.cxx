@@ -2,7 +2,7 @@
 
 Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
-Date:   15/04/14
+Date:   2015/01/08
 
 Detail: The program is meant to generate a set of example gradient FIDs in
         plaintext format.
@@ -21,12 +21,13 @@ Detail: The program is meant to generate a set of example gradient FIDs in
 #include "fid.h"
 
 using namespace fid;
-using namespace fid::sweep;
 
 int main(int argc, char **argv)
 {
-  // initialize the configurable parameters
-  load_params(argc, argv);
+  double grad_min = 0;
+  double grad_max = 100;
+  double dgrad = 1.0;
+  char str[60];
 
   // some necessary parameters
   vec wf;
@@ -35,10 +36,10 @@ int main(int argc, char **argv)
   vec grad_0;
   vec gradient;
 
-  char str[60];
+  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
+  tm = construct_range(sim::start_time, final_time, sim::delta_time);
 
-  construct_time_vector(len_fids, i_time, d_time, tm);
-  grads = construct_range(grad_range);
+  grads = construct_range(grad_min, grad_max, dgrad);
 
   // Make FidFactory
   GradientFidFactory gff;

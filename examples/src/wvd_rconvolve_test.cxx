@@ -13,6 +13,7 @@ Detail: This is a new test program for my FID libraries
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cmath>
 using std::vector;
 using std::cout;
 using std::endl;
@@ -32,14 +33,14 @@ int main(int argc, char** argv)
   cout.setf(std::ios::fixed, std:: ios::floatfield);
 
   // declare variables
-  int fid_length = 10000;
+  int fid_length = 5000;
   double ti = -1.0;
   double dt = 0.001;
   double ftruth = 23.0;
 
-  vector<double> wf;
+  vector<double> wf_re;
   vector<double> tm;
-  wf.reserve(fid_length);
+  wf_re.reserve(fid_length);
   tm.reserve(fid_length);
 
   std::ofstream out;
@@ -49,12 +50,31 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
 
-  ideal_fid(wf, tm, ftruth);
+  for (int i = 0; i < fid_length; ++i) {
+    wf_re.push_back(sin(40 * tm[i]));
+  }
 
-  FID my_fid(wf, tm);
+  auto wf_im = dsp::hilbert(wf_re);
+  arma::cx_vec wf(wf_im.size());
 
-  auto res = dsp::wvd(wf);
-  res.quiet_save("wvd_test.dat", arma::csv_ascii);
+  for (int i = 0; i < wf_re.size(); ++i) {
+    wf[i] = arma::cx_double(wf_re[i], wf_im[i]);
+  }
+  
+
+  auto wf_rc = dsp::rconvolve(wf, 4000);
+
+  out.open("wvd_test_rc_real.txt");
+  for (int i = 0; i < wf_rc.n_elem; ++i) {
+    out << wf_rc[i].real() << ",";
+  }
+  out.close();
+
+  out.open("wvd_test_rc_imag.txt");
+  for (int i = 0; i < wf_rc.n_elem; ++i) {
+    out << wf_rc[i].imag() << ",";
+  }
+  out.close();
 
   return 0;
 }

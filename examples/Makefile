@@ -1,13 +1,10 @@
 # Grab the targets and sources as two batches
 SOURCES = $(wildcard src/*.cxx)
-OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
-TARGETS = $(patsubst src/%.cxx,%,$(SOURCES))
+OBJECTS = $(patsubst src/%.cxx,build/%.o,$(SOURCES))
+TARGETS = $(patsubst src/%.cxx,bin/%,$(SOURCES))
 
 # Debugging/profiling flags
 DEBUG = -g -pg
-
-# Set the directory of the FID headers and lib
-FID_DIR = ../cpp
 
 # Figure out the architecture
 UNAME_S = $(shell uname -s)
@@ -37,8 +34,8 @@ all: $(TARGETS)
 build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $< 
 
-%: build/%.o
-	$(CXX) $(FLAGS) -o build/$@ $+ $(LIBS)
+bin/%: build/%.o
+	$(CXX) $(FLAGS) -o $@ $+ $(LIBS)
 
 clean:
-	rm -f build/* 
+	rm -f $(OBJECTS) $(TARGETS)

@@ -8,19 +8,39 @@ namespace fid {
 
 FidFactory::FidFactory()
 {
-  ti_ = i_time;
-  tf_ = ti_ + d_time * len_fids;
-  dt_ = sim::dt_integration;
-  sim_to_fid_ = (tf_ - ti_) / (dt_ * len_fids) + 0.5; 
-  sim_length_ = sim_to_fid_ * len_fids;
+  ti_ = sim::start_time;
+  tf_ = ti_ + sim::delta_time * sim::num_samples;
+  cout << "Loading dt_integration: " << sim::dt_integration << endl;
+  cout << "sim::dt_int @ " << &sim::dt_integration << endl;
+
+  sim_to_fid_ = (tf_ - ti_) / (sim::dt_integration * sim::num_samples) + 0.5; 
+  if (sim_to_fid_ == 0) {
+    cout << "WARNING: The given integration step was larger than the ";
+    cout << "sampling time, so the sampling time, " << sim::delta_time;
+    cout << ", will be used instead." << endl;
+    sim_to_fid_ = 1;
+    dt_ = sim::delta_time;
+  } else {
+
+    dt_ = sim::delta_time / sim_to_fid_;
+  
+    if (dt_ != sim::dt_integration) {
+      cout << "WARNING: The given integration time step was not an even";
+      cout << " divisor of the sampling rate, so it has been rounded to ";
+      cout << dt_ << endl;
+    }
+  }
+
+  sim_length_ = sim_to_fid_ * sim::num_samples;
   printer_idx_ = 0;
 }
+
 
 void FidFactory::SimulateFid(vec& wf, vec& tm)
 {
   // make sure memory is allocated for the final FIDs
-  tm.reserve(len_fids);
-  wf.reserve(len_fids);
+  tm.reserve(sim::num_samples);
+  wf.reserve(sim::num_samples);
   s_ = sim::spin_0; // The starting spin vector
 
   // Bind the member function and make a reference so it isn't copied.
@@ -40,7 +60,7 @@ void FidFactory::SimulateFid(vec& wf, vec& tm)
   tm.resize(0);
   wf.resize(0);
 
-  for (int i = 0; i < len_fids; ++i) {
+  for (int i = 0; i < sim::num_samples; ++i) {
     tm.push_back(time_vec_[i * sim_to_fid_]);
     wf.push_back(spin_vec_[i * sim_to_fid_]);
   }
@@ -128,7 +148,6 @@ void FidFactory::Printer(vec const &s , double t)
     spin_vec_ = LowPassFilter(spin_vec_);
 
     // Reset the counters
-    cout << "Resetting printer_idx_." << endl;
     printer_idx_ = 0; // They'll get incremented after.
   }
 }
@@ -137,8 +156,8 @@ void FidFactory::Printer(vec const &s , double t)
 vec FidFactory::LowPassFilter(vec& s)
 {
   // Store the filter statically though this might be a minimal speed boost.
-  static vec filter;
-  static double freq_cut = 0.2 * sim::freq_larmor;
+  vec filter;
+  double freq_cut = 0.2 * sim::freq_larmor;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
   if (filter.size() == 0) {
@@ -179,13 +198,16 @@ void FidFactory::IdealFid(vec& wf, vec& tm)
 
   // Define the waveform
   double temp;
+  double w = kTau * (sim::freq_larmor - sim::freq_ref);
+  double phi = sim::mixdown_phi;
+  double tau = 1.0 / sim::gamma_1;
 
   for (auto it = tm.begin(); it != tm.end(); ++it){
 
     if (*it >= sim::t_pulse){
 
-      temp = std::exp(-(*it - sim::t_pulse) * s_tau);
-      temp *= std::sin((*it) * kTau * s_freq + s_phase);
+      temp = std::exp(-(*it - sim::t_pulse) * tau);
+      temp *= std::sin((*it) * w + phi);
       wf.push_back(temp);
 
     } else {
@@ -195,7 +217,17 @@ void FidFactory::IdealFid(vec& wf, vec& tm)
     }
   } 
 
-  addnoise(wf, s_snr, sim::seed);
+  addnoise(wf, sim::snr);
+}
+
+void FidFactory::PrintDiagnosticInfo()
+{
+  cout << endl;
+  cout << "Printing Diagnostic Info for FidFactory @" << this << endl;
+  cout << "The time step, fid length: " << dt_ << ", ";
+  cout << sim::num_samples << endl;
+  cout << "The sim length, sim-to-fid: " << sim_length_ << ", ";
+  cout << sim_to_fid_ << endl;
 }
 
 //---------------------------------------------------------------------------//
@@ -207,7 +239,7 @@ GradientFidFactory::GradientFidFactory()
   pf_fid_ = new TFile(grad::root_file.c_str());
   pt_fid_ = (TTree *)pf_fid_->Get("t");
   
-  wf_.resize(len_fids);
+  wf_.resize(sim::num_samples);
   pt_fid_->SetBranchAddress(grad::fid_branch.c_str(), &wf_[0]);
   pt_fid_->GetEntry(0);
 
@@ -226,13 +258,13 @@ GradientFidFactory::~GradientFidFactory()
 void GradientFidFactory::ConstructFid(const vec& gradient, vec& wf)
 {
   // Find the appropriate FIDs and sum them
-  wf.assign(len_fids, 0.0);
+  wf.assign(sim::num_samples, 0.0);
 
   for (auto val : gradient){
 
     pt_fid_->GetEntry(GetTreeIndex(val));
 
-    for (int i = 0; i < wf.size(); i++){
+    for (uint i = 0; i < wf.size(); i++){
       wf[i] += wf_[i] / gradient.size();
     }
   }

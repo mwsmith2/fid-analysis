@@ -1,14 +1,18 @@
 # Grab the targets and sources as two batches
 SOURCES = $(wildcard src/*.cxx)
-HEADERS = $(SOURCES:.cxx=.hh)
+HEADERS = $(wildcard include/*.h)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
-# Grab the sources in prog
-#SOURCES = $(wildcard prog/*.cxx)
-#MODULES = $(patsubst prog%.cxx,build%.o,$(SOURCES))
+
+# Versioning info
+MAJOR=0
+MINOR=4.2
+SONAME=libfid.so
+LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
+PREFIX=/usr/local
 
 # Some optional flags
 DEBUG = -g -pg
-#OPTIMIZE = -O3
+OPTIMIZE = -O3
 
 # Figure out the architecture
 UNAME_S = $(shell uname -s)
@@ -17,33 +21,45 @@ UNAME_S = $(shell uname -s)
 ifeq ($(UNAME_S), Darwin)
 	CXX = clang++
 	CC  = clang
-	FLAGS = -std=c++11 $(DEBUG) $(OPTIMIZE)
+	FLAGS = -std=c++11
+	LDCONFIG = cp $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME).$(MAJOR)
 endif
 
 # Gnu compiler
 ifeq ($(UNAME_S), Linux)
 	CXX = g++
 	CC  = gcc
-	FLAGS = -std=c++0x $(DEBUG) $(OPTIMIZE)
+	FLAGS = -std=c++0x 
+	LDCONFIG = ldconfig -n -v $(PREFIX)/lib
 endif
 
-LIBNAME = lib/libFid.a
-AR = ar
-ARFLAGS = rvs 
-
-FLAGS += -Iinclude
+FLAGS += -Wall -fPIC $(DEBUG) $(OPTIMIZE) -Iinclude
 LIBS = -lfftw3 -lm
 
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)
 
-all:
+all: $(LIBNAME)
 
 build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $<
 
-lib: $(OBJECTS)
-	$(AR) $(ARFLAGS) $(LIBNAME) $+
+$(LIBNAME): $(OBJECTS)
+	$(CXX) -shared -fPIC $+ -o $(LIBNAME) $(LIBS)
+
+install:
+	cp $(LIBNAME) $(PREFIX)/lib/$(LIBNAME)
+	cp $(HEADERS) $(PREFIX)/include/
+	ln -s $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME)
+	$(LDCONFIG)
+
+uninstall:
+	rm -f $(PREFIX)/lib/$(SONAME)*
+	rm -f $(patsubst include/%,$(PREFIX)/include/%,$(HEADERS))
+
+reinstall:
+	make uninstall
+	make install
 
 clean:
 	rm -f $(TARGETS) build/* 

@@ -1,0 +1,62 @@
+{
+	"header":{
+		"author":"Matthias W Smith",
+		"email":"mwsmith2@uw.edu",
+		"date":"14/04/14",
+		"notes":[
+			"The default parameters for FID analysis library"
+			]
+	},
+
+	"fid":{
+		"num_samples":10000,
+		"start_time":-1.0,
+		"delta_time": 0.001,
+
+		"params":{
+			"fit_width":20,
+			"zc_width":40,
+			"edge_ignore":10,
+			"start_thresh":20.0,
+			"max_phase_jump":1.8,
+			"low_pass_freq":100.0,
+			"centroid_thresh":0.01,
+			"hyst_thresh":0.3
+		},
+
+		"sim":{
+			"seed":0,
+			"dt_integration":1.0e-5,
+			"snr":300.0,
+
+			"freq_larmor":997.0,
+			"freq_ref":950.0,
+			"mixdown_phi":0.0,
+			"spin_0":[
+				0.0,
+				0.0,
+				1.0
+			],
+
+			"gamma_g":1.0,
+			"gamma_1":0.05,
+			"gamma_2":0.05,
+			"omega_r":50.0,
+			"t_pulse":0.005
+		},
+
+		"grad":{
+			"root_file":"runtime/sim_fids.root",
+			"fid_branch":"fid",
+			"min":-2000.0,
+			"max":2000.0,
+			"poln_order":2,
+			"poln_coefs":[
+				0.0,
+				0.0,
+				1.0,
+				0.0
+			]
+		}
+	}
+}

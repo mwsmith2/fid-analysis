@@ -15,44 +15,82 @@ Detail: This is a new test program for my FID libraries
 #include "fid.h"
 
 using namespace fid;
-using namespace fid::sweep;
 
 int main(int argc, char **argv)
 {
+  // run parameters 
+  string data_file = "data/ideal_fid_sweep_data.csv";
+  string sim_conf_file = "runtime/sim_params.json";
+  int num_fids = 100;
+
   // initialize the configurable parameters
-  load_params(argc, argv);
+  if (argc > 1) load_params(argv[1]);
 
   // some necessary parameters
   vec wf;
   vec tm;
 
-  fid::construct_time_vector(len_fids, i_time, d_time, tm);
+  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
+  tm = construct_range(sim::start_time, sim::delta_time, final_time);
 
   ofstream out;
   out.precision(10);
-  out.open("data/ideal_fid_sweep_data.csv");
+  out.open(data_file);
 
   vec freqs;
   vec phases;
   vec snrs;
+  vec vals;
 
   // Get the range to sweep over.
-  if (freq_sweep){
-    freqs = construct_range(freq_range);
+  boost::property_tree::ptree conf;
+  boost::property_tree::ptree pt;
+  boost::property_tree::read_json(sim_conf_file, conf);
+
+  // Get the range to sweep over.
+  pt = conf.get_child("sweep.freq");
+  if (pt.get<bool>("in_use")) {
+
+    vals.resize(0);
+    for (auto &val : pt.get_child("values")) {
+      vals.push_back(val.second.get_value<double>());
+    }
+
+    freqs = construct_range(vals);
+
   } else {
-    freqs.push_back(s_freq);
+
+    freqs.push_back(sim::freq_larmor - sim::freq_ref);
   }
 
-  if (phase_sweep){
-    phases = construct_range(phase_range);
+  pt = conf.get_child("sweep.phase");
+  if (pt.get<bool>("in_use")) {
+
+    vals.resize(0);
+    for (auto &val : pt.get_child("values")) {
+      vals.push_back(val.second.get_value<double>());
+    }
+
+    phases = construct_linspace(vals);
+
   } else {
-    phases.push_back(s_phase);
+
+    phases.push_back(sim::mixdown_phi);
   }
 
-  if (snr_sweep){
-    snrs = construct_range(snr_range);
+  pt = conf.get_child("sweep.snr");
+  if (pt.get<bool>("in_use")) {
+   
+    vals.resize(0);
+    for (auto &val : pt.get_child("values")) {
+      vals.push_back(val.second.get_value<double>());
+    }
+
+    snrs = construct_range(vals);
+
   } else {
-    snrs.push_back(s_snr);
+
+    snrs.push_back(sim::snr);
   }
 
   // begin sweeps
@@ -62,22 +100,23 @@ int main(int argc, char **argv)
 
       for (auto s: snrs){
 
-        if (freq_sweep) cout << "Running for frequency " << f;
-        if (phase_sweep) cout << ", phase " << p;
-        if (snr_sweep) cout << ", signal-to-noise " << s;
+        if (freqs.size() > 1) cout << "Running for frequency " << f;
+        if (phases.size() > 1) cout << ", phase " << p;
+        if (snrs.size() > 1) cout << ", signal-to-noise " << s;
         cout << endl;
 
         for (int i = 0; i < num_fids; i++){
 
-          if (freq_sweep) out << f << ", ";
-          if (phase_sweep) out << p << ", ";
-          if (snr_sweep) out << s << ", ";
+          if (freqs.size() > 1) out << f << ", ";
+          if (phases.size() > 1) out << p << ", ";
+          if (snrs.size() > 1) out << s << ", ";
 
           ideal_fid(wf, tm, f, p, s);
           FID my_fid(wf, tm);
 
           calc_freq_write_csv(my_fid, out);
-        } // n_fids
+
+        } // num_fids
 
       } // snr
 
