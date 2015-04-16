@@ -91,7 +91,7 @@ void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm, bool
 
   if (withnoise) addnoise(wf, sim::snr);
 
-  floor(wf);
+  if (discretize) floor(wf);
 }
 
 void FidFactory::SimulateFid(std::vector<double>& wf, std::vector<double>& tm, bool withnoise)
@@ -126,7 +126,7 @@ void FidFactory::SimulateFid(std::vector<double>& wf, std::vector<double>& tm, b
 
   if (withnoise) addnoise(wf, sim::snr);
 
-  floor(wf);
+  if (discretize) floor(wf);
 }
 
 void FidFactory::GradientFid(const std::vector<double>& gradient, std::vector<double>& wf, bool withnoise)
@@ -156,7 +156,7 @@ void FidFactory::GradientFid(const std::vector<double>& gradient, std::vector<do
 
   if (withnoise) addnoise(wf, sim::snr);
 
-  floor(wf);
+  if (discretize) floor(wf);
 }
 
 void FidFactory::PrintDiagnosticInfo()

@@ -48,15 +48,18 @@ public:
   // member methods
   void IdealFid(std::vector<double>& wf, 
                 std::vector<double>& tm, 
-                bool withnoise=false);
+                bool withnoise=false,
+                bool discretize=false);
 
   void SimulateFid(std::vector<double>& wf, 
                    std::vector<double>& tm, 
-                   bool withnoise=false);
+                   bool withnoise=false,
+                   bool discretize=false);
 
   void GradientFid(const std::vector<double>& gradient, 
                    std::vector<double>& wf, 
-                   bool withnoise=false);
+                   bool withnoise=false,
+                   bool discretize=false);
 
   void PrintDiagnosticInfo();
 
