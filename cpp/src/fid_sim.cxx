@@ -61,7 +61,10 @@ FidFactory::~FidFactory()
 }
 
 // Create an idealized FID with current Simulation parameters
-void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm, bool withnoise)
+void FidFactory::IdealFid(std::vector<double>& wf, 
+                          std::vector<double>& tm, 
+                          bool withnoise,
+                          bool discretize)
 {
   wf.reserve(tm.size());
   wf.resize(0);
@@ -94,7 +97,10 @@ void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm, bool
   if (discretize) floor(wf);
 }
 
-void FidFactory::SimulateFid(std::vector<double>& wf, std::vector<double>& tm, bool withnoise)
+void FidFactory::SimulateFid(std::vector<double>& wf, 
+                             std::vector<double>& tm, 
+                             bool withnoise,
+                             bool discretize)
 {
   using namespace boost::numeric::odeint;
   using std::bind;
@@ -129,7 +135,10 @@ void FidFactory::SimulateFid(std::vector<double>& wf, std::vector<double>& tm, b
   if (discretize) floor(wf);
 }
 
-void FidFactory::GradientFid(const std::vector<double>& gradient, std::vector<double>& wf, bool withnoise)
+void FidFactory::GradientFid(const std::vector<double>& gradient, 
+                             std::vector<double>& wf, 
+                             bool withnoise,
+                             bool discretize)
 {
   if (!pf_fid_->IsOpen()) {
     std::cout << "No ROOT file loaded.  Cannot make gradient FIDs." << std::endl;
