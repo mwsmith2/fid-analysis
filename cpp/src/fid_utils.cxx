@@ -269,7 +269,9 @@ void calc_phase_freq_write_csv(FID& my_fid, std::ofstream& out)
   out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << std::endl;
 }
 
-void read_fid_file(std::string fname, std::vector<double> &wf, std::vector<double> &tm)
+void read_fid_file(std::string fname, 
+                   std::vector<double> &wf, 
+                   std::vector<double> &tm)
 {
   // open the file first
   std::ifstream in(fname);
@@ -286,6 +288,18 @@ void read_fid_file(std::string fname, std::vector<double> &wf, std::vector<doubl
     in >> tm_temp >> wf_temp;
     tm.push_back(tm_temp);
     wf.push_back(wf_temp);
+  }
+}
+
+void write_fid_file(std::string fname,
+                    const std::vector<double> &wf, 
+                    const std::vector<double> &tm)
+{
+  // open the file first
+  std::ofstream out(fname);
+
+  for (int i = 0; i < tm.size(); ++i) {
+    out << tm[i] << ", " << wf[i] << std::endl;
   }
 }
 
