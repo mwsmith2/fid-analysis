@@ -86,8 +86,8 @@ namespace fid
 
   // Read a FID file which is two space delimited columns (time voltage)
   void write_fid_file(std::string fname, 
-                     std::vector<double> &wf, 
-                     std::vector<double> &tm);
+                      const std::vector<double> &wf, 
+                      const std::vector<double> &tm);
 
 
   // Get a time vector for the FID

@@ -30,6 +30,7 @@
 
 			"freq_larmor":997.0,
 			"freq_ref":950.0,
+			"freq_cut_ratio": 0.1,
 			"mixdown_phi":0.0,
 			"spin_0":[
 				0.0,
