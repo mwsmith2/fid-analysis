@@ -32,6 +32,7 @@ namespace sim {
 
   double freq_ref = 950.0;    
   double freq_larmor = 997.0; 
+  double freq_cut_ratio = 0.1;
   double mixdown_phi = 950.0; 
   std::vector<double> spin_0 = {0.0, 0.0, 1.0};         
 

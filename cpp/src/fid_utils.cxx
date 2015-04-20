@@ -40,6 +40,7 @@ void load_params(std::string conf_file)
 
   freq_larmor = pt.get<double>("sim.freq_larmor", freq_larmor);
   freq_ref = pt.get<double>("sim.freq_ref", freq_ref);
+  freq_cut_ratio = pt.get<double>("sim.freq_ref", freq_cut_ratio);
   mixdown_phi = pt.get<double>("sim.mixdown_phi", mixdown_phi);
 
   omega_r = pt.get<double>("sim.omega_r", omega_r);

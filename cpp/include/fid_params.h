@@ -59,6 +59,7 @@ namespace sim {
 
   extern double freq_ref;    // reference frequency used to mix down
   extern double freq_larmor; // Larmor frequency to be simulated
+  extern double freq_cut_ratio; // lowpass freq as fraction of freq_larmor;
   extern double mixdown_phi; // arbitrary phase for mixing freq
   extern std::vector<double> spin_0; // the initial spin vector
 

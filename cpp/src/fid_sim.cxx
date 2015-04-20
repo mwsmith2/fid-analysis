@@ -272,7 +272,7 @@ std::vector<double> FidFactory::LowPassFilter(std::vector<double>& s)
 {
   // Allocate the filter and set the central frequency.
   std::vector<double> filter;
-  double freq_cut = 0.5 * sim::freq_larmor;
+  double freq_cut = sim::freq_cut_ratio * sim::freq_larmor;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
   if (filter.size() == 0) {
