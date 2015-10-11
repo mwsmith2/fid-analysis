@@ -156,6 +156,9 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re, const std::vect
 
 	// Now unwrap the phase
 	double thresh = params::max_phase_jump;
+  double m_avg = 0.0;
+  double a = 0.001;
+
 	int k = 0; // to track the winding number
   	for (auto it = phase.begin() + 1; it != phase.end(); ++it) {
 
@@ -163,14 +166,42 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re, const std::vect
     	*it += k * kTau;
 
     	// Check for large jumps, both positive and negative.
-    	if (*(it - 1) - *it > thresh) {
-	      	k++;
-    	  	*it += kTau;
+      double m = *(it) - *(it - 1);
 
-	    } else if (*it - *(it - 1) > thresh) {
+    	if (-m > thresh) {
+	      	k++;
+          *it += kTau;
+
+	    } else if (m > thresh) {
 	        k--;
 	        *it -= kTau;
 	    }
+
+      // Recalculate slope.
+
+      m = *(it) - *(it - 1);
+      // Check against the slope of the last few points for outliers
+      if (k > 20) {
+        if (m > 3.0 * m_avg) {
+
+          k--;
+          *it -= kTau;
+
+        } else if (m < -2.0 * m_avg) {
+
+          k++;
+          *it += kTau;
+        }
+      }
+
+      // Compute the exponential moving average
+      if (k < 20) {
+        m_avg = *it - *(it - 1);
+
+      } else {
+
+        m_avg = a * (*it - *(it - 1)) + (1 - a) * m_avg;
+      }
     }
 
     return phase;
