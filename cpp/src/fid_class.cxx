@@ -53,8 +53,8 @@ void FID::Init()
   CenterFid();
   CalcNoise();
   CalcMaxAmp();
-  FindFidRange();
   CalcPowerEnvAndPhase();
+  FindFidRange();
   CalcFftFreq();
   GuessFitParams();
 
@@ -183,54 +183,56 @@ void FID::CalcMaxAmp()
 void FID::FindFidRange()
 {
   // Find the starting and ending points
-  double thresh = params::start_thresh * noise_;
+  double thresh = params::start_thresh * max_amp_;
   bool checks_out = false;
 
   // Find the first element with magnitude larger than thresh
-  auto it_1 = wf_.begin() + params::edge_ignore;
+  auto it_1 = env_.begin() + params::edge_ignore;
   while (!checks_out) {
 
-    auto it_i = std::find_if(it_1, wf_.end(), 
+    auto it_i = std::find_if(it_1, env_.end(), 
         [thresh](double x){return std::abs(x) > thresh;});
 
-    if (it_i != wf_.end() && it_i+1 != wf_.end()) {
+    if (it_i != env_.end() && it_i+1 != env_.end()) {
       checks_out = std::abs(*(it_i+1)) > thresh;
       it_1 = it_i + 1;
 
       // Turn the iterator into an index
       if (checks_out) {
-        i_wf_ = std::distance(wf_.begin(), it_i);
+        i_wf_ = std::distance(env_.begin(), it_i);
       }
 
     } else {
-        i_wf_ = std::distance(wf_.begin(), wf_.end());
+        i_wf_ = std::distance(env_.begin(), env_.end());
       break;
     }
   }
 
-  // Find the last element with magnitude larger than thresh
+  // Find the next element with magnitude lower than thresh
   checks_out = false;
-  auto it_2 = wf_.rbegin();
+  auto it_2 = env_.begin() + i_wf_ + 10;
   while (!checks_out) {
 
-    auto it_f = std::find_if(it_2, wf_.rend(), 
-      [thresh](double x){return std::abs(x) > thresh;});
+    auto it_f = std::find_if(it_2, env_.end(), 
+      [thresh](double x){return std::abs(x) < thresh;});
 
-    if (it_f != wf_.rend() && it_f+1 != wf_.rend()) {
-      checks_out = std::abs(*(it_f+1)) > thresh;
+    if (it_f != env_.end() && it_f+1 != env_.end()) {
+      checks_out = std::abs(*(it_f+1)) < thresh;
       it_2 = it_f + 1;
 
       // Turn the iterator into an index
       if (checks_out) {
-        f_wf_ = std::distance(it_f, wf_.rend());
+        f_wf_ = std::distance(env_.begin(), it_f);
       }
 
     } else {
 
-      f_wf_ = std::distance(wf_.rend(), wf_.rend());
+      f_wf_ = std::distance(env_.begin(), env_.begin());
       break;
     }
   }
+
+  // Gradients can cause a waist in the amplitude.
 
   // Mark the signal as bad if it didn't find signal above threshold.
   if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
@@ -356,17 +358,18 @@ double FID::CalcZeroCountFreq()
   if (std::abs(*mm.first) > max) max = std::abs(*mm.first);
   
   //  double max = (-(*mm.first) > *mm.second) ? -(*mm.first) : *mm.second;
-  double thresh = params::hyst_thresh * max;
+  //  double thresh = params::hyst_thresh * max;
+  //  thresh = 10 * noise_;
 
   int i_zero = -1;
   int f_zero = -1;
 
   // iterate over vector
-  for (unsigned int i = i_wf_; i < (f_wf_ - i_wf_); i++){
+  for (unsigned int i = i_wf_; i < f_wf_; i++){
 
     // hysteresis check
     if (hyst){
-      hyst = std::abs(wf_[i]) > thresh;
+      hyst = std::abs(wf_[i]) > params::hyst_thresh * env_[i];
       continue;
     }
 
