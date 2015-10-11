@@ -539,8 +539,8 @@ double FID::CalcPhaseFreq(int poln)
   gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
 
   res_.resize(0);
-  for (unsigned int i = i_fft_; i < f_fft_ + 1; ++i){
-    res_.push_back(wf_[i] - f_fit_.Eval(tm_[i]));
+  for (unsigned int idx = i; idx <= f; ++idx){
+    res_.push_back(phase_[idx] - f_fit_.Eval(tm_[idx]));
   }
 
   freq_ = f_fit_.GetParameter(1) / kTau;
