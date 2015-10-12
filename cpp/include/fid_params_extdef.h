@@ -8,11 +8,11 @@ namespace params {
   int fit_width = 20;  
   int zc_width = 100;   
   int edge_ignore = 10; 
-  double start_thresh = 20.0; 
-  double max_phase_jump = 0.7; 
-  double low_pass_freq = 500.0; 
+  double start_thresh = 0.37; 
+  double max_phase_jump = 1.57; 
+  double low_pass_freq = 2000.0; 
   double centroid_thresh = 0.01; 
-  double hyst_thresh = 0.3;
+  double hyst_thresh = 0.7;
   Method freq_method = PH;
 
 } // ::params
