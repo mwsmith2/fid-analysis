@@ -51,6 +51,8 @@ std::vector<double> dsp::ifft(const std::vector<std::complex<double>>& fft)
   	*it /= Nroot;
   }
 
+  delete fft_ptr;
+
   return ifft_vec;
 }
 
