@@ -178,10 +178,10 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re, const std::vect
 	    }
 
       // Recalculate slope.
-
       m = *(it) - *(it - 1);
+
       // Check against the slope of the last few points for outliers
-      if (k > 20) {
+      if (k > 30) {
         if (m > 3.0 * m_avg) {
 
           k--;
@@ -195,7 +195,7 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re, const std::vect
       }
 
       // Compute the exponential moving average
-      if (k < 20) {
+      if (k < 30) {
         m_avg = *it - *(it - 1);
 
       } else {
