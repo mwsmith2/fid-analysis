@@ -200,17 +200,19 @@ void FID::FindFidRange()
       // Turn the iterator into an index
       if (checks_out) {
         i_wf_ = std::distance(env_.begin(), it_i);
+        std::cout << "Setting i_wf_ to " << i_wf_ << std::endl;
       }
 
     } else {
         i_wf_ = std::distance(env_.begin(), env_.end());
-      break;
+        std::cout << "Setting i_wf_ to " << i_wf_ << std::endl;
+        break;
     }
   }
 
   // Find the next element with magnitude lower than thresh
   checks_out = false;
-  auto it_2 = env_.begin() + i_wf_ + 10;
+  auto it_2 = env_.begin() + i_wf_ + params::edge_ignore;
   while (!checks_out) {
 
     auto it_f = std::find_if(it_2, env_.end(), 
@@ -227,7 +229,7 @@ void FID::FindFidRange()
 
     } else {
 
-      f_wf_ = std::distance(env_.begin(), env_.begin());
+      f_wf_ = std::distance(env_.begin(), env_.end());
       break;
     }
   }

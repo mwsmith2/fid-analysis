@@ -7,7 +7,7 @@ namespace params {
 
   int fit_width = 20;  
   int zc_width = 100;   
-  int edge_ignore = 10; 
+  int edge_ignore = 50; 
   double start_thresh = 0.37; 
   double max_phase_jump = 1.57; 
   double low_pass_freq = 2000.0; 
