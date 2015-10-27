@@ -60,6 +60,33 @@ void FID::Init()
 
   // Go ahead and do the default frequency extraction
   CalcFreq();
+
+  health_ = 100.0;
+
+  // Flag the FID as bad.
+  if (freq_ < 0) {
+    health_ = 0.0;
+
+    // Try a different method
+    CalcLorentzianFreq();
+  }
+
+  if (freq_ < 0.0) {
+
+    health_ = 0.0;
+
+  } else {
+
+    health_ = 100.0;
+  }
+
+  if (max_amp_ < noise_ * 50) {
+    health_ *= 2.0 * max_amp_ / noise_;
+  }
+
+  if (f_wf_ - i_wf_ < 0.05 * wf_.size()) {
+    health_ *= (f_wf_ - i_wf_) / 0.05 * wf_.size();
+  }
 }
 
 double FID::GetFreq()
@@ -173,10 +200,10 @@ void FID::CalcNoise()
 void FID::CalcMaxAmp() 
 {
   auto mm = std::minmax_element(wf_.begin(), wf_.end());
-  if (abs(*mm.first) > abs(*mm.second)) {
-    max_amp_ = abs(*mm.first);
+  if (std::abs(*mm.first) > std::abs(*mm.second)) {
+    max_amp_ = std::abs(*mm.first);
   } else {
-    max_amp_ = abs(*mm.second);
+    max_amp_ = std::abs(*mm.second);
   }
 }
 
@@ -184,6 +211,12 @@ void FID::FindFidRange()
 {
   // Find the starting and ending points
   double thresh = params::start_thresh * max_amp_;
+
+  if (thresh < 5.0 * noise_) {
+    std::cout << "Warning: FID signal to noise very low." << std::endl;
+    thresh = 3.0 * noise_;
+  }
+
   bool checks_out = false;
 
   // Find the first element with magnitude larger than thresh
@@ -239,14 +272,11 @@ void FID::FindFidRange()
   // Mark the signal as bad if it didn't find signal above threshold.
   if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
 
-    isgood_ = false;
+    health_ = false;
     i_wf_ = 0;
     f_wf_ = wf_.size() * 0.01;
 
-  } else {
-
-    isgood_ = true;
-  }
+  } 
 }
 
 void FID::CalcPowerEnvAndPhase()
@@ -758,6 +788,26 @@ void FastFid::Init()
   CalcMaxAmp();
   FindFidRange();
   CalcFreq();
+
+  health_ = 100.0;
+
+  // Flag the FID as bad if it's negative.
+  if (freq_ < 0.0) {
+
+    health_ = 0.0;
+
+  } else {
+
+    health_ = 100.0;
+  }
+
+  if (max_amp_ < noise_ * 50) {
+    health_ *= 2.0 * max_amp_ / noise_;
+  }
+
+  if (f_wf_ - i_wf_ < 0.05 * wf_.size()) {
+    health_ *= (f_wf_ - i_wf_) / 0.05 * wf_.size();
+  }
 }
 
 double FastFid::GetFreq()
@@ -797,10 +847,10 @@ void FastFid::CalcNoise()
 void FastFid::CalcMaxAmp() 
 {
   auto mm = std::minmax_element(wf_.begin(), wf_.end());
-  if (abs(*mm.first) > abs(*mm.second)) {
-    max_amp_ = abs(*mm.first);
+  if (std::abs(*mm.first) > std::abs(*mm.second)) {
+    max_amp_ = std::abs(*mm.first);
   } else {
-    max_amp_ = abs(*mm.second);
+    max_amp_ = std::abs(*mm.second);
   }
 }
 
@@ -841,7 +891,7 @@ void FastFid::FindFidRange()
     auto it_i = std::find_if(it_2, wf_.end(), 
       [thresh](double x){return std::abs(x) > thresh;});
 
-    auto it_f = std::find_if(it_2, wf_.end(), 
+    auto it_f = std::find_if(it_i+1, wf_.end(), 
       [thresh](double x){return std::abs(x) < thresh;});
 
     if (it_f != wf_.end()) {
@@ -873,14 +923,11 @@ void FastFid::FindFidRange()
   // Mark the signal as bad if it didn't find signal above threshold.
   if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
 
-    isgood_ = false;
+    health_ = false;
     i_wf_ = 0;
     f_wf_ = wf_.size() * 0.01;
 
-  } else {
-
-    isgood_ = true;
-  }
+  } 
 }
 
 double FastFid::CalcFreq()
