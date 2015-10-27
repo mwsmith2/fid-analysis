@@ -60,7 +60,7 @@ class FID {
   void PrintDiagnosticInfo(std::iostream out);
 
   // accessors
-  const bool& isgood() const { return isgood_; };
+  const bool isgood() const { return health_ > 0.0; };
   const std::vector<double>& wf() const { return wf_; };
   const std::vector<double>& tm() const { return tm_; };
   const std::vector<double>& res() const { return res_; };
@@ -96,11 +96,11 @@ class FID {
  private:
   
   // Private Member Variables
-  bool isgood_;
   unsigned int i_wf_; // start and stop of relevant data
   unsigned int f_wf_;
   unsigned int i_fft_;
   unsigned int f_fft_;
+  double health_;
   double noise_;
   double max_amp_;
   double mean_;
@@ -161,7 +161,7 @@ class FastFid {
   void PrintDiagnosticInfo(std::iostream out);
 
   // accessors
-  const bool& isgood() const { return isgood_; };
+  const bool isgood() const { return health_ > 0.0; };
   const std::vector<double>& wf() const { return wf_; };
   const std::vector<double>& tm() const { return tm_; };
   const double& freq() const {  return freq_;  }
@@ -175,9 +175,9 @@ class FastFid {
  private:
   
   // Private Member Variables
-  bool isgood_;
   unsigned int i_wf_; // start and stop of relevant data
   unsigned int f_wf_;
+  double health_; // percentage between 0 and 100.
   double noise_;
   double max_amp_;
   double mean_;

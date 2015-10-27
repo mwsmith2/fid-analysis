@@ -160,6 +160,7 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re, const std::vect
 	double thresh = params::max_phase_jump;
   double m_avg = 0.0;
   double m_std = 0.0;
+  double m = 0.0;
   double a = 0.001;
   bool phase_trend = false;
 
@@ -170,16 +171,31 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re, const std::vect
     	*it += k * kTau;
 
     	// Check for large jumps, both positive and negative.
-      double m = *(it) - *(it - 1);
+      while (abs(m) > thresh) {
 
-    	if (-m > thresh) {
-	      	k++;
+        m = *(it) - *(it - 1);
+
+      	if (-m > thresh) {
+
+          if (m + kTau > thresh) {
+            std::cout << "Warning: jump over threshold." << std::endl;
+            break;
+          }
+    
+         	k++;
           *it += kTau;
 
-	    } else if (m > thresh) {
+  	    } else if (m > thresh) {
+
+          if (m - kTau < -thresh) {
+            std::cout << "Warning: jump over threshold." << std::endl;
+            break;
+          }
+
 	        k--;
 	        *it -= kTau;
-	    }
+  	    }
+      }
 
       // Recalculate slope.
       m = *(it) - *(it - 1);
@@ -203,7 +219,7 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re, const std::vect
         m_avg = a * (*it - *(it - 1)) + (1 - a) * m_avg;
         m_std = a * (m - m_avg) + (1 - a) * m_std;
 
-        if (abs(m_avg) > 10.0 * abs(m_std)) {
+        if (abs(m_avg) > 15.0 * abs(m_std)) {
           m_avg = *it - *(it - 1);
           phase_trend = true;
         }
@@ -247,7 +263,7 @@ arma::cx_mat dsp::wvd_cx(const std::vector<double>& wf, bool upsample)
     N = wf.size();
   }
 
-  // Instiate the return matrix
+  // Initiate the return matrix
   arma::cx_mat res(M, N, arma::fill::zeros);
 
   // Artificially double the sampling rate by repeating each sample.
