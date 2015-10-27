@@ -839,18 +839,19 @@ void FastFid::FindFidRange()
 
     // Find a range above threshold
     auto it_i = std::find_if(it_2, wf_.end(), 
-      [thresh](double x){return std::abs(x) > thresh;});
+      [thresh](double x){return std::abs(x) > 0.9 * thresh;});
 
-    auto it_f = std::find_if(it_2, wf_.end(), 
-      [thresh](double x){return std::abs(x) < thresh;});
+    auto it_f = std::find_if(it_i + 1, wf_.end(), 
+      [thresh](double x){return std::abs(x) < 0.9 * thresh;});
 
-    if (it_f != wf_.end()) {
+    // Now check if it actually made it over threshold.
+    if ((it_i != wf_.end()) && (it_f != wf_.end())) {
 
       auto mm = std::minmax_element(it_i, it_f);
 
       if ((*mm.first < -thresh) || (*mm.second > thresh)) {
 
-        checks_out = false;
+        it_2 = it_f;
 
       } else {
 
@@ -860,12 +861,12 @@ void FastFid::FindFidRange()
       // Turn the iterator into an index
       if (checks_out) {
         f_wf_ = std::distance(wf_.begin(), it_f);
-
-      } else {
-
-        f_wf_ = std::distance(wf_.begin(), wf_.end());
-        break;
       }
+    
+    } else {
+
+      f_wf_ = std::distance(wf_.begin(), wf_.end());
+      break;
     }
   }
 
