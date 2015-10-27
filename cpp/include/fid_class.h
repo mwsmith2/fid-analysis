@@ -71,6 +71,7 @@ class FID {
   const double& freq() const {  return freq_;  }
   const double& freq_err() const { return freq_err_; };
   const double& chi2() const { return chi2_; };
+  const double &health() const { return health_; };
   const double fid_time() const { return tm_[f_wf_] - tm_[i_wf_]; };
   const double snr() const { return pow(max_amp_ / noise_, 2); };
   const TGraph& gr_time_series() const { return gr_time_series_; };
@@ -166,6 +167,7 @@ class FastFid {
   const std::vector<double>& tm() const { return tm_; };
   const double& freq() const {  return freq_;  }
   const double& freq_err() const { return freq_err_; };
+  const double &health() const { return health_; };
   const double fid_time() const { return tm_[f_wf_] - tm_[i_wf_]; };
   const double snr() const { return pow(max_amp_ / noise_, 2); };
   const TGraph& gr_time_series() const { return gr_time_series_; };
