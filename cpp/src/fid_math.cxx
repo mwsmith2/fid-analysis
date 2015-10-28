@@ -51,7 +51,7 @@ std::vector<double> dsp::ifft(const std::vector<std::complex<double>>& fft)
   	*it /= Nroot;
   }
 
-  delete fft_ptr;
+  delete[] fft_ptr;
 
   return ifft_vec;
 }
@@ -165,36 +165,15 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
   double a = 0.001;
   bool phase_trend = false;
 
-<<<<<<< Updated upstream
   int k = 0; // to track the winding number
   for (auto it = phase.begin() + 1; it != phase.end(); ++it) {
-=======
-	int k = 0; // to track the winding number
-  	for (auto it = phase.begin() + 1; it != phase.end(); ++it) {
-
-    	// Add current total
-    	*it += k * kTau;
-
-    	// Check for large jumps, both positive and negative.
-      while (abs(m) > thresh) {
-
-        m = *(it) - *(it - 1);
-        std::cout << *it << ", " << *(it - 1) << std::endl;
-
-      	if (-m > thresh) {
-
-          if (m + kTau > thresh) {
-            std::cout << "Warning: jump over threshold." << std::endl;
-            break;
-          }
->>>>>>> Stashed changes
     
     // Add current total
     *it += k * kTau;
     m = *(it) - *(it - 1);
     
     // Check for large jumps, both positive and negative.
-    while (abs(m) > thresh) {
+    while (std::abs(m) > thresh) {
       
       if (-m > thresh) {
         
@@ -238,11 +217,11 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
     }
     
     // Compute the exponential moving average
-    if (!phase_trend && (abs(k) > 5)) {
+    if (!phase_trend && (std::abs(k) > 5)) {
       m_avg = a * (*it - *(it - 1)) + (1 - a) * m_avg;
       m_std = a * (m - m_avg) + (1 - a) * m_std;
       
-      if (abs(m_avg) > 15.0 * abs(m_std)) {
+      if (std::abs(m_avg) > 15.0 * std::abs(m_std)) {
         m_avg = *it - *(it - 1);
         phase_trend = true;
       }

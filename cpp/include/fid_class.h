@@ -183,7 +183,6 @@ class FastFid {
   double noise_;
   double max_amp_;
   double mean_;
-  double chi2_; // Store the most recent chi2
   double freq_;
   double freq_err_;
   Method freq_method_;
