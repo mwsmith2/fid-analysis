@@ -5,7 +5,7 @@ OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
 # Versioning info
 MAJOR=0
-MINOR=5.2
+MINOR=6.0
 SONAME=libfid.so
 LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
 PREFIX=/usr/local
