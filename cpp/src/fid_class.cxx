@@ -801,12 +801,12 @@ void FastFid::Init()
     health_ = 100.0;
   }
 
-  if (max_amp_ < noise_ * 50) {
-    health_ *= 2.0 * max_amp_ / noise_;
+  if (max_amp_ < noise_ * params::snr_thresh) {
+    health_ *= max_amp_ / (noise_ * params::snr_thresh);
   }
 
-  if (f_wf_ - i_wf_ < 0.05 * wf_.size()) {
-    health_ *= (f_wf_ - i_wf_) / 0.05 * wf_.size();
+  if (f_wf_ - i_wf_ < wf_.size() * params::len_thresh) {
+    health_ *= (f_wf_ - i_wf_) / (wf_.size() * params::len_thresh);
   }
 }
 

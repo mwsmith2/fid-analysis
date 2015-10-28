@@ -10,9 +10,11 @@ namespace params {
   int edge_ignore = 50; 
   double start_thresh = 0.37; 
   double max_phase_jump = 3.14; 
-  double low_pass_freq = 2000.0; 
+  double low_pass_freq = 2000.0;
   double centroid_thresh = 0.01; 
   double hyst_thresh = 0.7;
+  double snr_thresh = 50.0;  // max_amp_ / noise_
+  double len_thresh = 0.02;  // fraction of signal
   Method freq_method = PH;
 
 } // ::params

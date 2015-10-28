@@ -40,6 +40,9 @@ namespace params {
   extern double low_pass_freq; // low pass frequency used by FID
   extern double centroid_thresh; // threshold of values included in centroid
   extern double hyst_thresh; // hysteris threshold used for zero counting
+  extern double snr_thresh;  // max_amp_ / noise_
+  extern double len_thresh;  // fraction of signal
+
   extern Method freq_method;
 
 } // ::params
