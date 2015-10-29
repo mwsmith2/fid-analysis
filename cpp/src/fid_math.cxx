@@ -199,37 +199,37 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
       m = *(it) - *(it - 1);
     }
     
-    // Recalculate slope.
-    m = *(it) - *(it - 1);
+    // // Recalculate slope.
+    // m = *(it) - *(it - 1);
 
-    // Check against the slope of the last few points for outliers
-    if (phase_trend) {
-      if (m > 3.0 * m_avg) {
+    // // Check against the slope of the last few points for outliers
+    // if (phase_trend) {
+    //   if (m > 3.0 * m_avg) {
 
-        k--;
-        *it -= kTau;
+    //     k--;
+    //     *it -= kTau;
         
-      } else if (m < -2.0 * m_avg) {
+    //   } else if (m < -2.0 * m_avg) {
         
-        k++;
-        *it += kTau;
-      }
-    }
+    //     k++;
+    //     *it += kTau;
+    //   }
+    // }
     
-    // Compute the exponential moving average
-    if (!phase_trend && (std::abs(k) > 5)) {
-      m_avg = a * (*it - *(it - 1)) + (1 - a) * m_avg;
-      m_std = a * (m - m_avg) + (1 - a) * m_std;
+    // // Compute the exponential moving average
+    // if (!phase_trend && (std::abs(k) > 15)) {
+    //   m_avg = a * (*it - *(it - 1)) + (1 - a) * m_avg;
+    //   m_std = a * (m - m_avg) + (1 - a) * m_std;
       
-      if (std::abs(m_avg) > 15.0 * std::abs(m_std)) {
-        m_avg = *it - *(it - 1);
-        phase_trend = true;
-      }
+    //   if (std::abs(m_avg) > 10.0 * std::abs(m_std)) {
+    //     m_avg = *it - *(it - 1);
+    //     phase_trend = true;
+    //   }
       
-    } else {
+    // } else {
       
-      m_avg = a * (*it - *(it - 1)) + (1 - a) * m_avg;
-    }
+    //   m_avg = a * (*it - *(it - 1)) + (1 - a) * m_avg;
+    // }
   }
   
   return phase;
