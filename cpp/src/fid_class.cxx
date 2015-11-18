@@ -253,8 +253,18 @@ void FID::FindFidRange()
   }
 
   // Find the next element with magnitude lower than thresh
-  checks_out = false;
-  auto it_2 = env_.begin() + i_wf_ + params::edge_ignore;
+  auto it_2 = env_.begin();
+
+  if (i_wf_ + params::edge_ignore < env_.size()) {
+
+    checks_out = false;
+    it_2 += i_wf_ + params::edge_ignore;
+
+  } else {
+
+    checks_out = true;
+  }
+
   while (!checks_out) {
 
     auto it_f = std::find_if(it_2, env_.end(), 
