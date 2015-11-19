@@ -43,6 +43,9 @@ FID::FID(const std::vector<double>& wf)
 
 void FID::Init()
 {
+  // Initialize the health to full.
+  health_ = 100.0;
+
   // Grab the default method
   freq_method_ = params::freq_method;
 
@@ -61,11 +64,8 @@ void FID::Init()
   // Go ahead and do the default frequency extraction
   CalcFreq();
 
-  health_ = 100.0;
-
   // Flag the FID as bad.
   if (freq_ < 0) {
-    health_ = 0.0;
 
     // Try a different method
     CalcLorentzianFreq();
@@ -75,9 +75,6 @@ void FID::Init()
 
     health_ = 0.0;
 
-  } else {
-
-    health_ = 100.0;
   }
 
   if (max_amp_ < noise_ * params::snr_thresh) {
@@ -291,7 +288,7 @@ void FID::FindFidRange()
   // Mark the signal as bad if it didn't find signal above threshold.
   if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
 
-    health_ = false;
+    health_ = 0.0;
     i_wf_ = 0;
     f_wf_ = wf_.size() * 0.01;
 
@@ -795,6 +792,9 @@ FastFid::FastFid(const std::vector<double>& wf)
 
 void FastFid::Init()
 {
+  // Initialize the health properly.
+  health_ = 100.0;
+
   // Grab the default method
   freq_method_ = params::freq_method;
 
@@ -808,18 +808,13 @@ void FastFid::Init()
   FindFidRange();
   CalcFreq();
 
-  health_ = 100.0;
-
   // Flag the FID as bad if it's negative.
   if (freq_ < 0.0) {
 
     health_ = 0.0;
 
-  } else {
-
-    health_ = 100.0;
   }
-
+  
   if (max_amp_ < noise_ * params::snr_thresh) {
     health_ *= max_amp_ / (noise_ * params::snr_thresh);
   }

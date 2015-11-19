@@ -167,7 +167,7 @@ class FastFid {
   const std::vector<double>& tm() const { return tm_; };
   const double& freq() const {  return freq_;  }
   const double& freq_err() const { return freq_err_; };
-  const double &health() const { return health_; };
+  const ushort &health() const { return health_; };
   const double fid_time() const { return tm_[f_wf_] - tm_[i_wf_]; };
   const double snr() const { return pow(max_amp_ / noise_, 2); };
   const TGraph& gr_time_series() const { return gr_time_series_; };
@@ -179,7 +179,7 @@ class FastFid {
   // Private Member Variables
   unsigned int i_wf_; // start and stop of relevant data
   unsigned int f_wf_;
-  double health_; // percentage between 0 and 100.
+  ushort health_; // percentage between 0 and 100.
   double noise_;
   double max_amp_;
   double mean_;
