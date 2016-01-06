@@ -45,21 +45,19 @@ build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $<
 
 $(LIBNAME): $(OBJECTS)
-	$(CXX) -shared -fPIC $+ -o $(LIBNAME) $(LIBS)
+	$(CXX) -shared -fPIC $+ -o lib/$(LIBNAME) $(LIBS)
 
 install:
-	cp $(LIBNAME) $(PREFIX)/lib/$(LIBNAME)
-	cp $(HEADERS) $(PREFIX)/include/
-	ln -s $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME)
+	mkdir -p $(PREFIX)/lib
+	cp lib/$(LIBNAME) $(PREFIX)/lib
+	mkdir -p $(PREFIX)/include
+	cp $(HEADERS) $(PREFIX)/include
+	ln -sf $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME)
 	$(LDCONFIG)
 
 uninstall:
 	rm -f $(PREFIX)/lib/$(SONAME)*
 	rm -f $(patsubst include/%,$(PREFIX)/include/%,$(HEADERS))
-
-reinstall:
-	make uninstall
-	make install
 
 clean:
 	rm -f $(TARGETS) build/* 
