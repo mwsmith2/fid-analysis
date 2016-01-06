@@ -1,7 +1,7 @@
 #ifndef FID_INCLUDE_FID_UTILS_H_
 #define FID_INCLUDE_FID_UTILS_H_
 
-/*===========================================================================*\
+/*==========================================================================*\
 
 author: Matthias W. Smith
 email: mwmsith2@uw.edu
@@ -11,32 +11,34 @@ notes:
 	This library consists of several frequency extraction and analysis 
 	methods for FIDs as well as a class to encapsulate all the ideas.
 
-\*===========================================================================*/
+\*==========================================================================*/
 
-//--- std includes ----------------------------------------------------------//
+//--- std includes ---------------------------------------------------------//
 #include <string>
 #include <vector>
 #include <random>
 
-//--- other includes --------------------------------------------------------//
+//--- other includes -------------------------------------------------------//
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include "TGraph.h"
 #include "TCanvas.h"
 
-//--- project includes ------------------------------------------------------//
+//--- project includes -----------------------------------------------------//
 #include "fid_class.h"
 
 namespace fid
 {
-	// Classes defined in separate headers
+	// Classes ared defined in a separate header.
 	class FidFactory;
 	class FID;
 
-  // Run this function first thing in any module to load a custom configuration
+  // Declare utility functions.
+
+  // Run this function first thing to load a custom configuration.
   void load_params(std::string conf_file);
 
-	// Declare utility functions.
+  // An exponential decay multiplied with a sinusoid.
 	void ideal_fid(std::vector<double>& wf, 
                  std::vector<double>& tm, 
                  double f, 
@@ -45,9 +47,10 @@ namespace fid
                  double tau=10.0, 
                  double t0=0.0);
 
-  // Plots and saves an image
+  // Plots and saves the image.
   void draw_graph(TGraph gr, std::string fname, std::string title);
 
+  // Plots and saves an image of the FID.
   void draw_graph(const std::vector<double> &wf, 
                   const std::vector<double> &tm, 
                   std::string fname, 
@@ -97,10 +100,10 @@ namespace fid
                              std::vector<double> &tm);
 
   // Get a linear gradient with a max(abs(grad)) == 1 and mean(grad) == 0
-  void construct_linear_gradient(int num_points, std::vector<double> &grad);
+  void construct_linear_gradient(int noints, std::vector<double> &grad);
 
   // Get a quadratic gradient with a max(abs(grad)) == 1 and mean(grad) = 0
-  void construct_quadratic_gradient(int num_points, std::vector<double> &grad);
+  void construct_quadratic_gradient(int npoints, std::vector<double> &grad);
   
 } // fid
 

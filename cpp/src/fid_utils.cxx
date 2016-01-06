@@ -10,6 +10,7 @@ void load_params(std::string conf_file)
   using namespace sim;
   using namespace params;
 
+  // Declare and load JSON params.
   ptree pt;
   read_json(conf_file, pt);
   pt = pt.get_child("fid");
@@ -64,10 +65,15 @@ void load_params(std::string conf_file)
 
 } // load_params
 
-// Generate an ideal FID
-void ideal_fid(std::vector<double>& wf, std::vector<double>& tm, double f, double phi, 
-	double snr, double tau, double t0){
 
+// Fill the input waveform vector with an ideal FID.
+void ideal_fid(std::vector<double>& wf, 
+               std::vector<double>& tm, 
+               double f, double phi, 
+               double snr, 
+               double tau, 
+               double t0)
+{
 	wf.reserve(tm.size());
 	wf.resize(0);
 
@@ -93,11 +99,14 @@ void ideal_fid(std::vector<double>& wf, std::vector<double>& tm, double f, doubl
 	for (auto it = wf.begin(); it != wf.end(); it++){
 		*it += norm(gen);
 	}
-
-	return;
 }
 
-void construct_time_vector(uint num_times, double t0, double dt, std::vector<double> &tm)
+
+// Create a linearly spaced vector over the interval.
+void construct_time_vector(uint num_times, 
+                           double t0, 
+                           double dt, 
+                           std::vector<double> &tm)
 {
   if (tm.size() != num_times){
     tm.resize(num_times);
@@ -109,22 +118,21 @@ void construct_time_vector(uint num_times, double t0, double dt, std::vector<dou
 }
 
 
-void construct_quadratic_gradient(int num_points, std::vector<double> &grad)
+// Create a discrete quadratic gradient with a normalized unit amplitude.
+void construct_quadratic_gradient(int npoints, std::vector<double> &grad)
 {
-  // construct a normalized, centered quadratic gradient
-
-  // first get the spacing right
-  for (int i = 0; i < num_points; i++){
+  // First get the spacing right.
+  for (int i = 0; i < npoints; i++){
     grad.push_back((double)i * i);
   }
 
-  // subtract off the average
+  // Subtract off the average.
   double avg = std::accumulate(grad.begin(), grad.end(), 0.0) / grad.size();
   for (uint i = 0; i < grad.size(); i++){
     grad[i] -= avg;
   }
 
-  // normalize by largest value
+  // Normalize by largest value.
   double max = *std::max_element(grad.begin(), grad.end());
   for (uint i = 0; i < grad.size(); i++){
     grad[i] /= max;
@@ -132,22 +140,21 @@ void construct_quadratic_gradient(int num_points, std::vector<double> &grad)
 }
 
 
-void construct_linear_gradient(int num_points, std::vector<double> &grad)
+// Create a discrete linear gradient with a normalized unit amplitude.
+void construct_linear_gradient(int npoints, std::vector<double> &grad)
 {
-  // construct a normalized, centered linear gradient
-
-  // first get the spacing right
-  for (int i = 0; i < num_points; i++){
+  // First get the spacing right.
+  for (int i = 0; i < npoints; i++){
     grad.push_back((double)i);
   }
 
-  // subtract off the average
+  // Subtract off the average.
   double avg = std::accumulate(grad.begin(), grad.end(), 0.0) / grad.size();
   for (uint i = 0; i < grad.size(); i++){
     grad[i] -= avg;
   }
 
-  // normalize by largest value
+  // Normalize by largest value.
   double max = *std::max_element(grad.begin(), grad.end());
   for (uint i = 0; i < grad.size(); i++){
     grad[i] /= max;
@@ -155,9 +162,10 @@ void construct_linear_gradient(int num_points, std::vector<double> &grad)
 }
 
 
+// Create a TCanvas and print the graph.
 void draw_graph(TGraph gr, std::string fname, std::string title)
 {
-  // Set up the graph
+  // Set up the graph.
   std::string new_title(title);
   new_title.append("; time [ms]; amplitude [a.u.]");
   gr.SetTitle(new_title.c_str());
@@ -170,6 +178,8 @@ void draw_graph(TGraph gr, std::string fname, std::string title)
   c1.Print(fname.c_str());
 }
 
+
+// Create a TGraph and feed it into the draw_graph() function.
 void draw_graph(const std::vector<double> &wf, const std::vector<double> &tm, std::string fname, std::string title)
 {
   // Create a graph
@@ -179,6 +189,7 @@ void draw_graph(const std::vector<double> &wf, const std::vector<double> &tm, st
 }
 
 
+// Feed the waveform and time vectors into draw_graph.
 void draw_fid(const FID &my_fid, std::string fname, std::string title)
 {
   // Get the data vectors
@@ -189,6 +200,7 @@ void draw_fid(const FID &my_fid, std::string fname, std::string title)
 }
 
 
+// Print the time series fit from an FID.
 void draw_fid_time_fit(const FID &my_fid, std::string fname, std::string title)
 {
   // Copy the graph
@@ -197,13 +209,7 @@ void draw_fid_time_fit(const FID &my_fid, std::string fname, std::string title)
 }
 
 
-void draw_fid_freq_fit(const FID &my_fid, std::string fname, std::string title)
-{
-  // Copy the graph
-  TGraph gr = my_fid.gr_freq_series();
-  draw_graph(gr, fname, title);
-}
-
+// Print the time series residuals from an FID.
 void draw_fid_time_res(const FID &my_fid, std::string fname, std::string title)
 {
   // Copy the residuals
@@ -225,6 +231,16 @@ void draw_fid_time_res(const FID &my_fid, std::string fname, std::string title)
 }
 
 
+// Print the freq series fit from an FID.
+void draw_fid_freq_fit(const FID &my_fid, std::string fname, std::string title)
+{
+  // Copy the graph
+  TGraph gr = my_fid.gr_freq_series();
+  draw_graph(gr, fname, title);
+}
+
+
+// Print the freq series residuals from an FID.
 void draw_fid_freq_res(const FID &my_fid, std::string fname, std::string title)
 {
   // Copy the residuals
@@ -245,6 +261,8 @@ void draw_fid_freq_res(const FID &my_fid, std::string fname, std::string title)
   draw_graph(gr, fname, title);
 }
 
+
+// Analyze an FID with all methods and print to output stream csv style.
 void calc_freq_write_csv(FID& my_fid, std::ofstream& out)
 {
   // Test all the frequency extraction methods and write the results
@@ -258,6 +276,7 @@ void calc_freq_write_csv(FID& my_fid, std::ofstream& out)
   out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << std::endl;
 }
 
+// Analyze an FID with all methods and print to output stream csv style.
 void calc_phase_freq_write_csv(FID& my_fid, std::ofstream& out)
 {
   // Test all the frequency extraction methods using the phase
@@ -270,6 +289,8 @@ void calc_phase_freq_write_csv(FID& my_fid, std::ofstream& out)
   out << my_fid.CalcSinusoidFreq() << ", " << my_fid.chi2() << std::endl;
 }
 
+
+// Read a FID text file into the waveform and time vectors.
 void read_fid_file(std::string fname, 
                    std::vector<double> &wf, 
                    std::vector<double> &tm)
@@ -292,6 +313,8 @@ void read_fid_file(std::string fname,
   }
 }
 
+
+// Write FID waveform/time vectors to a text file.
 void write_fid_file(std::string fname,
                     const std::vector<double> &wf, 
                     const std::vector<double> &tm)
