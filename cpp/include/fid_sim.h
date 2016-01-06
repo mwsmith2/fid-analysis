@@ -37,7 +37,7 @@ namespace fid {
 
 class FidFactory
 {
-public:
+ public:
 
   // ctors
   FidFactory();

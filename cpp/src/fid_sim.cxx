@@ -6,23 +6,29 @@ namespace fid {
 //--- FID Factory -----------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
+
 FidFactory::FidFactory()
 {
   using std::cout;
   using std::endl;
 
+  // Set the start/stop times.
   ti_ = sim::start_time;
   tf_ = ti_ + sim::delta_time * sim::num_samples;
-  cout << "Loading dt_integration: " << sim::dt_integration << endl;
-  cout << "sim::dt_int @ " << &sim::dt_integration << endl;
 
+  // Calculate the decimation ratio.
   sim_to_fid_ = (tf_ - ti_) / (sim::dt_integration * sim::num_samples) + 0.5; 
+
+  // If zero, more less integration steps than sampling times were requested.
   if (sim_to_fid_ == 0) {
+
     cout << "WARNING: The given integration step was larger than the ";
     cout << "sampling time, so the sampling time, " << sim::delta_time;
     cout << ", will be used instead." << endl;
+
     sim_to_fid_ = 1;
     dt_ = sim::delta_time;
+
   } else {
 
     dt_ = sim::delta_time / sim_to_fid_;
@@ -34,6 +40,7 @@ FidFactory::FidFactory()
     }
   }
 
+  // Set number of simulation samples.
   sim_length_ = sim_to_fid_ * sim::num_samples;
   printer_idx_ = 0;
 
@@ -53,12 +60,14 @@ FidFactory::FidFactory()
   }
 }
 
+
 FidFactory::~FidFactory()
 {
   // closing the TFile will take care of the TTree pointer
   pf_fid_->Close();
   delete pf_fid_;
 }
+
 
 // Create an idealized FID with current Simulation parameters
 void FidFactory::IdealFid(std::vector<double>& wf, 
@@ -97,6 +106,8 @@ void FidFactory::IdealFid(std::vector<double>& wf,
   if (discretize) floor(wf);
 }
 
+
+// Simulate an FID with the current class settings.
 void FidFactory::SimulateFid(std::vector<double>& wf, 
                              std::vector<double>& tm, 
                              bool withnoise,
@@ -105,7 +116,7 @@ void FidFactory::SimulateFid(std::vector<double>& wf,
   using namespace boost::numeric::odeint;
   using std::bind;
   using std::ref;
-  namespace pl = std::placeholders;
+  using std::placeholders; // _1, _2, _3
 
   // make sure memory is allocated for the final FIDs
   tm.reserve(sim::num_samples);
@@ -114,40 +125,47 @@ void FidFactory::SimulateFid(std::vector<double>& wf,
 
   // Bind the member function and make a reference so it isn't copied.
   integrate_const(runge_kutta4<std::vector<double>>(), 
-                  bind(&FidFactory::Bloch, ref(*this), pl::_1, pl::_2, pl::_3), 
+                  bind(&FidFactory::Bloch, ref(*this), _1, _2, _3), 
                   s_, 
                   ti_, 
                   tf_, 
                   dt_, 
-                  bind(&FidFactory::Printer, ref(*this), pl::_1, pl::_2));
+                  bind(&FidFactory::Printer, ref(*this), _1, _2));
 
   // Set the results
   tm.resize(0);
   wf.resize(0);
 
+  // Fill the FID vectors with simulation results.
   for (int i = 0; i < sim::num_samples; ++i) {
     tm.push_back(time_vec_[i * sim_to_fid_]);
     wf.push_back(spin_vec_[i * sim_to_fid_] + sim::baseline);
   }
 
+  // Take care of optional effects.
   if (withnoise) addnoise(wf, sim::snr);
-
   if (discretize) floor(wf);
 }
 
+
+// Simulate a gradient FID by combining multiple simulated FIDs.
 void FidFactory::GradientFid(const std::vector<double>& gradient, 
                              std::vector<double>& wf, 
                              bool withnoise,
                              bool discretize)
 {
+  // Make sure we have an example file draw from.
   if (!pf_fid_->IsOpen()) {
-    std::cout << "No ROOT file loaded.  Cannot make gradient FIDs." << std::endl;
+    std::cout << "No ROOT file loaded.  Cannot make gradient FIDs.";
+    std::cout << std::endl;
     return;
   }
 
   // Find the appropriate FIDs and sum them
   wf.assign(sim::num_samples, 0.0);
 
+
+  // Add each FID in the gradient.
   for (auto& g : gradient){
 
     pt_fid_->GetEntry(GetTreeIndex(g));
@@ -157,16 +175,18 @@ void FidFactory::GradientFid(const std::vector<double>& gradient,
     }
   }
 
+  // Calculate the proper amplitude and scale + offset the sim FID.
   double amp = sim::amplitude / gradient.size();
 
   for (auto& val : wf) {
     val = val * amp + sim::baseline;
   }
 
+  // Take care of optional effects.
   if (withnoise) addnoise(wf, sim::snr);
-
   if (discretize) floor(wf);
 }
+
 
 void FidFactory::PrintDiagnosticInfo()
 {
@@ -181,15 +201,19 @@ void FidFactory::PrintDiagnosticInfo()
   cout << sim_to_fid_ << endl;
 }
 
-void FidFactory::Bloch(std::vector<double> const &s, std::vector<double> &dsdt, double t)
+
+// Define the Bloch equation governing FID signals.
+void FidFactory::Bloch(std::vector<double> const &s, 
+                       std::vector<double> &dsdt, 
+                       double t)
 {
   // Again static to save time on memory allocations.
-  static std::vector<double> b = {{0., 0., 0.}};   // Bfield
-  static std::vector<double> s1 = {{0., 0., 0.}};  // Cross product piece of spin
-  static std::vector<double> s2 = {{0., 0., 0.}};  // Relaxation piece of spin
+  static std::vector<double> bf = {{0., 0., 0.}};   // Bfield
+  static std::vector<double> s1 = {{0., 0., 0.}};  // Cross product spin
+  static std::vector<double> s2 = {{0., 0., 0.}};  // Relaxation spin
 
   // Update the Bfield.
-  b = Bfield(t);
+  bf = Bfield(t);
 
   // Set the relaxtion bits of the differential.
   s2[0] = sim::gamma_2 * s[0];
@@ -197,17 +221,19 @@ void FidFactory::Bloch(std::vector<double> const &s, std::vector<double> &dsdt, 
   s2[2] = sim::gamma_1 * (s[2] - 1.0);
 
   // Calculate the cross product.
-  cross(b, s, s1);
+  cross(bf, s, s1);
 
   // Set the differential to be integrated.
   dsdt = s1 - s2;
 }
 
+
+// A function that defines the static + RF B-fields.
 std::vector<double> FidFactory::Bfield(const double& t)
 {
   // Made static to save on memory calls.
-  static std::vector<double> a = {0., 0., 0.}; // holds constant external field
-  static std::vector<double> b = {0., 0., 0.}; // for time dependent B field
+  static std::vector<double> a = {0., 0., 0.}; // constant external field
+  static std::vector<double> b = {0., 0., 0.}; // time dependent B field
 
   // Return static external field if after the pulsed field.
   if (t >= sim::t_pulse){
@@ -230,7 +256,7 @@ std::vector<double> FidFactory::Bfield(const double& t)
   return b;
 }
 
-// Printer function is called to do stuff each step of integration.
+// The function called each step of integration.
 void FidFactory::Printer(std::vector<double> const &s , double t)
 {
   // Cache the cosine function for mixing later.
@@ -238,8 +264,11 @@ void FidFactory::Printer(std::vector<double> const &s , double t)
     cos_cache_.reserve(sim_length_);
 
     double temp = t;
+    double val;
+
     for (int i = 0; i < sim_length_; i++){
-      cos_cache_.push_back(cos(kTau * sim::freq_ref * temp + sim::mixdown_phi));
+      val = cos(kTau * sim::freq_ref * temp + sim::mixdown_phi);
+      cos_cache_.push_back(val);
       temp += dt_;
     }
 
@@ -267,7 +296,7 @@ void FidFactory::Printer(std::vector<double> const &s , double t)
   }
 }
 
-// Low pass filter to suppress the higher frequency introducing in mixing down.
+// Low pass filter suppresses higher frequencies from mixing down.
 std::vector<double> FidFactory::LowPassFilter(std::vector<double>& s)
 {
   // Allocate the filter and set the central frequency.
