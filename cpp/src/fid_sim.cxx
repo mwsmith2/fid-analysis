@@ -116,7 +116,7 @@ void FidFactory::SimulateFid(std::vector<double>& wf,
   using namespace boost::numeric::odeint;
   using std::bind;
   using std::ref;
-  using std::placeholders; // _1, _2, _3
+  using namespace std::placeholders; // _1, _2, _3
 
   // make sure memory is allocated for the final FIDs
   tm.reserve(sim::num_samples);

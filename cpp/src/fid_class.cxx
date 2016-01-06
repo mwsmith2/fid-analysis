@@ -304,9 +304,9 @@ void FID::CalcPowerEnvAndPhase()
   auto wf_im = dsp::hilbert(wf_);
 
   // Optional lowpass filter. 
-//  double df = (wf.size() - 1) / (wf.size() * (tm_[wf.size() - 1] - tm_[0]));
-//  double cutoff_index = params::low_pass_freq / df;
-//  
+  //  double df = (wf.size() - 1) / (wf.size() * (tm_[wf.size() - 1] - tm_[0]));
+  //  double cutoff_index = params::low_pass_freq / df;
+  //  
 
   // Now we can get power, envelope and phase.
   power_ = dsp::norm(fid_fft);

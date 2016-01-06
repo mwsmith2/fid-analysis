@@ -1,15 +1,15 @@
 #ifndef FID_ANALYSIS_FID_CLASS_H_
 #define FID_ANALYSIS_FID_CLASS_H_
 
-/*===========================================================================*\
+/*============================================================================*\
 
 author: Matthias W. Smith
 email: mwmsith2@uw.edu
 
 notes:
 
-  This library consists of several frequency extraction and analysis 
-  methods for FIDs as well as a class to encapsulate all the ideas.
+  Defines several frequency extraction and analysis methods for FIDs 
+  as a class to encapsulate all the ideas.
 
 \*===========================================================================*/
 
@@ -32,8 +32,7 @@ notes:
 #include "fid_math.h"
 #include "fid_utils.h"
 
-namespace fid
-{
+namespace fid {
 
 class FID {
 
