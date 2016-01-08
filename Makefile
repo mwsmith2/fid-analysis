@@ -1,11 +1,11 @@
 # Grab the targets and sources as two batches
 SOURCES = $(wildcard src/*.cxx)
-HEADERS = $(wildcard include/*.h)
+HEADERS = $(wildcard include/*)
 OBJECTS = $(patsubst src%.cxx,build%.o,$(SOURCES))
 
 # Versioning info
 MAJOR=0
-MINOR=6.2
+MINOR=7.0
 SONAME=libfid.so
 LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
 PREFIX=/usr/local
@@ -51,7 +51,7 @@ install:
 	mkdir -p $(PREFIX)/lib
 	cp lib/$(LIBNAME) $(PREFIX)/lib
 	mkdir -p $(PREFIX)/include
-	cp $(HEADERS) $(PREFIX)/include
+	cp -r $(HEADERS) $(PREFIX)/include
 	ln -sf $(PREFIX)/lib/$(LIBNAME) $(PREFIX)/lib/$(SONAME)
 	$(LDCONFIG)
 

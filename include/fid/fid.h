@@ -1,5 +1,5 @@
-#ifndef FID_ANALYSIS_FID_CLASS_H_
-#define FID_ANALYSIS_FID_CLASS_H_
+#ifndef FID_ANALYSIS_FID_FID_H_
+#define FID_ANALYSIS_FID_FID_H_
 
 /*============================================================================*\
 
@@ -28,9 +28,9 @@ notes:
 #include "TF1.h"
 
 //--- project includes ------------------------------------------------------//
-#include "fid_params.h"
-#include "fid_math.h"
-#include "fid_utils.h"
+#include "fid/params.h"
+#include "fid/math.h"
+#include "fid/utils.h"
 
 namespace fid {
 

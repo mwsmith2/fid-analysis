@@ -27,7 +27,7 @@ notes:
 #include "fftw3.h"
 
 //--- project includes ------------------------------------------------------//
-#include "fid_params.h"
+#include "fid/params.h"
 
 namespace fid
 {

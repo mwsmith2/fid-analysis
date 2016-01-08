@@ -14,10 +14,10 @@ notes:
 \*===========================================================================*/
 
 //--- project includes ------------------------------------------------------//
-#include "fast_fid_class.h"
-#include "fid_class.h"
-#include "fid_sim.h"
-#include "fid_math.h"
-#include "fid_utils.h"
+#include "fid/fast_fid.h"
+#include "fid/fid.h"
+#include "fid/fid_factory.h"
+#include "fid/math.h"
+#include "fid/utils.h"
 
 #endif

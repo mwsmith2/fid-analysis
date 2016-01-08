@@ -1,4 +1,4 @@
-#include "fast_fid_class.h"
+#include "fid/fast_fid.h"
 
 namespace fid {
 

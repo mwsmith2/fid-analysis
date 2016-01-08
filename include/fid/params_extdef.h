@@ -1,4 +1,7 @@
-#include "fid_params.h"
+#ifndef FID_ANALYSIS_INCLUDE_FID_PARAMS_EXTDEF_H_
+#define FID_ANALYSIS_INCLUDE_FID_PARAMS_EXTDEF_H_
+
+#include "fid/params.h"
 
 namespace fid {
 
@@ -60,3 +63,4 @@ namespace grad {
 
 } // ::fid
 
+#endif

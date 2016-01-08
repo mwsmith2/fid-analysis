@@ -1,5 +1,5 @@
-#ifndef FID_ANALYSIS_INCLUDE_FID_SIM_H_
-#define FID_ANALYSIS_INCLUDE_FID_SIM_H_
+#ifndef FID_ANALYSIS_INCLUDE_FID_FID_FACTORY_H_
+#define FID_ANALYSIS_INCLUDE_FID_FID_FACTORY_H_
 
 /*===========================================================================*\
 
@@ -28,8 +28,8 @@ notes:
 #include "TTree.h"
 
 // //--- project includes ------------------------------------------------------//
-#include "fid_params.h"
-#include "fid_math.h"
+#include "fid/params.h"
+#include "fid/math.h"
 
 //--- namespaces ------------------------------------------------------------//
 
