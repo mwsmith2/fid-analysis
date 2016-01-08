@@ -161,8 +161,9 @@ inline std::vector<T> construct_range(const std::vector<T> &range_vec) {
 }
 
 template<typename T>
-inline std::vector<T> construct_linspace(const T& i, const T& f, const int& n) {
+inline std::vector<T> construct_linspace(const T& i, const T& f, const int& n=0) {
     std::vector<T> res;
+    if (n == 0) n = f - i;
     double d = (f - i) / (n - 1);
     for (int j = 0; j < n; ++j) {
         res.push_back(i + j*d);
@@ -180,6 +181,9 @@ inline std::vector<T> construct_linspace(const std::vector<T>& vals) {
     }
     return res;
 }
+
+// Get a linear gradient with a max(abs(grad)) == 1 and mean(grad) == 0
+std::vector<double> normalized_gradient(int npoints, int poln=1); 
 
 namespace dsp
 {

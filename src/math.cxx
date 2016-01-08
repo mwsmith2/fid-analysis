@@ -1,7 +1,33 @@
 #include "fid/math.h"
 
-namespace fid 
+namespace fid {
+
+std::vector<double> normalized_gradient(int npoints, int poln)
 {
+  std::vector<double> grad;
+
+  // First get the spacing right.
+  for (int i = 0; i < npoints; i++){
+    grad.push_back(pow(i, poln));
+  }
+
+  // Subtract off the average.
+  double avg = std::accumulate(grad.begin(), grad.end(), 0.0) / grad.size();
+
+  for (uint i = 0; i < grad.size(); i++){
+    grad[i] -= avg;
+  }
+
+  // Normalize by largest value.
+  double max = *std::max_element(grad.begin(), grad.end());
+
+  for (uint i = 0; i < grad.size(); i++){
+    grad[i] /= max;
+  }
+
+  return grad;
+}
+
 
 std::vector<std::complex<double>> dsp::fft(const std::vector<double> &wf)
 {
@@ -27,6 +53,7 @@ std::vector<std::complex<double>> dsp::fft(const std::vector<double> &wf)
 
   return fft_vec;
 }
+
 
 std::vector<double> dsp::ifft(const std::vector<std::complex<double>>& fft)
 {

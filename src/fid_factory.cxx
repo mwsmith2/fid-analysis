@@ -116,7 +116,7 @@ void FidFactory::SimulateFid(std::vector<double>& wf,
   using namespace boost::numeric::odeint;
   using std::bind;
   using std::ref;
-  using namespace std::placeholders; // _1, _2, _3
+  namespace pl = std::placeholders; // _1, _2, _3
 
   // make sure memory is allocated for the final FIDs
   tm.reserve(sim::num_samples);
@@ -125,12 +125,12 @@ void FidFactory::SimulateFid(std::vector<double>& wf,
 
   // Bind the member function and make a reference so it isn't copied.
   integrate_const(runge_kutta4<std::vector<double>>(), 
-                  bind(&FidFactory::Bloch, ref(*this), _1, _2, _3), 
+                  bind(&FidFactory::Bloch, ref(*this), pl::_1, pl::_2, pl::_3), 
                   s_, 
                   ti_, 
                   tf_, 
                   dt_, 
-                  bind(&FidFactory::Printer, ref(*this), _1, _2));
+                  bind(&FidFactory::Printer, ref(*this), pl::_1, pl::_2));
 
   // Set the results
   tm.resize(0);

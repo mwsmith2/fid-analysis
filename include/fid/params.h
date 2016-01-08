@@ -13,6 +13,9 @@ about: This header file holds the projects parameter namespace.  These
 
 \*---------------------------------------------------------------------------*/
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 namespace fid {
 
 // Enumerate the different methods of frequency extraction
@@ -87,6 +90,9 @@ namespace grad {
   extern int poln_order;
   extern std::vector<double> poln_coefs;
 }
+
+// header implementation of load_params
+void load_params(std::string conf_file);
 
 } // ::fid
 

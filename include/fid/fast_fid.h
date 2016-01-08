@@ -30,7 +30,6 @@ notes:
 //--- project includes ------------------------------------------------------//
 #include "fid/params.h"
 #include "fid/math.h"
-#include "fid/utils.h"
 
 namespace fid {
 
