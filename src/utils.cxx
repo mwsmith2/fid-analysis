@@ -66,90 +66,50 @@ void load_params(std::string conf_file)
 } // load_params
 
 
-// Create a linearly spaced vector over the interval.
-void construct_time_vector(uint num_times, 
-                           double t0, 
-                           double dt, 
-                           std::vector<double> &tm)
+// Create a vector of linear spaced values.
+std::vector<double> linspace(double x0, double xf, int n)
 {
-  if (tm.size() != num_times){
-    tm.resize(num_times);
+  // If n isn't set assuming integer spacing.
+  if (n == 0) {
+    n = xf - x0 + 0.5;
   }
 
-  for (uint i = 0; i < num_times; i++){
-    tm[i] = dt * i + t0;
+  double dx = (xf - x0) / n;
+  std::vector<double> vec(0.0, n);
+
+  for (int i = 0; i < n; ++i){
+    vec[i] = dx * i + x0;
   }
+
+  return vec;
 }
 
 
 // Create a discrete quadratic gradient with a normalized unit amplitude.
-void construct_quadratic_gradient(int npoints, std::vector<double> &grad)
+std::vector<double> normalized_gradient(int npoints, int poln)
 {
+  std::vector<double> grad;
+
   // First get the spacing right.
   for (int i = 0; i < npoints; i++){
-    grad.push_back((double)i * i);
+    grad.push_back(pow(i, poln));
   }
 
   // Subtract off the average.
   double avg = std::accumulate(grad.begin(), grad.end(), 0.0) / grad.size();
+
   for (uint i = 0; i < grad.size(); i++){
     grad[i] -= avg;
   }
 
   // Normalize by largest value.
   double max = *std::max_element(grad.begin(), grad.end());
+
   for (uint i = 0; i < grad.size(); i++){
     grad[i] /= max;
   }
-}
 
-
-// Create a discrete linear gradient with a normalized unit amplitude.
-void construct_linear_gradient(int npoints, std::vector<double> &grad)
-{
-  // First get the spacing right.
-  for (int i = 0; i < npoints; i++){
-    grad.push_back((double)i);
-  }
-
-  // Subtract off the average.
-  double avg = std::accumulate(grad.begin(), grad.end(), 0.0) / grad.size();
-  for (uint i = 0; i < grad.size(); i++){
-    grad[i] -= avg;
-  }
-
-  // Normalize by largest value.
-  double max = *std::max_element(grad.begin(), grad.end());
-  for (uint i = 0; i < grad.size(); i++){
-    grad[i] /= max;
-  }
-}
-
-
-// Create a TCanvas and print the graph.
-void draw_graph(TGraph gr, std::string filename, std::string title)
-{
-  // Set up the graph.
-  std::string new_title(title);
-  new_title.append("; time [ms]; amplitude [a.u.]");
-  gr.SetTitle(new_title.c_str());
-
-  // Get our own TCanvas
-  TCanvas c1;
-
-  // Draw the waveform
-  gr.Draw();
-  c1.Print(filename.c_str());
-}
-
-
-// Create a TGraph and feed it into the draw_graph() function.
-void draw_graph(const std::vector<double> &wf, const std::vector<double> &tm, std::string filename, std::string title)
-{
-  // Create a graph
-  TGraph gr(wf.size(), &tm[0], &wf[0]);
-
-  draw_graph(gr, filename, title);
+  return grad;
 }
 
 } // ::fid

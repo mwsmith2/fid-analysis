@@ -38,34 +38,12 @@ namespace fid
   // Run this function first thing to load a custom configuration.
   void load_params(std::string conf_file);
 
-  // Plots and saves the image.
-  void draw_graph(TGraph gr, std::string filename, std::string title);
-
-  // Plots and saves an image of the FID.
-  void draw_graph(const std::vector<double> &wf, 
-                  const std::vector<double> &tm, 
-                  std::string filename, 
-                  std::string title);
-
-
-  // Try all frequency extraction methods and write in a csv format
-  void calc_freq_write_csv(FID &my_fid, std::ofstream &out);
-
-  // Try all phase related frequency extraction methods and write to csv
-  void calc_phase_freq_write_csv(FID &my_fid, std::ofstream &out);
-
-  // Get a time vector for the FID
-  void construct_time_vector(int num_times, 
-                             double t0, 
-                             double dt, 
-                             std::vector<double> &tm);
+  // Replicate the functionality of MATLAB/numpy linspace
+  std::vector<double> linspace(double x0, double xf, int n=0);
 
   // Get a linear gradient with a max(abs(grad)) == 1 and mean(grad) == 0
-  void construct_linear_gradient(int noints, std::vector<double> &grad);
+  std::vector<double> normalized_gradient(int npoints, int poln=1); 
 
-  // Get a quadratic gradient with a max(abs(grad)) == 1 and mean(grad) = 0
-  void construct_quadratic_gradient(int npoints, std::vector<double> &grad);
-  
 } // fid
 
 #endif
