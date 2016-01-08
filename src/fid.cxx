@@ -783,6 +783,16 @@ void FID::SavePlot(std::string filename, std::string title)
 // Print the time series fit from an FID.
 void FID::SaveTimeFit(std::string filename, std::string title)
 {
+  if (title == "") {
+
+    title = std::string("Time Series Fit; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }  
+
   // Copy the current time fit graph.
   gr_ = gr_time_series_;
   SaveGraph(filename, title);
@@ -791,8 +801,71 @@ void FID::SaveTimeFit(std::string filename, std::string title)
 // Print the time series fit from an FID.
 void FID::SaveFreqFit(std::string filename, std::string title)
 {
+  if (title == "") {
+
+    title = std::string("Frequency Series Fit; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }  
+
   // Copy the current time fit graph.
   gr_ = gr_freq_series_;
+  SaveGraph(filename, title);
+}
+
+void FID::SaveTimeRes(std::string filename, std::string title)
+{
+  if (title == "") {
+
+    title = std::string("Time Series Fit Residuals; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }  
+
+  // Copy the current time fit.
+  gr_ = gr_time_series_;
+
+  // Set the points
+  for (uint i = 0; i < res_.size(); ++i){
+    static double x, y;
+
+    gr_.GetPoint(i, x, y);
+    gr_.SetPoint(i, x, res_[i]); 
+  }
+
+  SaveGraph(filename, title);
+}
+
+
+void FID::SaveFreqRes(std::string filename, std::string title)
+{
+  if (title == "") {
+
+    title = std::string("Freq Series Fit Residuals; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }  
+
+  // Copy the current time fit.
+  gr_ = gr_freq_series_;
+
+  // Set the points
+  for (uint i = 0; i < res_.size(); ++i){
+    static double x, y;
+
+    gr_.GetPoint(i, x, y);
+    gr_.SetPoint(i, x, res_[i]); 
+  }
+
   SaveGraph(filename, title);
 }
 
