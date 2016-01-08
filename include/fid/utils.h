@@ -39,31 +39,28 @@ namespace fid
   void load_params(std::string conf_file);
 
   // Plots and saves the image.
-  void draw_graph(TGraph gr, std::string fname, std::string title);
+  void draw_graph(TGraph gr, std::string filename, std::string title);
 
   // Plots and saves an image of the FID.
   void draw_graph(const std::vector<double> &wf, 
                   const std::vector<double> &tm, 
-                  std::string fname, 
+                  std::string filename, 
                   std::string title);
 
-  // Plots and save specific FID images
-  void draw_fid(const FID &my_fid, std::string fname, std::string title);
-
   void draw_fid_time_fit(const FID &my_fid, 
-                         std::string fname, 
+                         std::string filename, 
                          std::string title);
 
   void draw_fid_freq_fit(const FID &my_fid, 
-                         std::string fname, 
+                         std::string filename, 
                          std::string title);
 
   void draw_fid_time_res(const FID &my_fid, 
-                         std::string fname, 
+                         std::string filename, 
                          std::string title);
 
   void draw_fid_freq_res(const FID &my_fid, 
-                         std::string fname, 
+                         std::string filename, 
                          std::string title);
 
 
@@ -74,12 +71,12 @@ namespace fid
   void calc_phase_freq_write_csv(FID &my_fid, std::ofstream &out);
 
   // Read a FID file which is two space delimited columns (time voltage)
-  void read_fid_file(std::string fname, 
+  void read_fid_file(std::string filename, 
                      std::vector<double> &wf, 
                      std::vector<double> &tm);
 
   // Read a FID file which is two space delimited columns (time voltage)
-  void write_fid_file(std::string fname, 
+  void write_fid_file(std::string filename, 
                       const std::vector<double> &wf, 
                       const std::vector<double> &tm);
 

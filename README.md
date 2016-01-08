@@ -243,19 +243,19 @@ The functions that let one save fit results and residuals (very useful for debug
 
 ```c++
 void draw_fid_time_fit(const FID &my_fid, 
-                       std::string fname, 
+                       std::string filename, 
                        std::string title);
 
 void draw_fid_freq_fit(const FID &my_fid, 
-                       std::string fname, 
+                       std::string filename, 
                        std::string title);
 
 void draw_fid_time_res(const FID &my_fid, 
-                       std::string fname, 
+                       std::string filename, 
                        std::string title);
 
 void draw_fid_freq_res(const FID &my_fid, 
-                       std::string fname, 
+                       std::string filename, 
                        std::string title);
 ```
 
@@ -264,7 +264,7 @@ void draw_fid_freq_res(const FID &my_fid,
 There are a few functions along these lines.  One saves the FID data itself to a text file.  Another saves frequency extraction results to a file stream.  Yet another save frequency extraction results for different types of phase fits to a file stream.
 
 ```c++
-void write_fid_file(std::string fname, 
+void write_fid_file(std::string filename, 
                     const std::vector<double> &wf, 
                     const std::vector<double> &tm);
 
