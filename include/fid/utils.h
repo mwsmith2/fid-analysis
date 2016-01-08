@@ -47,23 +47,6 @@ namespace fid
                   std::string filename, 
                   std::string title);
 
-  void draw_fid_time_fit(const FID &my_fid, 
-                         std::string filename, 
-                         std::string title);
-
-  void draw_fid_freq_fit(const FID &my_fid, 
-                         std::string filename, 
-                         std::string title);
-
-  void draw_fid_time_res(const FID &my_fid, 
-                         std::string filename, 
-                         std::string title);
-
-  void draw_fid_freq_res(const FID &my_fid, 
-                         std::string filename, 
-                         std::string title);
-
-
   // Try all frequency extraction methods and write in a csv format
   void calc_freq_write_csv(FID &my_fid, std::ofstream &out);
 
