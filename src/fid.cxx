@@ -751,13 +751,18 @@ Method FID::ParseMethod(const std::string& m)
 }
 
 
+// Save the interanl TGraph.
+void FID::SaveGraph(std::string filename, std::string title)
+{ 
+  gr_.SetTitle(title.c_str());
+  gr_.Draw();
+  c1_.Print(filename.c_str());
+}
+
+
 // Save a plot of FID waveform.
 void FID::SavePlot(std::string filename, std::string title)
 {
-  // Get our own TCanvas
-  static TCanvas c1;
-  static TGraph gr;
-
   // If no title supplied give a reasonable default.
   if (title == "") {
 
@@ -769,13 +774,9 @@ void FID::SavePlot(std::string filename, std::string title)
     title.append("; time [ms]; amplitude [a.u.]");
   }
 
-  // Set the graph.
-  gr = TGraph(wf_.size(), &tm_[0], &wf_[0]);
-  gr.SetTitle(title.c_str());
+  gr_ = TGraph(wf_.size(), &tm_[0], &wf_[0]);
 
-  // Draw the waveform
-  gr.Draw();
-  c1.Print(filename.c_str());
+  SaveGraph(filename, title);
 }
 
 

@@ -63,8 +63,8 @@ class FID {
   void SaveData(std::string filename);
   void SavePlot(std::string filename, std::string title="");
   void SaveTimeFit(std::string filename, std::string title="");
-  void SaveTimeRes(std::string filename, std::string title="");
   void SaveFreqFit(std::string filename, std::string title="");
+  void SaveTimeRes(std::string filename, std::string title="");
   void SaveFreqRes(std::string filename, std::string title="");
 
   // accessors
@@ -121,6 +121,10 @@ class FID {
   TF1 f_fit_;
   TGraph gr_time_series_;
   TGraph gr_freq_series_;
+
+  // For general plotting.
+  TCanvas c1_;
+  TGraph gr_;
   
   // bigger data arrays
   std::vector<double> wf_;
@@ -135,6 +139,7 @@ class FID {
   // Private Member Functions  
   // init function to be called after wf_ and tm_ are set.
   void Init();
+  void SaveGraph(std::string filename, std::string title);
 
   // internal utility functions
   void CalcNoise();
