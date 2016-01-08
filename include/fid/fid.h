@@ -66,6 +66,8 @@ class FID {
   void SaveFreqFit(std::string filename, std::string title="");
   void SaveTimeRes(std::string filename, std::string title="");
   void SaveFreqRes(std::string filename, std::string title="");
+  void WriteFreqCsv(std::ofstream& out);
+  void WritePhaseFreqCsv(std::ofstream& out);
 
   // accessors
   const bool isgood() const { return health_ > 0.0; };

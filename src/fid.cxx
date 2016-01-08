@@ -881,6 +881,7 @@ void FID::SaveData(std::string filename)
   }
 }
 
+
 void FID::LoadTextData(std::string filename)
 {
   // open the file first
@@ -898,6 +899,34 @@ void FID::LoadTextData(std::string filename)
     tm_.push_back(tm_temp);
     wf_.push_back(wf_temp);
   } 
+}
+
+
+// Analyze an FID with all methods and print to output stream csv style.
+void FID::WriteFreqCsv(std::ofstream& out)
+{
+  // Test all the frequency extraction methods and write the results
+  out << CalcZeroCountFreq() << ", " << 0.0 << ", ";
+  out << CalcCentroidFreq() << ", " << 0.0 << ", ";
+  out << CalcAnalyticalFreq() << ", " << chi2_ << ", ";
+  out << CalcLorentzianFreq() << ", " << chi2_ << ", ";
+  out << CalcSoftLorentzianFreq() << ", " << chi2_ << ", ";
+  out << CalcExponentialFreq() << ", " << chi2_ << ", ";
+  out << CalcPhaseFreq() << ", " << chi2_ << ", ";
+  out << CalcSinusoidFreq() << ", " << chi2_ << std::endl;
+}
+
+
+// Test all the frequency extraction methods using the phase
+void FID::WritePhaseFreqCsv(std::ofstream& out)
+{
+  out << CalcPhaseFreq() << ", " << chi2_ << ", ";
+  out << CalcPhaseFreq(2) << ", " << chi2_ << ", ";
+  out << CalcPhaseFreq(3) << ", " << chi2_ << ", ";
+  out << CalcPhaseDerivFreq() << ", " << chi2_ << ", ";
+  out << CalcPhaseDerivFreq(2) << ", " << chi2_ << ", ";
+  out << CalcPhaseDerivFreq(3) << ", " << chi2_ << ", ";
+  out << CalcSinusoidFreq() << ", " << chi2_ << std::endl;
 }
 
 } // fid
