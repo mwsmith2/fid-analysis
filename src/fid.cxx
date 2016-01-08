@@ -780,6 +780,23 @@ void FID::SavePlot(std::string filename, std::string title)
 }
 
 
+// Print the time series fit from an FID.
+void FID::SaveTimeFit(std::string filename, std::string title)
+{
+  // Copy the current time fit graph.
+  gr_ = gr_time_series_;
+  SaveGraph(filename, title);
+}
+
+// Print the time series fit from an FID.
+void FID::SaveFreqFit(std::string filename, std::string title)
+{
+  // Copy the current time fit graph.
+  gr_ = gr_freq_series_;
+  SaveGraph(filename, title);
+}
+
+
 // Save the FID data to a text file as "<time> <amp>".
 void FID::SaveData(std::string filename)
 {
