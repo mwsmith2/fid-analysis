@@ -25,6 +25,7 @@ notes:
 #include <boost/algorithm/string.hpp>
 #include <armadillo>
 #include "TGraph.h"
+#include "TCanvas.h"
 #include "TF1.h"
 
 //--- project includes ------------------------------------------------------//
@@ -57,6 +58,9 @@ class FID {
   // diagnostic function
   void PrintDiagnosticInfo();
   void PrintDiagnosticInfo(std::iostream out);
+
+  // utility functions
+  void SavePlot(std::string filename, std::string title="");
 
   // accessors
   const bool isgood() const { return health_ > 0.0; };

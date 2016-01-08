@@ -750,4 +750,30 @@ Method FID::ParseMethod(const std::string& m)
   return freq_method_;
 }
 
+void FID::SavePlot(std::string filename, std::string title)
+{
+  // Get our own TCanvas
+  static TCanvas c1;
+  static TGraph gr;
+
+  // If no title supplied give a reasonable default.
+  if (title == "") {
+
+    title = std::string("FID; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }
+
+  // Set the graph.
+  gr = TGraph(wf_.size(), &tm_[0], &wf_[0]);
+  gr.SetTitle(title.c_str());
+
+  // Draw the waveform
+  gr.Draw();
+  c1.Print(filename.c_str());
+}
+
 } // fid
