@@ -91,6 +91,7 @@ class FastFid {
   // Private Member Functions  
   // init function to be called after wf_ and tm_ are set.
   void Init();
+  void LoadTextData(std::string filename);
 
   // internal utility functions
   void CalcNoise();

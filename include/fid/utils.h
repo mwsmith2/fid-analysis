@@ -47,16 +47,12 @@ namespace fid
                   std::string filename, 
                   std::string title);
 
+
   // Try all frequency extraction methods and write in a csv format
   void calc_freq_write_csv(FID &my_fid, std::ofstream &out);
 
   // Try all phase related frequency extraction methods and write to csv
   void calc_phase_freq_write_csv(FID &my_fid, std::ofstream &out);
-
-  // Read a FID file which is two space delimited columns (time voltage)
-  void read_fid_file(std::string filename, 
-                     std::vector<double> &wf, 
-                     std::vector<double> &tm);
 
   // Get a time vector for the FID
   void construct_time_vector(int num_times, 

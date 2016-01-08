@@ -140,6 +140,7 @@ class FID {
   // init function to be called after wf_ and tm_ are set.
   void Init();
   void SaveGraph(std::string filename, std::string title);
+  void LoadTextData(std::string filename); 
 
   // internal utility functions
   void CalcNoise();

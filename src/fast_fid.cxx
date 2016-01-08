@@ -5,7 +5,7 @@ namespace fid {
 FastFid::FastFid(const std::string& fid_file)
 {
   // Read and store the waveform and time from a .fid file.
-  read_fid_file(fid_file, wf_, tm_);
+  LoadTextData(fid_file);
 
   Init();
 }
@@ -16,7 +16,7 @@ FastFid::FastFid(const char* fid_file)
   std::string fid_string(fid_file);
 
   // Read and store the waveform and time from a .fid file.
-  read_fid_file(fid_string, wf_, tm_);
+  LoadTextData(fid_string);
 
   Init();
 }
@@ -278,6 +278,27 @@ void FastFid::PrintDiagnosticInfo(std::iostream out)
   out << "noise level: " << noise_ << endl;
   out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
   out << std::string(80, '>') << endl;
+}
+
+
+// Load FID data from a formatted text file.
+void FastFid::LoadTextData(std::string filename)
+{
+  // open the file first
+  std::ifstream in(filename);
+
+  // shrink vectors
+  wf_.resize(0);
+  tm_.resize(0);
+
+  double wf_temp;
+  double tm_temp;
+
+  while (in.good()) {
+    in >> tm_temp >> wf_temp;
+    tm_.push_back(tm_temp);
+    wf_.push_back(wf_temp);
+  } 
 }
 
 } // fid
