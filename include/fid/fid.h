@@ -60,7 +60,12 @@ class FID {
   void PrintDiagnosticInfo(std::iostream out);
 
   // utility functions
+  void SaveData(std::string filename);
   void SavePlot(std::string filename, std::string title="");
+  void SaveTimeFit(std::string filename, std::string title="");
+  void SaveTimeRes(std::string filename, std::string title="");
+  void SaveFreqFit(std::string filename, std::string title="");
+  void SaveFreqRes(std::string filename, std::string title="");
 
   // accessors
   const bool isgood() const { return health_ > 0.0; };

@@ -750,6 +750,8 @@ Method FID::ParseMethod(const std::string& m)
   return freq_method_;
 }
 
+
+// Save a plot of FID waveform.
 void FID::SavePlot(std::string filename, std::string title)
 {
   // Get our own TCanvas
@@ -774,6 +776,18 @@ void FID::SavePlot(std::string filename, std::string title)
   // Draw the waveform
   gr.Draw();
   c1.Print(filename.c_str());
+}
+
+
+// Save the FID data to a text file as "<time> <amp>".
+void FID::SaveData(std::string filename)
+{
+  // open the file first
+  std::ofstream out(filename);
+
+  for (int i = 0; i < tm_.size(); ++i) {
+    out << tm_[i] << " " << wf_[i] << std::endl;
+  }
 }
 
 } // fid

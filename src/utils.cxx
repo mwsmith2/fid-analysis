@@ -278,17 +278,4 @@ void read_fid_file(std::string filename,
 }
 
 
-// Write FID waveform/time vectors to a text file.
-void write_fid_file(std::string filename,
-                    const std::vector<double> &wf, 
-                    const std::vector<double> &tm)
-{
-  // open the file first
-  std::ofstream out(filename);
-
-  for (int i = 0; i < tm.size(); ++i) {
-    out << tm[i] << ", " << wf[i] << std::endl;
-  }
-}
-
 } // ::fid
