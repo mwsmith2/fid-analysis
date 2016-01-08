@@ -57,7 +57,7 @@ install:
 
 uninstall:
 	rm -f $(PREFIX)/lib/$(SONAME)*
-	rm -f $(patsubst include/%,$(PREFIX)/include/%,$(HEADERS))
+	rm -rf $(patsubst include/%,$(PREFIX)/include/%,$(HEADERS))
 
 clean:
 	rm -f $(TARGETS) build/* 
