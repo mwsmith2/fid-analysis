@@ -48,9 +48,11 @@ int main(int argc, char **argv)
 
   // Make FidFactory
   FidFactory ff;
-  ff.SimulateFid(tm, wf);
+  ff.SimulateFid(wf, tm);
 
   FID my_fid(wf, tm);
+
+  my_fid.SavePlot("test.png", "FID Test");
 
   fid::write_fid_file("test.fid", my_fid.tm(), my_fid.wf());
 

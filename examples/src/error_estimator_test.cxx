@@ -67,11 +67,17 @@ int main(int argc, char **argv)
   std::default_random_engine gen;
   std::uniform_real_distribution<double> rand_flat_dist(35.0, 40.0);
 
+  FidFactory ff;
+
   for (int i = 0; i < 2000; ++i) {
     
     // Make ideal FID waveform
     double freq = rand_flat_dist(gen);
-    ideal_fid(wf, tm, freq, 0.0, 100 * 100);
+    sim::freq_larmor = freq;
+    sim::mixdown_phi = 0.0;
+    sim::snr = 100 * 100;
+
+    ff.IdealFid(wf, tm, true);
 
     FID myfid(wf, tm);
     out << freq << "\t" << 0.0 << "\t";
