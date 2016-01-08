@@ -38,15 +38,6 @@ namespace fid
   // Run this function first thing to load a custom configuration.
   void load_params(std::string conf_file);
 
-  // An exponential decay multiplied with a sinusoid.
-	void ideal_fid(std::vector<double>& wf, 
-                 std::vector<double>& tm, 
-                 double f, 
-                 double phi=0.0, 
-                 double snr=100.0, 
-                 double tau=10.0, 
-                 double t0=0.0);
-
   // Plots and saves the image.
   void draw_graph(TGraph gr, std::string fname, std::string title);
 

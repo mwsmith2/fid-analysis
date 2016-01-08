@@ -91,7 +91,6 @@ class FID {
   double CalcPhaseFreq(int poln=1);
   double CalcPhaseDerivFreq(int poln=1);
   double CalcSinusoidFreq();
-
   
  private:
   
