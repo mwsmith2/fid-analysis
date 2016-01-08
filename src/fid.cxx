@@ -3,7 +3,7 @@
 
 namespace fid {
 
-FID::FID(const std::string& fid_file)
+Fid::Fid(const std::string& fid_file)
 {
   // Read and store the waveform and time from a .fid file.
   LoadTextData(fid_file);
@@ -11,7 +11,7 @@ FID::FID(const std::string& fid_file)
   Init();
 }
 
-FID::FID(const char* fid_file)
+Fid::Fid(const char* fid_file)
 {
   // Convert the char pointer toa string.
   std::string fid_string(fid_file);
@@ -23,7 +23,7 @@ FID::FID(const char* fid_file)
 }
 
 
-FID::FID(const std::vector<double>& wf, const std::vector<double>& tm)
+Fid::Fid(const std::vector<double>& wf, const std::vector<double>& tm)
 {
   // Copy the waveform and time to member vectors.
   wf_ = wf;
@@ -32,7 +32,7 @@ FID::FID(const std::vector<double>& wf, const std::vector<double>& tm)
   Init();
 }
 
-FID::FID(const std::vector<double>& wf)
+Fid::Fid(const std::vector<double>& wf)
 {
   // Copy the waveform and construct a generic time range.
   wf_ = wf;
@@ -42,7 +42,7 @@ FID::FID(const std::vector<double>& wf)
 }
 
 
-void FID::Init()
+void Fid::Init()
 {
   // Initialize the health to full.
   health_ = 100.0;
@@ -96,22 +96,22 @@ void FID::Init()
   }
 }
 
-double FID::GetFreq()
+double Fid::GetFreq()
 {
   return freq_;
 }
 
-double FID::GetFreq(const std::string& method_name)
+double Fid::GetFreq(const std::string& method_name)
 {
   return GetFreq(ParseMethod(method_name));
 }
 
-double FID::GetFreq(const char* method_name)
+double Fid::GetFreq(const char* method_name)
 {
   return GetFreq((std::string(method_name)));
 }
 
-double FID::GetFreq(const Method m)
+double Fid::GetFreq(const Method m)
 {
   // Recalculate if necessary
   if (freq_method_ != m) {
@@ -125,13 +125,13 @@ double FID::GetFreq(const Method m)
   }
 }
 
-double FID::GetFreqError()
+double Fid::GetFreqError()
 {
   return freq_err_;
 }
 
 // Calculate the frequency using the current Method
-double FID::CalcFreq()
+double Fid::CalcFreq()
 {
   switch(freq_method_) {
 
@@ -180,7 +180,7 @@ double FID::CalcFreq()
   return freq_;
 }
 
-void FID::CenterFid()
+void Fid::CenterFid()
 {
   int w = params::zc_width;
   double sum  = std::accumulate(wf_.begin(), wf_.begin() + w, 0.0);
@@ -190,7 +190,7 @@ void FID::CenterFid()
   std::for_each(wf_.begin(), wf_.end(), [avg](double& x){ x -= avg; });
 }
 
-void FID::CalcNoise()
+void Fid::CalcNoise()
 { 
   // Grab a new handle to the noise window width for aesthetics.
   int i = params::edge_ignore;
@@ -204,7 +204,7 @@ void FID::CalcNoise()
   noise_ = (tail < head) ? (tail) : (head);
 }
 
-void FID::CalcMaxAmp() 
+void Fid::CalcMaxAmp() 
 {
   auto mm = std::minmax_element(wf_.begin(), wf_.end());
   if (std::abs(*mm.first) > std::abs(*mm.second)) {
@@ -214,7 +214,7 @@ void FID::CalcMaxAmp()
   }
 }
 
-void FID::FindFidRange()
+void Fid::FindFidRange()
 {
   // Find the starting and ending points
   double thresh = params::start_thresh * max_amp_;
@@ -296,7 +296,7 @@ void FID::FindFidRange()
   } 
 }
 
-void FID::CalcPowerEnvAndPhase()
+void Fid::CalcPowerEnvAndPhase()
 {
   // Get the fft of the waveform first.
   auto fid_fft = dsp::fft(wf_);
@@ -315,13 +315,13 @@ void FID::CalcPowerEnvAndPhase()
   env_ = dsp::envelope(wf_, wf_im);
 }
 
-void FID::CalcFftFreq()
+void Fid::CalcFftFreq()
 {
   // @todo: consider storing as start, step, stop
   fftfreq_ = dsp::fftfreq(tm_);
 }
 
-void FID::GuessFitParams()
+void Fid::GuessFitParams()
 {
   // Guess the general fit parameters
   guess_.assign(6, 0.0);
@@ -374,7 +374,7 @@ void FID::GuessFitParams()
 }
 
 
-void FID::FreqFit(TF1& func)
+void Fid::FreqFit(TF1& func)
 {
   // Make a TGraph to fit
   gr_freq_series_ = TGraph(f_fft_ - i_fft_, &fftfreq_[i_fft_], &power_[i_fft_]);
@@ -392,7 +392,7 @@ void FID::FreqFit(TF1& func)
   return;
 }
 
-double FID::CalcZeroCountFreq()
+double Fid::CalcZeroCountFreq()
 {
   // set up vectors to hold relevant stuff about the important part
   temp_.resize(f_wf_ - i_wf_);
@@ -450,7 +450,7 @@ double FID::CalcZeroCountFreq()
   return freq_;
 }
 
-double FID::CalcCentroidFreq()
+double Fid::CalcCentroidFreq()
 {
   // Find the peak power
   double thresh = *std::max_element(power_.begin(), power_.end());
@@ -484,7 +484,7 @@ double FID::CalcCentroidFreq()
 }
 
 
-double FID::CalcAnalyticalFreq()
+double Fid::CalcAnalyticalFreq()
 {
   // @todo check the algebra on this guy
   // Set the fit function
@@ -512,7 +512,7 @@ double FID::CalcAnalyticalFreq()
 }
 
 
-double FID::CalcLorentzianFreq()
+double Fid::CalcLorentzianFreq()
 {
   // Set the fit function
   std::string fcn("[2] / (1 + ((x - [0]) / (0.5 * [1]))^2) + [3]");
@@ -531,7 +531,7 @@ double FID::CalcLorentzianFreq()
 }
 
 
-double FID::CalcSoftLorentzianFreq()
+double Fid::CalcSoftLorentzianFreq()
 {
   // Set the fit function
   f_fit_ = TF1("f_fit_", "[2] / (1 + ((x - [0]) / (0.5 * [1]))^[4]) + [3]");
@@ -551,7 +551,7 @@ double FID::CalcSoftLorentzianFreq()
 }
 
 
-double FID::CalcExponentialFreq()
+double Fid::CalcExponentialFreq()
 {
   // Set the fit function
   f_fit_ = TF1("f_fit_", "[2] * exp(-abs(x - [0]) / [1]) + [3]");
@@ -571,7 +571,7 @@ double FID::CalcExponentialFreq()
 }
 
 
-double FID::CalcPhaseFreq(int poln)
+double Fid::CalcPhaseFreq(int poln)
 {
   gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &phase_[i_wf_]);
 
@@ -602,7 +602,7 @@ double FID::CalcPhaseFreq(int poln)
   return freq_;
 }
 
-double FID::CalcPhaseDerivFreq(int poln)
+double Fid::CalcPhaseDerivFreq(int poln)
 {
   // Do the normal polynomial phase fit to set the fit function
   CalcPhaseFreq(poln);
@@ -614,7 +614,7 @@ double FID::CalcPhaseDerivFreq(int poln)
 } 
 
 
-double FID::CalcSinusoidFreq()
+double Fid::CalcSinusoidFreq()
 {
   // Normalize the waveform by the envelope
   temp_.resize(wf_.size());
@@ -664,7 +664,7 @@ double FID::CalcSinusoidFreq()
   return freq_;
 }
 
-void FID::PrintDiagnosticInfo()
+void Fid::PrintDiagnosticInfo()
 {
   using std::cout;
   using std::endl;
@@ -677,7 +677,7 @@ void FID::PrintDiagnosticInfo()
   cout << std::string(80, '>') << endl;
 }
 
-void FID::PrintDiagnosticInfo(std::iostream out)
+void Fid::PrintDiagnosticInfo(std::iostream out)
 {
   using std::cout;
   using std::endl;
@@ -690,7 +690,7 @@ void FID::PrintDiagnosticInfo(std::iostream out)
   out << std::string(80, '>') << endl;
 }
 
-Method FID::ParseMethod(const std::string& m)
+Method Fid::ParseMethod(const std::string& m)
 {
   using std::string;
 
@@ -753,7 +753,7 @@ Method FID::ParseMethod(const std::string& m)
 
 
 // Save the interanl TGraph.
-void FID::SaveGraph(std::string filename, std::string title)
+void Fid::SaveGraph(std::string filename, std::string title)
 { 
   gr_.SetTitle(title.c_str());
   gr_.Draw();
@@ -762,7 +762,7 @@ void FID::SaveGraph(std::string filename, std::string title)
 
 
 // Save a plot of FID waveform.
-void FID::SavePlot(std::string filename, std::string title)
+void Fid::SavePlot(std::string filename, std::string title)
 {
   // If no title supplied give a reasonable default.
   if (title == "") {
@@ -782,7 +782,7 @@ void FID::SavePlot(std::string filename, std::string title)
 
 
 // Print the time series fit from an FID.
-void FID::SaveTimeFit(std::string filename, std::string title)
+void Fid::SaveTimeFit(std::string filename, std::string title)
 {
   if (title == "") {
 
@@ -800,7 +800,7 @@ void FID::SaveTimeFit(std::string filename, std::string title)
 }
 
 // Print the time series fit from an FID.
-void FID::SaveFreqFit(std::string filename, std::string title)
+void Fid::SaveFreqFit(std::string filename, std::string title)
 {
   if (title == "") {
 
@@ -817,7 +817,7 @@ void FID::SaveFreqFit(std::string filename, std::string title)
   SaveGraph(filename, title);
 }
 
-void FID::SaveTimeRes(std::string filename, std::string title)
+void Fid::SaveTimeRes(std::string filename, std::string title)
 {
   if (title == "") {
 
@@ -844,7 +844,7 @@ void FID::SaveTimeRes(std::string filename, std::string title)
 }
 
 
-void FID::SaveFreqRes(std::string filename, std::string title)
+void Fid::SaveFreqRes(std::string filename, std::string title)
 {
   if (title == "") {
 
@@ -872,7 +872,7 @@ void FID::SaveFreqRes(std::string filename, std::string title)
 
 
 // Save the FID data to a text file as "<time> <amp>".
-void FID::SaveData(std::string filename)
+void Fid::SaveData(std::string filename)
 {
   // open the file first
   std::ofstream out(filename);
@@ -883,7 +883,7 @@ void FID::SaveData(std::string filename)
 }
 
 
-void FID::LoadTextData(std::string filename)
+void Fid::LoadTextData(std::string filename)
 {
   // open the file first
   std::ifstream in(filename);
@@ -904,7 +904,7 @@ void FID::LoadTextData(std::string filename)
 
 
 // Analyze an FID with all methods and print to output stream csv style.
-void FID::WriteFreqCsv(std::ofstream& out)
+void Fid::WriteFreqCsv(std::ofstream& out)
 {
   // Test all the frequency extraction methods and write the results
   out << CalcZeroCountFreq() << ", " << 0.0 << ", ";
@@ -919,7 +919,7 @@ void FID::WriteFreqCsv(std::ofstream& out)
 
 
 // Test all the frequency extraction methods using the phase
-void FID::WritePhaseFreqCsv(std::ofstream& out)
+void Fid::WritePhaseFreqCsv(std::ofstream& out)
 {
   out << CalcPhaseFreq() << ", " << chi2_ << ", ";
   out << CalcPhaseFreq(2) << ", " << chi2_ << ", ";

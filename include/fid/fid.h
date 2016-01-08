@@ -34,15 +34,15 @@ notes:
 
 namespace fid {
 
-class FID {
+class Fid {
 
  public:
   
   // ctors
-  FID(const std::string& fid_file);
-  FID(const char* fid_file);
-  FID(const std::vector<double>& wf, const std::vector<double>& tm);
-  FID(const std::vector<double>& wf);
+  Fid(const std::string& fid_file);
+  Fid(const char* fid_file);
+  Fid(const std::vector<double>& wf, const std::vector<double>& tm);
+  Fid(const std::vector<double>& wf);
 
   // Simplified frequency extraction
   double GetFreq();
@@ -154,7 +154,7 @@ class FID {
   void FreqFit(TF1& func);
   Method ParseMethod(const std::string& m);
   
-}; // FID
+}; // Fid
  
 } // fid
 
