@@ -25,7 +25,12 @@ using namespace fid;
 int main(int argc, char **argv)
 {
   // Make sure a data file was specified and get it.
-  assert(argc > 1);
+  if (argc < 2) {
+  	std::cout << "Insufficient arguments: must provide data." << std::endl;
+  	std::cout << "usage: ./simple_fid_analyzer <input-data>" << std::endl;
+  	exit(1);
+  }
+
   Fid myfid(argv[1]);
 
   std::cout << "Frequency, Error" << std::endl;
