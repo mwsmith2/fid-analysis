@@ -4,9 +4,6 @@ namespace fid {
 
 FidFactory::FidFactory()
 {
-  using std::cout;
-  using std::endl;
-
   LoadParams();
 
   // Set the start/stop times.
@@ -19,9 +16,9 @@ FidFactory::FidFactory()
   // If zero, more less integration steps than sampling times were requested.
   if (sim_to_fid_ == 0) {
 
-    cout << "WARNING: The given integration step was larger than the ";
-    cout << "sampling time, so the sampling time, " << delta_time_;
-    cout << ", will be used instead." << endl;
+    std::cout << "WARNING: The given integration step was larger than the ";
+    std::cout << "sampling time, so the sampling time, " << delta_time_;
+    std::cout << ", will be used instead." << std::endl;
 
     sim_to_fid_ = 1;
     dt_ = delta_time_;
@@ -31,9 +28,9 @@ FidFactory::FidFactory()
     dt_ = delta_time_ / sim_to_fid_;
   
     if (dt_ != dt_integration_) {
-      cout << "WARNING: The given integration time step was not an even";
-      cout << " divisor of the sampling rate, so it has been rounded to ";
-      cout << dt_ << endl;
+      std::cout << "WARNING: The given integration time step was not an even";
+      std::cout << " divisor of the sampling rate, so it has been rounded to ";
+      std::cout << dt_ << std::endl;
     }
   }
 
@@ -93,10 +90,7 @@ void FidFactory::LoadParams()
 
 
 // Create an idealized FID with current Simulation parameters
-void FidFactory::IdealFid(std::vector<double>& wf, 
-                          std::vector<double>& tm, 
-                          bool withnoise,
-                          bool discretize)
+void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm)
 {
   wf.reserve(tm.size());
   wf.resize(0);
@@ -124,17 +118,14 @@ void FidFactory::IdealFid(std::vector<double>& wf,
     }
   } 
 
-  if (withnoise) addnoise(wf, snr_);
+  if (with_noise_) addnoise(wf, snr_);
 
-  if (discretize) floor(wf);
+  if (discretize_) floor(wf);
 }
 
 
 // Simulate an FID with the current class settings.
-void FidFactory::SimulateFid(std::vector<double>& wf, 
-                             std::vector<double>& tm, 
-                             bool withnoise,
-                             bool discretize)
+void FidFactory::SimulateFid(std::vector<double>& wf, std::vector<double>& tm)
 {
   using namespace boost::numeric::odeint;
   using std::bind;
@@ -166,16 +157,14 @@ void FidFactory::SimulateFid(std::vector<double>& wf,
   }
 
   // Take care of optional effects.
-  if (withnoise) addnoise(wf, snr_);
-  if (discretize) floor(wf);
+  if (with_noise_) addnoise(wf, snr_);
+  if (discretize_) floor(wf);
 }
 
 
 // Simulate a gradient FID by combining multiple simulated FIDs.
-void FidFactory::GradientFid(const std::vector<double>& gradient, 
-                             std::vector<double>& wf, 
-                             bool withnoise,
-                             bool discretize)
+void FidFactory::GradientFid(const std::vector<double>& grad, 
+                             std::vector<double>& wf)
 {
   // Make sure we have an example file draw from.
   if (!pf_fid_->IsOpen()) {
@@ -189,7 +178,7 @@ void FidFactory::GradientFid(const std::vector<double>& gradient,
 
 
   // Add each FID in the gradient.
-  for (auto& g : gradient){
+  for (auto& g : grad){
 
     pt_fid_->GetEntry(GetTreeIndex(g));
 
@@ -199,15 +188,15 @@ void FidFactory::GradientFid(const std::vector<double>& gradient,
   }
 
   // Calculate the proper amplitude_ and scale + offset the sim FID.
-  double amp = amplitude_ / gradient.size();
+  double amp = amplitude_ / grad.size();
 
   for (auto& val : wf) {
     val = val * amp + baseline_;
   }
 
   // Take care of optional effects.
-  if (withnoise) addnoise(wf, snr_);
-  if (discretize) floor(wf);
+  if (with_noise_) addnoise(wf, snr_);
+  if (discretize_) floor(wf);
 }
 
 

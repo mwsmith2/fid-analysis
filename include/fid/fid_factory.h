@@ -46,20 +46,35 @@ class FidFactory
   ~FidFactory();
 
   // member methods
-  void IdealFid(std::vector<double>& wf, 
-                std::vector<double>& tm, 
-                bool withnoise=false,
-                bool discretize=false);
+  void IdealFid(std::vector<double>& wf, std::vector<double>& tm);
+  void SimulateFid(std::vector<double>& wf, std::vector<double>& tm);
+  void GradientFid(const std::vector<double>& grad, std::vector<double>& wf);
 
-  void SimulateFid(std::vector<double>& wf, 
-                   std::vector<double>& tm, 
-                   bool withnoise=false,
-                   bool discretize=false);
+  // Functions to set simulation parameters.
+  void SetSeed(const int seed) { seed_ = seed; };
+  void SetDtIntegration(const double step) { dt_integration_ = step; };
 
-  void GradientFid(const std::vector<double>& gradient, 
-                   std::vector<double>& wf, 
-                   bool withnoise=false,
-                   bool discretize=false);
+  void SetSNR(const double snr) { snr_ = snr; };
+  void SetAmplitude(const double amp) { amplitude_ = amp; };
+  void SetBaseline(const double baseline) { baseline_ = baseline; };
+  void SetStartTime(const double start_time) { start_time_ = start_time; };
+  void SetDeltaTime(const double delta_time) { delta_time_ = delta_time; };
+  void SetNumSamples(int n) { num_samples_ = n; };
+
+  void SetFreqLarmor(const double f) { freq_larmor_ = f; };
+  void SetFreqRef(const double f) { freq_ref_ = f; };
+  void SetFreqCutRatio(const double ratio) { freq_cut_ratio_ = ratio; };
+  void SetMixdownPhi(const double phi) { mixdown_phi_ = phi; };
+  void SetInitialSpin(const std::vector<double>& s) { spin_0_ = s; };
+
+  void SetGamma1(const double g) { gamma_1_ = g; };
+  void SetGamma2(const double g) { gamma_2_ = g; };
+  void SetGammaG(const double g) { gamma_g_ = g; };
+  void SetOmegaR(const double o) { omega_r_ = o; };
+  void SetTPulse(const double t) { t_pulse_ = t; };
+
+  void SetWithNoise(bool whith_noise) { with_noise_ = whith_noise; };
+  void SetDiscretize(bool discretize) { discretize_ = discretize; };
 
   void PrintDiagnosticInfo();
 
@@ -102,6 +117,9 @@ class FidFactory
 
   double omega_r_;
   double t_pulse_;
+
+  bool discretize_;
+  bool with_noise_;
   
   // Low pass filter to extract mixed down signal.
   std::vector<double> LowPassFilter(std::vector<double>& s);
