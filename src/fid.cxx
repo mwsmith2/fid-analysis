@@ -78,12 +78,12 @@ void Fid::Init()
 
   }
 
-  if (max_amp_ < noise_ * params::snr_thresh) {
-    health_ *= max_amp_ / (noise_ * params::snr_thresh);
+  if (max_amp_ < noise_ * snr_thresh_) {
+    health_ *= max_amp_ / (noise_ * snr_thresh_);
   }
 
   if (f_wf_ - i_wf_ < 0.05 * wf_.size()) {
-    health_ *= (f_wf_ - i_wf_) / (wf_.size() * params::len_thresh);
+    health_ *= (f_wf_ - i_wf_) / (wf_.size() * len_thresh_);
   }
 
   if (health_ > 100.0) {
@@ -200,7 +200,7 @@ void Fid::LoadParams()
 
 void Fid::CenterFid()
 {
-  int w = params::zc_width;
+  int w = zc_width_;
   double sum  = std::accumulate(wf_.begin(), wf_.begin() + w, 0.0);
   double avg = sum / w; // to pass into lambda
   mean_ = avg; // save to class
@@ -211,8 +211,8 @@ void Fid::CenterFid()
 void Fid::CalcNoise()
 { 
   // Grab a new handle to the noise window width for aesthetics.
-  int i = params::edge_ignore;
-  int f = params::zc_width + i;
+  int i = edge_ignore_;
+  int f = zc_width_ + i;
 
   // Find the noise level in the head and tail.
   double head = stdev(wf_.begin() + i, wf_.begin() + f);
@@ -235,7 +235,7 @@ void Fid::CalcMaxAmp()
 void Fid::FindFidRange()
 {
   // Find the starting and ending points
-  double thresh = params::start_thresh * max_amp_;
+  double thresh = start_thresh_ * max_amp_;
 
   if (thresh < 5.0 * noise_) {
     std::cout << "Warning: FID signal to noise very low." << std::endl;
@@ -245,7 +245,7 @@ void Fid::FindFidRange()
   bool checks_out = false;
 
   // Find the first element with magnitude larger than thresh
-  auto it_1 = env_.begin() + params::edge_ignore;
+  auto it_1 = env_.begin() + edge_ignore_;
   while (!checks_out) {
 
     auto it_i = std::find_if(it_1, env_.end(), 
@@ -271,10 +271,10 @@ void Fid::FindFidRange()
   // Find the next element with magnitude lower than thresh
   auto it_2 = env_.begin();
 
-  if (i_wf_ + params::edge_ignore < env_.size()) {
+  if (i_wf_ + edge_ignore_ < env_.size()) {
 
     checks_out = false;
-    it_2 += i_wf_ + params::edge_ignore;
+    it_2 += i_wf_ + edge_ignore_;
 
   } else {
 
@@ -324,7 +324,7 @@ void Fid::CalcPowerEnvAndPhase()
 
   // Optional lowpass filter. 
   //  double df = (wf.size() - 1) / (wf.size() * (tm_[wf.size() - 1] - tm_[0]));
-  //  double cutoff_index = params::low_pass_freq / df;
+  //  double cutoff_index = low_pass_freq / df;
   //  
 
   // Now we can get power, envelope and phase.
@@ -352,10 +352,10 @@ void Fid::GuessFitParams()
   int max_idx = std::distance(power_.begin(),
     std::max_element(power_.begin(), power_.end()));
 
-  i_fft_ = max_idx - params::fit_width;
-  if (max_idx - params::fit_width < 0) i_fft_ = 0;  
+  i_fft_ = max_idx - fit_width_;
+  if (max_idx - fit_width_ < 0) i_fft_ = 0;  
 
-  f_fft_ = max_idx + params::fit_width;
+  f_fft_ = max_idx + fit_width_;
   if (f_fft_ > power_.size()) f_fft_ = power_.size();
 
   auto it_pi = power_.begin() + i_fft_; // to shorten subsequent lines
@@ -425,7 +425,7 @@ double Fid::CalcZeroCountFreq()
   if (std::abs(*mm.first) > max) max = std::abs(*mm.first);
   
   //  double max = (-(*mm.first) > *mm.second) ? -(*mm.first) : *mm.second;
-  //  double thresh = params::hyst_thresh * max;
+  //  double thresh = hyst_thresh_ * max;
   //  thresh = 10 * noise_;
 
   int i_zero = -1;
@@ -436,7 +436,7 @@ double Fid::CalcZeroCountFreq()
 
     // hysteresis check
     if (hyst){
-      hyst = std::abs(wf_[i]) > params::hyst_thresh * env_[i];
+      hyst = std::abs(wf_[i]) > hyst_thresh_ * env_[i];
       continue;
     }
 
@@ -472,7 +472,7 @@ double Fid::CalcCentroidFreq()
 {
   // Find the peak power
   double thresh = *std::max_element(power_.begin(), power_.end());
-  thresh *= params::centroid_thresh;
+  thresh *= centroid_thresh_;
 
   // Find the indices for a window around the max
   int it_i = std::distance(power_.begin(), 
@@ -602,8 +602,8 @@ double Fid::CalcPhaseFreq(int poln)
   f_fit_.SetParameter(1, guess_[0] * kTau);
 
   // Adjust to ignore the edges
-  int i = i_wf_ + params::edge_ignore;
-  int f = f_wf_ - params::edge_ignore;
+  int i = i_wf_ + edge_ignore_;
+  int f = f_wf_ - edge_ignore_;
 
   // Do the fit.
   gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
@@ -664,8 +664,8 @@ double Fid::CalcSinusoidFreq()
   f_fit_.SetParLimits(2, 0.0, kTau); // it's a phase
 
   // Adjust to ignore the edges
-  int i = i_wf_ + params::edge_ignore;
-  int f = f_wf_ - params::edge_ignore;
+  int i = i_wf_ + edge_ignore_;
+  int f = f_wf_ - edge_ignore_;
 
   // Do the fit.
   gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
