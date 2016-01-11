@@ -34,7 +34,14 @@ using namespace fid;
 int main(int argc, char **argv)
 {
   // Make sure a data file was specified and get the file handle.
-  assert(argc > 1);
+  if (argc < 2) {
+    std::cout << "Insufficient arguments: input data must be specified.";
+    std::cout << std::endl;
+    std::cout << "Usage: ./single_fid_analyzer <input-file>" << std::endl;
+    exit(1);
+  }
+
+  // Load the data.
   string data_file(argv[1]);
 
   // Now check for an optional output directory.
