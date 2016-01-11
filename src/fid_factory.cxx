@@ -2,38 +2,35 @@
 
 namespace fid {
 
-//---------------------------------------------------------------------------//
-//--- FID Factory -----------------------------------------------------------//
-//---------------------------------------------------------------------------//
-
-
 FidFactory::FidFactory()
 {
   using std::cout;
   using std::endl;
 
+  LoadParams();
+
   // Set the start/stop times.
-  ti_ = sim::start_time;
-  tf_ = ti_ + sim::delta_time * sim::num_samples;
+  ti_ = start_time_;
+  tf_ = ti_ + delta_time_ * num_samples_;
 
   // Calculate the decimation ratio.
-  sim_to_fid_ = (tf_ - ti_) / (sim::dt_integration * sim::num_samples) + 0.5; 
+  sim_to_fid_ = (tf_ - ti_) / (dt_integration_ * num_samples_) + 0.5; 
 
   // If zero, more less integration steps than sampling times were requested.
   if (sim_to_fid_ == 0) {
 
     cout << "WARNING: The given integration step was larger than the ";
-    cout << "sampling time, so the sampling time, " << sim::delta_time;
+    cout << "sampling time, so the sampling time, " << delta_time_;
     cout << ", will be used instead." << endl;
 
     sim_to_fid_ = 1;
-    dt_ = sim::delta_time;
+    dt_ = delta_time_;
 
   } else {
 
-    dt_ = sim::delta_time / sim_to_fid_;
+    dt_ = delta_time_ / sim_to_fid_;
   
-    if (dt_ != sim::dt_integration) {
+    if (dt_ != dt_integration_) {
       cout << "WARNING: The given integration time step was not an even";
       cout << " divisor of the sampling rate, so it has been rounded to ";
       cout << dt_ << endl;
@@ -41,7 +38,7 @@ FidFactory::FidFactory()
   }
 
   // Set number of simulation samples.
-  sim_length_ = sim_to_fid_ * sim::num_samples;
+  sim_length_ = sim_to_fid_ * num_samples_;
   printer_idx_ = 0;
 
   // open the default root file
@@ -50,7 +47,7 @@ FidFactory::FidFactory()
   if (pf_fid_->IsOpen()) {
     pt_fid_ = (TTree *)pf_fid_->Get("t");
   
-    wf_.resize(sim::num_samples);
+    wf_.resize(num_samples_);
     pt_fid_->SetBranchAddress(grad::fid_branch.c_str(), &wf_[0]);
     pt_fid_->GetEntry(0);
 
@@ -69,6 +66,32 @@ FidFactory::~FidFactory()
 }
 
 
+void FidFactory::LoadParams()
+{
+  seed_ = sim::seed;
+  dt_integration_ = sim::dt_integration;
+  snr_ = sim::snr;
+  amplitude_ = sim:: amplitude;
+  baseline_ = sim::baseline;
+
+  num_samples_ = sim::num_samples;
+  start_time_ = sim::start_time;
+  delta_time_ = sim::delta_time;
+
+  freq_ref_ = sim::freq_ref;
+  freq_larmor_ = sim::freq_larmor;
+  freq_cut_ratio_ = sim::freq_cut_ratio;
+  mixdown_phi_ = sim::mixdown_phi;
+  spin_0_ = sim::spin_0;
+
+  gamma_1_ = sim::gamma_1;
+  gamma_2_ = sim::gamma_2;
+  gamma_g_ = sim::gamma_g;
+  omega_r_ = sim::omega_r;
+  t_pulse_ = sim::t_pulse;
+}
+
+
 // Create an idealized FID with current Simulation parameters
 void FidFactory::IdealFid(std::vector<double>& wf, 
                           std::vector<double>& tm, 
@@ -80,17 +103,17 @@ void FidFactory::IdealFid(std::vector<double>& wf,
 
   // Define the waveform
   double temp;
-  double w = kTau * (sim::freq_larmor - sim::freq_ref);
-  double phi = sim::mixdown_phi;
-  double tau = 1.0 / sim::gamma_1;
-  double amp = sim::amplitude;
-  double base = sim::baseline;
+  double w = kTau * (freq_larmor_ - freq_ref_);
+  double phi = mixdown_phi_;
+  double tau = 1.0 / gamma_1_;
+  double amp = amplitude_;
+  double base = baseline_;
 
   for (auto it = tm.begin(); it != tm.end(); ++it){
 
-    if (*it >= sim::t_pulse){
+    if (*it >= t_pulse_){
 
-      temp = amp * std::exp(-(*it - sim::t_pulse) / tau);
+      temp = amp * std::exp(-(*it - t_pulse_) / tau);
       temp *= std::sin((*it) * w + phi);
       wf.push_back(temp + base);
 
@@ -101,7 +124,7 @@ void FidFactory::IdealFid(std::vector<double>& wf,
     }
   } 
 
-  if (withnoise) addnoise(wf, sim::snr);
+  if (withnoise) addnoise(wf, snr_);
 
   if (discretize) floor(wf);
 }
@@ -119,9 +142,9 @@ void FidFactory::SimulateFid(std::vector<double>& wf,
   namespace pl = std::placeholders; // _1, _2, _3
 
   // make sure memory is allocated for the final FIDs
-  tm.reserve(sim::num_samples);
-  wf.reserve(sim::num_samples);
-  s_ = sim::spin_0; // The starting spin vector
+  tm.reserve(num_samples_);
+  wf.reserve(num_samples_);
+  s_ = spin_0_; // The starting spin vector
 
   // Bind the member function and make a reference so it isn't copied.
   integrate_const(runge_kutta4<std::vector<double>>(), 
@@ -137,13 +160,13 @@ void FidFactory::SimulateFid(std::vector<double>& wf,
   wf.resize(0);
 
   // Fill the FID vectors with simulation results.
-  for (int i = 0; i < sim::num_samples; ++i) {
+  for (int i = 0; i < num_samples_; ++i) {
     tm.push_back(time_vec_[i * sim_to_fid_]);
-    wf.push_back(spin_vec_[i * sim_to_fid_] + sim::baseline);
+    wf.push_back(spin_vec_[i * sim_to_fid_] + baseline_);
   }
 
   // Take care of optional effects.
-  if (withnoise) addnoise(wf, sim::snr);
+  if (withnoise) addnoise(wf, snr_);
   if (discretize) floor(wf);
 }
 
@@ -162,7 +185,7 @@ void FidFactory::GradientFid(const std::vector<double>& gradient,
   }
 
   // Find the appropriate FIDs and sum them
-  wf.assign(sim::num_samples, 0.0);
+  wf.assign(num_samples_, 0.0);
 
 
   // Add each FID in the gradient.
@@ -175,15 +198,15 @@ void FidFactory::GradientFid(const std::vector<double>& gradient,
     }
   }
 
-  // Calculate the proper amplitude and scale + offset the sim FID.
-  double amp = sim::amplitude / gradient.size();
+  // Calculate the proper amplitude_ and scale + offset the sim FID.
+  double amp = amplitude_ / gradient.size();
 
   for (auto& val : wf) {
-    val = val * amp + sim::baseline;
+    val = val * amp + baseline_;
   }
 
   // Take care of optional effects.
-  if (withnoise) addnoise(wf, sim::snr);
+  if (withnoise) addnoise(wf, snr_);
   if (discretize) floor(wf);
 }
 
@@ -196,7 +219,7 @@ void FidFactory::PrintDiagnosticInfo()
   cout << endl;
   cout << "Printing Diagnostic Info for FidFactory @" << this << endl;
   cout << "The time step, fid length: " << dt_ << ", ";
-  cout << sim::num_samples << endl;
+  cout << num_samples_ << endl;
   cout << "The sim length, sim-to-fid: " << sim_length_ << ", ";
   cout << sim_to_fid_ << endl;
 }
@@ -216,9 +239,9 @@ void FidFactory::Bloch(std::vector<double> const &s,
   bf = Bfield(t);
 
   // Set the relaxtion bits of the differential.
-  s2[0] = sim::gamma_2 * s[0];
-  s2[1] = sim::gamma_2 * s[1];
-  s2[2] = sim::gamma_1 * (s[2] - 1.0);
+  s2[0] = gamma_2_ * s[0];
+  s2[1] = gamma_2_ * s[1];
+  s2[2] = gamma_1_ * (s[2] - 1.0);
 
   // Calculate the cross product.
   cross(bf, s, s1);
@@ -236,14 +259,14 @@ std::vector<double> FidFactory::Bfield(const double& t)
   static std::vector<double> b = {0., 0., 0.}; // time dependent B field
 
   // Return static external field if after the pulsed field.
-  if (t >= sim::t_pulse){
+  if (t >= t_pulse_){
     return a;
 
   // Set the fields if the simulation is just starting.
   } else if (t <= ti_ + dt_) {
 
-    a[2] = kTau * sim::freq_larmor;
-    b[2] = kTau * sim::freq_larmor;
+    a[2] = kTau * freq_larmor_;
+    b[2] = kTau * freq_larmor_;
 
   }
 
@@ -251,8 +274,8 @@ std::vector<double> FidFactory::Bfield(const double& t)
   if (t < 0.0) return a;
 
   // If none of the above, return the time-dependent, pulsed field.
-  b[0] = sim::omega_r * cos(kTau * sim::freq_ref * t);
-  b[1] = sim::omega_r * sin(kTau * sim::freq_ref * t);
+  b[0] = omega_r_ * cos(kTau * freq_ref_ * t);
+  b[1] = omega_r_ * sin(kTau * freq_ref_ * t);
   return b;
 }
 
@@ -267,7 +290,7 @@ void FidFactory::Printer(std::vector<double> const &s , double t)
     double val;
 
     for (int i = 0; i < sim_length_; i++){
-      val = cos(kTau * sim::freq_ref * temp + sim::mixdown_phi);
+      val = cos(kTau * freq_ref_ * temp + mixdown_phi_);
       cos_cache_.push_back(val);
       temp += dt_;
     }
@@ -280,7 +303,7 @@ void FidFactory::Printer(std::vector<double> const &s , double t)
   if (t < ti_ + dt_) printer_idx_ = 0;
 
   // Record spin in the y-direction and mix down
-  spin_vec_[printer_idx_] = sim::amplitude * s[1] * cos_cache_[printer_idx_]; 
+  spin_vec_[printer_idx_] = amplitude_ * s[1] * cos_cache_[printer_idx_]; 
 
   // Record the time and increment printer_idx_
   time_vec_[printer_idx_++] = t;
@@ -301,7 +324,7 @@ std::vector<double> FidFactory::LowPassFilter(std::vector<double>& s)
 {
   // Allocate the filter and set the central frequency.
   std::vector<double> filter;
-  double freq_cut = sim::freq_cut_ratio * sim::freq_larmor;
+  double freq_cut = freq_cut_ratio_ * freq_larmor_;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
   if (filter.size() == 0) {

@@ -78,6 +78,30 @@ class FidFactory
   std::vector<double> spin_sum_;
   std::vector<double> cos_cache_;
   std::vector<double> gradient_;
+
+  // Simulation parameters (loaded from fid::sim namespace).
+  int seed_;
+  double dt_integration_;
+  double snr_;
+  double amplitude_;
+  double baseline_;
+
+  double start_time_;
+  double delta_time_;
+  int num_samples_;
+
+  double freq_ref_;
+  double freq_larmor_;
+  double freq_cut_ratio_;
+  double mixdown_phi_;
+  std::vector<double> spin_0_;
+
+  double gamma_1_;
+  double gamma_2_;
+  double gamma_g_;
+
+  double omega_r_;
+  double t_pulse_;
   
   // Low pass filter to extract mixed down signal.
   std::vector<double> LowPassFilter(std::vector<double>& s);
@@ -100,6 +124,8 @@ class FidFactory
   std::vector<Double_t> wf_;
 
   int GetTreeIndex(double grad_strength);
+
+  void LoadParams();
 }; // FidFactory
 
 } // ::fid

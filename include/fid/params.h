@@ -76,9 +76,6 @@ namespace sim {
   extern double omega_r;  // strength of rf-pulse
   extern double t_pulse;  // length of nmr pulse
 
-  extern double start_time; // start time for the FID
-  extern double delta_time; // time spacing for the FID
-
 } // ::sim
 
 namespace grad {

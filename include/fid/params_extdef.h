@@ -26,7 +26,7 @@ namespace params {
 // simulation parameters
 namespace sim {
 
-  int seed = 0;   
+  int seed = 0;
   double dt_integration = 2.0e-5;
   double snr = 90000.0;   
   double amplitude = 2000.0;
