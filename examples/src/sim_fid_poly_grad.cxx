@@ -5,7 +5,7 @@ Email:  mwsmith2@uw.edu
 Date:   2015/01/08
 
 Detail: The program is meant to test the effects of field gradients
-        on the FID frequency extraction.  The sweep parameters are
+        on the Fid frequency extraction.  The sweep parameters are
         set in a separate config file here, but the user need not rely
         on the config parameters.  All that needs to be done is the
         defining of a gradient vector.
@@ -97,13 +97,13 @@ int main(int argc, char **argv)
       }
 
       ff.GradientFid(gradient, wf);
-      FID my_fid(wf, tm);
+      Fid my_fid(wf, tm);
 
-      calc_freq_write_csv(my_fid, out);
+      my_fid.WriteFreqCsv(out);
 
       if (i == 0){
         sprintf(str, "data/fig/fid_pol%d_grad_%03dppb.pdf", grad::poln_order, (int)g);
-        draw_fid(my_fid, str, std::string("Test FID")); 
+        my_fid.SavePlot(str, "Test Fid"); 
       }
     }
   } // grad

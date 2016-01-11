@@ -4,7 +4,7 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   11/02/14
 
-Detail: This is a new test program for my FID libraries 
+Detail: This is a new test program for my Fid libraries 
 
 \*===========================================================================*/
 
@@ -49,9 +49,11 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
 
-  ideal_fid(wf, tm, ftruth);
+  FidFactory ff;
+  sim::freq_larmor = ftruth + sim::freq_ref;
+  ff.IdealFid(wf, tm, true);
 
-  FID my_fid(wf, tm);
+  Fid my_fid(wf, tm);
 
   auto res = dsp::wvd(wf);
   res.quiet_save("wvd_test.dat", arma::csv_ascii);

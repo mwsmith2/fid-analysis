@@ -4,7 +4,7 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   11/02/14
 
-Detail: This is a new test program for my FID libraries 
+Detail: This is a new test program for my Fid libraries 
 
 \*===========================================================================*/
 
@@ -50,7 +50,11 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
 
-  ideal_fid(wf, tm, ftruth);
+  sim::freq_larmor = ftruth + sim::freq_ref;
+
+  FidFactory ff;
+  ff.IdealFid(wf, tm);
+  
   for (int i = 0; i < wf.size(); ++i) {
     wf[i] = sin(40 * tm[i]);
   }

@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 {
   // Make sure a data file was specified and get it.
   assert(argc > 1);
-  FID myfid(argv[1]);
+  Fid myfid(argv[1]);
 
   std::cout << "Frequency, Error" << std::endl;
   std::cout << myfid.GetFreq() << ", " << myfid.GetFreqError() << std::endl;

@@ -4,7 +4,7 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   11/02/14
 
-Detail: This is a new test program for my FID libraries 
+Detail: This is a new test program for my Fid libraries 
 
 \*===========================================================================*/
 
@@ -34,6 +34,8 @@ int main(int argc, char **argv)
   // some necessary parameters
   std::vector<double> wf;
   std::vector<double> tm;
+
+  FidFactory ff;
 
   double final_time = sim::start_time + sim::num_samples*sim::delta_time;
   tm = construct_range(sim::start_time, sim::delta_time, final_time);
@@ -116,10 +118,14 @@ int main(int argc, char **argv)
           if (phases.size() > 1) out << p << ", ";
           if (snrs.size() > 1) out << s << ", ";
 
-          ideal_fid(wf, tm, f, p, s);
-          FID my_fid(wf, tm);
+          sim::freq_larmor = f;
+          sim::mixdown_phi = p;
+          sim::snr = s;
 
-          calc_freq_write_csv(my_fid, out);
+          ff.IdealFid(wf, tm, true);
+          Fid my_fid(wf, tm);
+
+          my_fid.WriteFreqCsv(out);
 
         } // num_fids
 

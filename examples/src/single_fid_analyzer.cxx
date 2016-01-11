@@ -6,7 +6,7 @@ date:   2015/01/09
 file:   single_fid_analyzer.cxx
 
 notes: This program extracts the frequency of a single fid file and 
-      produces plots of the FID, envelope function and fits. The analysis
+      produces plots of the Fid, envelope function and fits. The analysis
       is extensive testing all available methods.
 
 usage:
@@ -59,8 +59,8 @@ int main(int argc, char **argv)
   boost::filesystem::path dir(fig_dir);
   boost::filesystem::create_directories(dir);
 
-  // Read the FID data and create FID object.
-  FID my_fid(data_file);
+  // Read the Fid data and create Fid object.
+  Fid my_fid(data_file);
 
   // Open the output filestream.
   std::ofstream out;
@@ -68,29 +68,29 @@ int main(int argc, char **argv)
   out.open(out_file);
 
   // Test all methods and save the frequency results
-  calc_freq_write_csv(my_fid, out);
+  my_fid.WriteFreqCsv(out);
 
   // Make plots of the fits and residuals.
-  string title("FID Fit");
+  string title("Fid Fit");
   my_fid.GetFreq("analytical");
-  draw_fid_freq_fit(my_fid, fig_dir + string("analytical_fit.pdf"), title);
-  draw_fid_freq_res(my_fid, fig_dir + string("analytical_res.pdf"), title);  
+  my_fid.SaveFreqFit(fig_dir + string("analytical_fit.pdf"), title);
+  my_fid.SaveFreqRes(fig_dir + string("analytical_res.pdf"), title);  
 
   my_fid.GetFreq("lorentzian");
-  draw_fid_freq_fit(my_fid, fig_dir + string("lorentzian_fit.pdf"), title);
-  draw_fid_freq_res(my_fid, fig_dir + string("lorentzian_res.pdf"), title);  
+  my_fid.SaveFreqFit(fig_dir + string("lorentzian_fit.pdf"), title);
+  my_fid.SaveFreqRes(fig_dir + string("lorentzian_res.pdf"), title);  
 
   my_fid.GetFreq("exponential");
-  draw_fid_freq_fit(my_fid, fig_dir + string("exponential_fit.pdf"), title);
-  draw_fid_freq_res(my_fid, fig_dir + string("exponential_res.pdf"), title);  
+  my_fid.SaveFreqFit(fig_dir + string("exponential_fit.pdf"), title);
+  my_fid.SaveFreqRes(fig_dir + string("exponential_res.pdf"), title);  
 
   my_fid.GetFreq("phase");
-  draw_fid_time_fit(my_fid, fig_dir + string("lin_phase_fit.pdf"), title);
-  draw_fid_time_res(my_fid, fig_dir + string("lin_phase_res.pdf"), title);  
+  my_fid.SaveTimeFit(fig_dir + string("lin_phase_fit.pdf"), title);
+  my_fid.SaveTimeRes(fig_dir + string("lin_phase_res.pdf"), title);  
 
   my_fid.GetFreq("sinusoid");
-  draw_fid_time_fit(my_fid, fig_dir + string("sinusoid_fit.pdf"), title);
-  draw_fid_time_res(my_fid, fig_dir + string("sinusoid_res.pdf"), title);  
+  my_fid.SaveTimeFit(fig_dir + string("sinusoid_fit.pdf"), title);
+  my_fid.SaveTimeRes(fig_dir + string("sinusoid_res.pdf"), title);  
 
   // Close the output filestream
   out.close();

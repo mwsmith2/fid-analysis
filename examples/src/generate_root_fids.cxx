@@ -4,7 +4,7 @@ author: Matthias W. Smith
 email:  mwsmith2@uw.edu
 file:   generate_root_fids.cxx
 
-notes: This is a new test program for my FID libraries 
+notes: This is a new test program for my Fid libraries 
 
 \*===========================================================================*/
 
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 
   // Set up the ROOT tree to hold the results
   TFile pf("sim_fids.root", "recreate");
-  TTree pt("t", "FID Tree");
+  TTree pt("t", "Fid Tree");
   cout.precision(12);
 
   pt.Branch("db", &delta_b, "delta_b/D");

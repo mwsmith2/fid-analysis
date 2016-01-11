@@ -4,7 +4,7 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   2015/01/08
 
-Detail: The program is meant to generate a set of example gradient FIDs in
+Detail: The program is meant to generate a set of example gradient Fids in
         plaintext format.
 
 \*===========================================================================*/
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
   // Make FidFactory
   FidFactory ff;
-  construct_quadratic_gradient(20, grad_0);
+  grad_0 = normalized_gradient(20, 2);
 
   // csv output
   std::ofstream out;

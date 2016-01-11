@@ -4,7 +4,7 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   11/02/14
 
-Detail: This is a new test program for my FID libraries 
+Detail: This is a new test program for my Fid libraries 
 
 \*===========================================================================*/
 

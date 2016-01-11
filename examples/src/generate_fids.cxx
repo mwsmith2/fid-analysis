@@ -4,7 +4,7 @@ author: Matthias W. Smith
 email:  mwsmith2@uw.edu
 file:   generate_fids.cxx
 
-about: This is a new test program for my FID libraries 
+about: This is a new test program for my Fid libraries 
 
 \*===========================================================================*/
 
@@ -110,10 +110,8 @@ int main(int argc, char **argv)
 
         ff.SimulateFid(wf, tm);
 
-        FID my_fid(wf, tm);
-        draw_fid(my_fid, 
-                 std::string("data/fig/test.pdf"), 
-                 std::string("Test FID"));
+        Fid my_fid(wf, tm);
+        my_fid.SavePlot("data/fig/test.pdf", "Test Fid");
 
       } // snr
 

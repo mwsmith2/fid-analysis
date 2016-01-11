@@ -45,13 +45,18 @@ int main(int argc, char **argv)
   double final_time = sim::start_time + sim::num_samples * sim::delta_time;
   tm = construct_range(sim::start_time, final_time, sim::delta_time);
 
+  FidFactory ff;
+  sim::snr = 100 * 100;
+  sim::mixdown_phi = 0.0;
+
   for (int i = 0; i < nfids; ++i) {
       
-    // Make ideal FID waveform
-    double freq = rand_flat_dist(gen);
-    ideal_fid(wf, tm, freq, 0.0, 100 * 100);
+    // Make ideal Fid waveform
+    sim::freq_larmor = rand_flat_dist(gen) + sim::freq_ref;
 
-    FID myfid(wf, tm);
+    ff.IdealFid(wf, tm, true);
+
+    Fid myfid(wf, tm);
 
     cout << "zc: " << myfid.GetFreq("zc") << " ";
     cout << myfid.CalcZeroCountFreq() << endl;

@@ -5,7 +5,7 @@ Email:  mwsmith2@uw.edu
 Date:   15/04/14
 
 Detail: The program is meant to test the effects of linear field 
-        gradients on the FID frequency extraction.  The sweep parameters
+        gradients on the Fid frequency extraction.  The sweep parameters
         are set in a separate config file here, but the user need not 
         rely on the config parameters.  All that needs to be done is 
         the defining of a gradient vector.
@@ -50,11 +50,10 @@ int main(int argc, char **argv)
   FidFactory ff;
   ff.SimulateFid(wf, tm);
 
-  FID my_fid(wf, tm);
+  Fid my_fid(wf, tm);
 
-  my_fid.SavePlot("test.png", "FID Test");
-
-  fid::write_fid_file("test.fid", my_fid.tm(), my_fid.wf());
+  my_fid.SavePlot("test.png", "Fid Test");
+  my_fid.SaveData("test.fid");
 
   return 0;
 }

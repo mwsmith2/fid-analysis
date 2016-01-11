@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 
   for (int i = 0; i < 2000; ++i) {
     
-    // Make ideal FID waveform
+    // Make ideal Fid waveform
     double freq = rand_flat_dist(gen);
     sim::freq_larmor = freq;
     sim::mixdown_phi = 0.0;
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 
     ff.IdealFid(wf, tm, true);
 
-    FID myfid(wf, tm);
+    Fid myfid(wf, tm);
     out << freq << "\t" << 0.0 << "\t";
     out << myfid.CalcZeroCountFreq() << "\t" << myfid.freq_err() << "\t";
     out << myfid.CalcCentroidFreq() << "\t" << myfid.freq_err() << "\t";

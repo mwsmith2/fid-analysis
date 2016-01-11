@@ -34,7 +34,7 @@ using std::to_string;
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
 
-#define FID_LEN 10000
+#define Fid_LEN 10000
 #define FREQ_METHOD 6
 
 using namespace fid;
@@ -63,24 +63,24 @@ int main(int argc, char **argv)
     Double_t i_psd;
     Double_t f_psd;
     Double_t freq_def;
-    Double_t wf[FID_LEN];
-    Double_t psd[FID_LEN/2];
-    Double_t phase[FID_LEN];
+    Double_t wf[Fid_LEN];
+    Double_t psd[Fid_LEN/2];
+    Double_t phase[Fid_LEN];
     Double_t freq_ext[FREQ_METHOD];
     Double_t freq_err[FREQ_METHOD];
-    Double_t fit[FREQ_METHOD][FID_LEN];
+    Double_t fit[FREQ_METHOD][Fid_LEN];
   };
 
   fid_data myfid_data;
 
   string br_vars;
   br_vars += "i_wf/D:f_wf/D:i_psd/D:f_psd/D:freq_def/D:";
-  br_vars += "wf[" + to_string(FID_LEN) + "]/D:";
-  br_vars += "psd[" + to_string(FID_LEN/2) + "]/D:";
-  br_vars += "phase[" + to_string(FID_LEN) + "]/D:";
+  br_vars += "wf[" + to_string(Fid_LEN) + "]/D:";
+  br_vars += "psd[" + to_string(Fid_LEN/2) + "]/D:";
+  br_vars += "phase[" + to_string(Fid_LEN) + "]/D:";
   br_vars += "freq_ext[" + to_string(FREQ_METHOD) + "]/D:";
   br_vars += "freq_err[" + to_string(FREQ_METHOD) + "]/D:";
-  br_vars += "fit[" + to_string(FREQ_METHOD) + "][" + to_string(FID_LEN) + "]/D";
+  br_vars += "fit[" + to_string(FREQ_METHOD) + "][" + to_string(Fid_LEN) + "]/D";
 
   TFile pf(out_file.c_str(), "RECREATE");
   TTree pt("t", "fid_fits");
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
       cout << "Processing round " << i << "." << endl;
     }
 
-    // Make ideal FID waveform
+    // Make ideal Fid waveform
     double freq = rand_flat_dist(gen);
     sim::freq_larmor = freq;
     sim::mixdown_phi = 0.0;
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 
     ff.IdealFid(wf, tm, true);
 
-    FID myfid(wf, tm);
+    Fid myfid(wf, tm);
     myfid_data.i_wf = myfid.i_wf();
     myfid_data.f_wf = myfid.f_wf();
     myfid_data.i_psd = myfid.i_fft();
