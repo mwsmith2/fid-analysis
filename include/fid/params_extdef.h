@@ -47,8 +47,10 @@ namespace sim {
   double gamma_g = 1.0;  
 
   double omega_r = 50.0;  
-  double t_pulse = 0.005;  
+  double t_pulse = 0.005; 
 
+  bool with_noise = true;
+  bool discretize = false;
 
 } // ::sim
 
@@ -107,6 +109,8 @@ void load_params(std::string conf_file)
 
   omega_r = pt.get<double>("sim.omega_r", omega_r);
   t_pulse = pt.get<double>("sim.t_pulse", t_pulse);
+  with_noise = pt.get<bool>("sim.with_noise", with_noise);
+  discretize = pt.get<bool>("sim.discretize", discretize);
 
   // gradient fid file parameters
   grad::root_file = pt.get<std::string>("grad.root_file", grad::root_file);
