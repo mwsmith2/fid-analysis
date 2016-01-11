@@ -12,6 +12,7 @@ namespace params {
   int zc_width = 100;   
   int edge_ignore = 50; 
   double start_thresh = 0.37; 
+  double zc_alpha = 0.8;
   double max_phase_jump = 4.71; 
   double low_pass_freq = 2000.0;
   double centroid_thresh = 0.01; 
@@ -84,6 +85,7 @@ void load_params(std::string conf_file)
   edge_ignore = pt.get<int>("params.edge_ignore", edge_ignore);
   zc_width = pt.get<int>("params.zc_width", zc_width);
   start_thresh = pt.get<double>("params.start_thresh", start_thresh);
+  zc_alpha = pt.get<double>("params.zc_alpha", zc_alpha);
   max_phase_jump = pt.get<double>("params.max_phase_jump", max_phase_jump);
   low_pass_freq = pt.get<double>("params.low_pass_freq", low_pass_freq);
   centroid_thresh = pt.get<double>("params.centroid_thresh", centroid_thresh);

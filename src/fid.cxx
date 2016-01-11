@@ -44,11 +44,11 @@ Fid::Fid(const std::vector<double>& wf)
 
 void Fid::Init()
 {
+  // Load the current configuration.
+  LoadParams();
+
   // Initialize the health to full.
   health_ = 100.0;
-
-  // Grab the default method
-  freq_method_ = params::freq_method;
 
   // Resize the temp array (maybe others?)
   temp_.reserve(wf_.size());
@@ -178,6 +178,24 @@ double Fid::CalcFreq()
   }
 
   return freq_;
+}
+
+
+// Load all the current parameters in the fid::params namespace.
+void Fid::LoadParams()
+{
+  freq_method_ = params::freq_method;
+  len_thresh_ = params::len_thresh;
+  snr_thresh_ = params::snr_thresh;
+  hyst_thresh_ = params::hyst_thresh; 
+  centroid_thresh_ = params::centroid_thresh; 
+  low_pass_freq_ = params::low_pass_freq; 
+  max_phase_jump_ = params::max_phase_jump; 
+  zc_alpha_ = params::zc_alpha; 
+  start_thresh_ = params::start_thresh; 
+  edge_ignore_ = params::edge_ignore; 
+  zc_width_ = params::zc_width;
+  fit_width_ = params::fit_width;
 }
 
 void Fid::CenterFid()

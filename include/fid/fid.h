@@ -116,6 +116,19 @@ class Fid {
   double chi2_; // Store the most recent chi2
   double freq_;
   double freq_err_;
+
+  // Fit paremeters that are intialized from a shared fid::params namespace.
+  int fit_width_;  // fit width used by spectral peak fits
+  int zc_width_;   // size of window used to calculate FID noise
+  int edge_ignore_; // samples to ignore when doing phase fits
+  double start_thresh_; // threshold above noise to define start of FID
+  double zc_alpha_; // parameter used by exponential moving average
+  double max_phase_jump_; // maximum change allowed when unwrapping phase
+  double low_pass_freq_; // low pass frequency used by FID
+  double centroid_thresh_; // threshold of values included in centroid
+  double hyst_thresh_; // hysteris threshold used for zero counting
+  double snr_thresh_;  // max_amp_ / noise_
+  double len_thresh_;  // fraction of si  
   Method freq_method_;
 
   std::vector<double> guess_;
@@ -140,6 +153,7 @@ class Fid {
   // Private Member Functions  
   // init function to be called after wf_ and tm_ are set.
   void Init();
+  void LoadParams();
   void SaveGraph(std::string filename, std::string title);
   void LoadTextData(std::string filename); 
 
