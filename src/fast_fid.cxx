@@ -47,9 +47,6 @@ void FastFid::Init()
   // Initialize the health properly.
   health_ = 100.0;
 
-  // Grab the default method
-  freq_method_ = params::freq_method;
-
   // Resize the temp array (maybe others?)
   temp_.reserve(wf_.size());
 
@@ -67,28 +64,49 @@ void FastFid::Init()
 
   }
   
-  if (max_amp_ < noise_ * params::snr_thresh) {
-    health_ *= max_amp_ / (noise_ * params::snr_thresh);
+  if (max_amp_ < noise_ * snr_thresh_) {
+    health_ *= max_amp_ / (noise_ * snr_thresh_);
   }
 
-  if (f_wf_ - i_wf_ < wf_.size() * params::len_thresh) {
-    health_ *= (f_wf_ - i_wf_) / (wf_.size() * params::len_thresh);
+  if (f_wf_ - i_wf_ < wf_.size() * len_thresh_) {
+    health_ *= (f_wf_ - i_wf_) / (wf_.size() * len_thresh_);
   }
 }
+
 
 double FastFid::GetFreq()
 {
   return freq_;
 }
 
+
 double FastFid::GetFreqError()
 {
   return freq_err_;
 }
 
+
+// Load all the current parameters in the fid::params namespace.
+void FastFid::LoadParams()
+{
+  freq_method_ = params::freq_method;
+  len_thresh_ = params::len_thresh;
+  snr_thresh_ = params::snr_thresh;
+  hyst_thresh_ = params::hyst_thresh; 
+  centroid_thresh_ = params::centroid_thresh; 
+  low_pass_freq_ = params::low_pass_freq; 
+  max_phase_jump_ = params::max_phase_jump; 
+  zc_alpha_ = params::zc_alpha; 
+  start_thresh_ = params::start_thresh; 
+  edge_ignore_ = params::edge_ignore; 
+  zc_width_ = params::zc_width;
+  fit_width_ = params::fit_width;
+}
+
+
 void FastFid::CenterFid()
 {
-  int w = params::zc_width;
+  int w = zc_width_;
   double sum  = std::accumulate(wf_.begin(), wf_.begin() + w, 0.0);
   double avg = sum / w; // to pass into lambda
   mean_ = avg; // save to class
@@ -96,11 +114,12 @@ void FastFid::CenterFid()
   std::for_each(wf_.begin(), wf_.end(), [avg](double& x){ x -= avg; });
 }
 
+
 void FastFid::CalcNoise()
 { 
   // Grab a new handle to the noise window width for aesthetics.
-  int i = params::edge_ignore;
-  int f = params::zc_width + i;
+  int i = edge_ignore_;
+  int f = zc_width_ + i;
 
   // Find the noise level in the head and tail.
   double head = stdev(wf_.begin() + i, wf_.begin() + f);
@@ -123,11 +142,11 @@ void FastFid::CalcMaxAmp()
 void FastFid::FindFidRange()
 {
   // Find the starting and ending points
-  double thresh = params::start_thresh * max_amp_;
+  double thresh = start_thresh_ * max_amp_;
   bool checks_out = false;
 
   // Find the first element with magnitude larger than thresh
-  auto it_1 = wf_.begin() + params::edge_ignore;
+  auto it_1 = wf_.begin() + edge_ignore_;
   while (!checks_out) {
 
     auto it_i = std::find_if(it_1, wf_.end(), 
@@ -150,7 +169,7 @@ void FastFid::FindFidRange()
 
   // Find the next element with magnitude lower than thresh
   checks_out = false;
-  auto it_2 = wf_.begin() + i_wf_ + params::edge_ignore;
+  auto it_2 = wf_.begin() + i_wf_ + edge_ignore_;
   while (!checks_out) {
 
     // Find a range above threshold
@@ -212,12 +231,12 @@ double FastFid::CalcFreq()
   if (std::abs(*mm.first) > max) max = std::abs(*mm.first);
   
   //  double max = (-(*mm.first) > *mm.second) ? -(*mm.first) : *mm.second;
-  //  double thresh = params::hyst_thresh * max;
+  //  double thresh = hyst_thresh_ * max;
   //  thresh = 10 * noise_;
 
   int i_zero = -1;
   int f_zero = -1;
-  double thresh = params::hyst_thresh * params::start_thresh * max_amp_; 
+  double thresh = hyst_thresh_ * start_thresh_ * max_amp_; 
 
   // iterate over vector
   for (unsigned int i = i_wf_; i < f_wf_; i++){

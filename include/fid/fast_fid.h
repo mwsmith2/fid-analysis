@@ -76,6 +76,19 @@ class FastFid {
   double mean_;
   double freq_;
   double freq_err_;
+
+  // Load default (or user configured params)
+  int fit_width_;
+  int zc_width_;
+  int edge_ignore_;
+  double start_thresh_;
+  double zc_alpha_;
+  double max_phase_jump_;
+  double low_pass_freq_;
+  double centroid_thresh_;
+  double hyst_thresh_;
+  double snr_thresh_;
+  double len_thresh_;
   Method freq_method_;
 
   std::vector<double> guess_;
@@ -90,6 +103,7 @@ class FastFid {
   // Private Member Functions  
   // init function to be called after wf_ and tm_ are set.
   void Init();
+  void LoadParams();
   void LoadTextData(std::string filename);
 
   // internal utility functions
