@@ -39,13 +39,13 @@ LIBS = -lfftw3 -lm
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)
 
-all: $(LIBNAME)
+all: lib/$(LIBNAME)
 
 build/%.o: src/%.cxx
 	$(CXX) $(FLAGS) -o $@ -c $<
 
-$(LIBNAME): $(OBJECTS)
-	$(CXX) -shared -fPIC $+ -o lib/$(LIBNAME) $(LIBS)
+lib/$(LIBNAME): $(OBJECTS)
+	$(CXX) -shared -fPIC $+ -o $@ $(LIBS)
 
 install:
 	mkdir -p $(PREFIX)/lib
