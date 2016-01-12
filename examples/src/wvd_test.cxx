@@ -50,11 +50,10 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
 
-  sim::freq_larmor = ftruth + sim::freq_ref;
-
   FidFactory ff;
+  ff.SetFreqLarmor(ftruth + sim::freq_ref);
   ff.IdealFid(wf, tm);
-  
+
   for (int i = 0; i < wf.size(); ++i) {
     wf[i] = sin(40 * tm[i]);
   }

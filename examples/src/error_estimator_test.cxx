@@ -68,19 +68,17 @@ int main(int argc, char **argv)
   std::uniform_real_distribution<double> rand_flat_dist(35.0, 40.0);
 
   FidFactory ff;
+  ff.SetMixdownPhi(0.0);
+  ff.SetSNR(100 * 100);
 
   for (int i = 0; i < 2000; ++i) {
     
     // Make ideal Fid waveform
-    double freq = rand_flat_dist(gen);
-    sim::freq_larmor = freq;
-    sim::mixdown_phi = 0.0;
-    sim::snr = 100 * 100;
-
-    ff.IdealFid(wf, tm, true);
+    ff.SetFreqLarmor(rand_flat_dist(gen));
+    ff.IdealFid(wf, tm);
 
     Fid myfid(wf, tm);
-    out << freq << "\t" << 0.0 << "\t";
+    out << ff.freq() << "\t" << 0.0 << "\t";
     out << myfid.CalcZeroCountFreq() << "\t" << myfid.freq_err() << "\t";
     out << myfid.CalcCentroidFreq() << "\t" << myfid.freq_err() << "\t";
     out << myfid.CalcAnalyticalFreq() << "\t" << myfid.freq_err() << "\t";

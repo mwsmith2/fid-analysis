@@ -50,8 +50,8 @@ int main(int argc, char** argv)
   }
 
   FidFactory ff;
-  sim::freq_larmor = ftruth + sim::freq_ref;
-  ff.IdealFid(wf, tm, true);
+  ff.SetLarmorFreq(ftruth + sim::freq_ref);
+  ff.IdealFid(wf, tm);
 
   Fid my_fid(wf, tm);
 

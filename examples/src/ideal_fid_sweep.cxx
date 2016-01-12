@@ -118,11 +118,11 @@ int main(int argc, char **argv)
           if (phases.size() > 1) out << p << ", ";
           if (snrs.size() > 1) out << s << ", ";
 
-          sim::freq_larmor = f;
-          sim::mixdown_phi = p;
-          sim::snr = s;
+          ff.SetFreqLarmor(f);
+          ff.SetMixdownPhi(p);
+          ff.SetSNR(s);
 
-          ff.IdealFid(wf, tm, true);
+          ff.IdealFid(wf, tm);
           Fid my_fid(wf, tm);
 
           my_fid.WriteFreqCsv(out);

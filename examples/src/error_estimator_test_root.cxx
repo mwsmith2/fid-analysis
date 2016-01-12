@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     Double_t freq_def;
     Double_t wf[Fid_LEN];
     Double_t psd[Fid_LEN/2];
-    Double_t phase[Fid_LEN];
+    Double_t phi[Fid_LEN];
     Double_t freq_ext[FREQ_METHOD];
     Double_t freq_err[FREQ_METHOD];
     Double_t fit[FREQ_METHOD][Fid_LEN];
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
   br_vars += "i_wf/D:f_wf/D:i_psd/D:f_psd/D:freq_def/D:";
   br_vars += "wf[" + to_string(Fid_LEN) + "]/D:";
   br_vars += "psd[" + to_string(Fid_LEN/2) + "]/D:";
-  br_vars += "phase[" + to_string(Fid_LEN) + "]/D:";
+  br_vars += "phi[" + to_string(Fid_LEN) + "]/D:";
   br_vars += "freq_ext[" + to_string(FREQ_METHOD) + "]/D:";
   br_vars += "freq_err[" + to_string(FREQ_METHOD) + "]/D:";
   br_vars += "fit[" + to_string(FREQ_METHOD) + "][" + to_string(Fid_LEN) + "]/D";
@@ -98,6 +98,7 @@ int main(int argc, char **argv)
   std::uniform_real_distribution<double> rand_flat_dist(35.0, 40.0);
 
   FidFactory ff;
+  ff.SetWithNoise(true);
 
   for (int i = 0; i < 1000; ++i) {
     
@@ -111,17 +112,17 @@ int main(int argc, char **argv)
     sim::mixdown_phi = 0.0;
     sim::snr = 100 * 100;
 
-    ff.IdealFid(wf, tm, true);
-
+    ff.IdealFid(wf, tm);
     Fid myfid(wf, tm);
+
     myfid_data.i_wf = myfid.i_wf();
     myfid_data.f_wf = myfid.f_wf();
     myfid_data.i_psd = myfid.i_fft();
     myfid_data.f_psd = myfid.f_fft();
     myfid_data.freq_def = freq;
     std::copy(myfid.wf().begin(), myfid.wf().end(), myfid_data.wf);
-    std::copy(myfid.power().begin(), myfid.power().end(), myfid_data.psd);
-    std::copy(myfid.phase().begin(), myfid.phase().end(), myfid_data.phase);
+    std::copy(myfid.psd().begin(), myfid.psd().end(), myfid_data.psd);
+    std::copy(myfid.phi().begin(), myfid.phi().end(), myfid_data.phi);
 
     int idx = 0;
     myfid_data.freq_ext[idx] = myfid.CalcZeroCountFreq();
