@@ -354,28 +354,41 @@ void BaseFid::SaveData(std::string filename)
 }
 
 
-void BaseFid::PrintDiagnosticInfo()
+void BaseFid::PrintDiagnosticData(std::ostream& out)
 {
-  using std::cout;
-  using std::endl;
-
-  cout << endl << std::string(80, '<') << endl;
-  cout << "Printing Diagostic Information for BaseFid @ " << this << endl;
-  cout << "noise level: " << noise_ << endl;
-  cout << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
-  cout << std::string(80, '>') << endl;
-}
-
-void BaseFid::PrintDiagnosticInfo(std::iostream out)
-{
-  using std::cout;
   using std::endl;
 
   out << std::string(80, '<') << endl;
-  out << "Printing Diagostic Information for BaseFid @ " << this << endl;
-  out << "noise level: " << noise_ << endl;
-  out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
-  out << std::string(80, '>') << endl;
+  out << "Diagostic Information for Fid @ " << this << endl;
+  out << std::string(80, '<') << endl;
+
+  out << "Fid Waveform Characterics" << endl;
+  out << "    mean:       " << mean_ << endl;
+  out << "    amplitude:  " << max_amp_ << endl;
+  out << "    noise:      " << noise_ << endl;
+  out << "    start time: " << i_wf_ << "(" << tm_[i_wf_] << " ms)" << endl;
+  out << "    stop time:  " << f_wf_ << "(" << tm_[f_wf_] << " ms)" << endl;
+  out << "    health:     " << health_ << endl;
+  out << std::string(80, '>') << endl << std::string(80, '>') << endl;
+}
+
+void BaseFid::DumpDiagnosticData(std::string dirname, std::string filestub)
+{
+  boost::filesystem::path dir(dirname);
+  boost::filesystem::create_directories(dir);
+
+  std::ofstream out;
+  std::string str = dir.string() + std::string("libfid.log");
+  out.open(str , std::ofstream::out | std::ofstream::app);
+
+  PrintDiagnosticData(out);
+  out.close();
+
+  SaveFreqFit(dirname + filestub + std::string("_freq_fit.png"));
+  SaveTimeFit(dirname + filestub + std::string("_time_fit.png"));
+  SaveFreqRes(dirname + filestub + std::string("_freq_res.png"));
+  SaveTimeRes(dirname + filestub + std::string("_time_res.png"));
+
 }
 
 } // fid

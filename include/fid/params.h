@@ -31,6 +31,8 @@ enum Method { ZC, CN, AN, LZ, EX, PH, SN,
 // constants
 const double kTau = 2 * M_PI;
 
+extern std::string logfile;
+
 // general fid analysis parameters
 namespace params {
 

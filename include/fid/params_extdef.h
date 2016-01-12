@@ -5,6 +5,8 @@
 
 namespace fid {
 
+std::string logfile("/var/log/fid/");
+
 // general fid analysis parameters
 namespace params {
 

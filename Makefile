@@ -34,7 +34,7 @@ ifeq ($(UNAME_S), Linux)
 endif
 
 FLAGS += -Wall -fPIC $(DEBUG) $(OPTIMIZE) -Iinclude
-LIBS = -lfftw3 -lm
+LIBS = -lfftw3 -lm -lboost_filesystem -lboost_system
 
 FLAGS += $(shell root-config --cflags)
 LIBS  += $(shell root-config --libs)

@@ -19,6 +19,7 @@ notes:
 #include <cmath>
 
 //--- other includes --------------------------------------------------------//
+#include "boost/filesystem.hpp"
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TF1.h"
@@ -43,8 +44,9 @@ class BaseFid {
   double GetFreqError();
   
   // diagnostic function
-  void PrintDiagnosticInfo();
-  void PrintDiagnosticInfo(std::iostream out);
+  void PrintDiagnosticData(std::ostream& out=std::cout);
+  void DumpDiagnosticData(std::string dirname=logfile, 
+                          std::string filestub="");
 
   // accessors
   const std::vector<double>& wf() const { return wf_; };
