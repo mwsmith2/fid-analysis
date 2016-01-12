@@ -1,5 +1,5 @@
-#ifndef FID_ANALYSIS_FID_FAST_FID_H_
-#define FID_ANALYSIS_FID_FAST_FID_H_
+#ifndef LIBFID_FID_FAST_FID_H_
+#define LIBFID_FID_FAST_FID_H_
 
 /*============================================================================*\
 

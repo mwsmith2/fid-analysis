@@ -1,5 +1,5 @@
-#ifndef FID_ANALYSIS_INCLUDE_FID_FID_FACTORY_H_
-#define FID_ANALYSIS_INCLUDE_FID_FID_FACTORY_H_
+#ifndef LIBFID_INCLUDE_FID_FID_FACTORY_H_
+#define LIBFID_INCLUDE_FID_FID_FACTORY_H_
 
 /*===========================================================================*\
 
