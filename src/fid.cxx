@@ -42,74 +42,25 @@ Fid::Fid(const std::vector<double>& wf)
 }
 
 
-void Fid::Init()
+void Fid::InitHook() 
 {
-  // Load the current configuration.
-  LoadParams();
-
-  // Initialize the health to full.
-  health_ = 100.0;
-
-  // Resize the temp array (maybe others?)
-  temp_.reserve(wf_.size());
-
-  // Initialize the FID for analysis
-  CenterFid();
-  CalcNoise();
-  CalcMaxAmp();
-  CalcPowerEnvAndPhase();
-  FindFidRange();
-  CalcFftFreq();
-  GuessFitParams();
-
-  // Go ahead and do the default frequency extraction
-  CalcFreq();
-
-  // Flag the FID as bad.
-  if (freq_ < 0) {
-
-    // Try a different method
-    CalcLorentzianFreq();
-  }
-
-  if (freq_ < 0.0) {
-
-    health_ = 0.0;
-
-  }
-
-  if (max_amp_ < noise_ * snr_thresh_) {
-    health_ *= max_amp_ / (noise_ * snr_thresh_);
-  }
-
-  if (f_wf_ - i_wf_ < 0.05 * wf_.size()) {
-    health_ *= (f_wf_ - i_wf_) / (wf_.size() * len_thresh_);
-  }
-
-  if (health_ > 100.0) {
-
-    health_ = 100.0;
-
-  } else if (health_ < 0.0) {
-
-    health_ = 0.0;
-  }
+  void CalcPowerEnvAndPhase();
+  void CalcFftFreq();
+  void GuessFitParams();
 }
 
-double Fid::GetFreq()
-{
-  return freq_;
-}
 
 double Fid::GetFreq(const std::string& method_name)
 {
   return GetFreq(ParseMethod(method_name));
 }
 
+
 double Fid::GetFreq(const char* method_name)
 {
   return GetFreq((std::string(method_name)));
 }
+
 
 double Fid::GetFreq(const Method m)
 {
@@ -125,10 +76,6 @@ double Fid::GetFreq(const Method m)
   }
 }
 
-double Fid::GetFreqError()
-{
-  return freq_err_;
-}
 
 // Calculate the frequency using the current Method
 double Fid::CalcFreq()
@@ -180,139 +127,6 @@ double Fid::CalcFreq()
   return freq_;
 }
 
-
-// Load all the current parameters in the fid::params namespace.
-void Fid::LoadParams()
-{
-  freq_method_ = params::freq_method;
-  len_thresh_ = params::len_thresh;
-  snr_thresh_ = params::snr_thresh;
-  hyst_thresh_ = params::hyst_thresh; 
-  centroid_thresh_ = params::centroid_thresh; 
-  low_pass_freq_ = params::low_pass_freq; 
-  max_phase_jump_ = params::max_phase_jump; 
-  zc_alpha_ = params::zc_alpha; 
-  start_thresh_ = params::start_thresh; 
-  edge_ignore_ = params::edge_ignore; 
-  zc_width_ = params::zc_width;
-  fit_width_ = params::fit_width;
-}
-
-void Fid::CenterFid()
-{
-  int w = zc_width_;
-  double sum  = std::accumulate(wf_.begin(), wf_.begin() + w, 0.0);
-  double avg = sum / w; // to pass into lambda
-  mean_ = avg; // save to class
-
-  std::for_each(wf_.begin(), wf_.end(), [avg](double& x){ x -= avg; });
-}
-
-void Fid::CalcNoise()
-{ 
-  // Grab a new handle to the noise window width for aesthetics.
-  int i = edge_ignore_;
-  int f = zc_width_ + i;
-
-  // Find the noise level in the head and tail.
-  double head = stdev(wf_.begin() + i, wf_.begin() + f);
-  double tail = stdev(wf_.rbegin() + i, wf_.rbegin() + f);
-
-  // Take the smaller of the two.
-  noise_ = (tail < head) ? (tail) : (head);
-}
-
-void Fid::CalcMaxAmp() 
-{
-  auto mm = std::minmax_element(wf_.begin(), wf_.end());
-  if (std::abs(*mm.first) > std::abs(*mm.second)) {
-    max_amp_ = std::abs(*mm.first);
-  } else {
-    max_amp_ = std::abs(*mm.second);
-  }
-}
-
-void Fid::FindFidRange()
-{
-  // Find the starting and ending points
-  double thresh = start_thresh_ * max_amp_;
-
-  if (thresh < 5.0 * noise_) {
-    std::cout << "Warning: FID signal to noise very low." << std::endl;
-    thresh = 3.0 * noise_;
-  }
-
-  bool checks_out = false;
-
-  // Find the first element with magnitude larger than thresh
-  auto it_1 = env_.begin() + edge_ignore_;
-  while (!checks_out) {
-
-    auto it_i = std::find_if(it_1, env_.end(), 
-        [thresh](double x){return std::abs(x) > thresh;});
-
-    if (it_i != env_.end() && it_i+1 != env_.end()) {
-      checks_out = std::abs(*(it_i+1)) > thresh;
-      it_1 = it_i + 1;
-
-      // Turn the iterator into an index
-      if (checks_out) {
-        i_wf_ = std::distance(env_.begin(), it_i);
-        std::cout << "Setting i_wf_ to " << i_wf_ << std::endl;
-      }
-
-    } else {
-        i_wf_ = std::distance(env_.begin(), env_.end());
-        std::cout << "Setting i_wf_ to " << i_wf_ << std::endl;
-        break;
-    }
-  }
-
-  // Find the next element with magnitude lower than thresh
-  auto it_2 = env_.begin();
-
-  if (i_wf_ + edge_ignore_ < env_.size()) {
-
-    checks_out = false;
-    it_2 += i_wf_ + edge_ignore_;
-
-  } else {
-
-    checks_out = true;
-  }
-
-  while (!checks_out) {
-
-    auto it_f = std::find_if(it_2, env_.end(), 
-      [thresh](double x){return std::abs(x) < thresh;});
-
-    if (it_f != env_.end() && it_f+1 != env_.end()) {
-      checks_out = std::abs(*(it_f+1)) < thresh;
-      it_2 = it_f + 1;
-
-      // Turn the iterator into an index
-      if (checks_out) {
-        f_wf_ = std::distance(env_.begin(), it_f);
-      }
-
-    } else {
-
-      f_wf_ = std::distance(env_.begin(), env_.end());
-      break;
-    }
-  }
-
-  // Gradients can cause a waist in the amplitude.
-
-  // Mark the signal as bad if it didn't find signal above threshold.
-  if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
-
-    health_ = 0.0;
-    i_wf_ = 0;
-    f_wf_ = wf_.size() * 0.01;
-
-  } 
-}
 
 void Fid::CalcPowerEnvAndPhase()
 {
@@ -682,31 +496,6 @@ double Fid::CalcSinusoidFreq()
   return freq_;
 }
 
-void Fid::PrintDiagnosticInfo()
-{
-  using std::cout;
-  using std::endl;
-
-  cout << std::string(80, '<') << endl;
-  cout << "Printing Diagostic Information for FID @ " << this << endl;
-  cout << "noise level: " << noise_ << endl;
-  cout << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
-  cout << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
-  cout << std::string(80, '>') << endl;
-}
-
-void Fid::PrintDiagnosticInfo(std::iostream out)
-{
-  using std::cout;
-  using std::endl;
-
-  out << std::string(80, '<') << endl;
-  out << "Printing Diagostic Information for FID @ " << this << endl;
-  out << "noise level: " << noise_ << endl;
-  out << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
-  out << "spectral start, stop: " << i_fft_ << ", " << f_fft_ << endl;
-  out << std::string(80, '>') << endl;
-}
 
 Method Fid::ParseMethod(const std::string& m)
 {
@@ -898,26 +687,6 @@ void Fid::SaveData(std::string filename)
   for (int i = 0; i < tm_.size(); ++i) {
     out << tm_[i] << " " << wf_[i] << std::endl;
   }
-}
-
-
-void Fid::LoadTextData(std::string filename)
-{
-  // open the file first
-  std::ifstream in(filename);
-
-  // shrink vectors
-  wf_.resize(0);
-  tm_.resize(0);
-
-  double wf_temp;
-  double tm_temp;
-
-  while (in.good()) {
-    in >> tm_temp >> wf_temp;
-    tm_.push_back(tm_temp);
-    wf_.push_back(wf_temp);
-  } 
 }
 
 

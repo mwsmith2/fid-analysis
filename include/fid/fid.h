@@ -29,12 +29,13 @@ notes:
 #include "TF1.h"
 
 //--- project includes ------------------------------------------------------//
+#include "fid/base_fid.h"
 #include "fid/params.h"
 #include "fid/math.h"
 
 namespace fid {
 
-class Fid {
+class Fid : public BaseFid {
 
  public:
   
@@ -54,10 +55,6 @@ class Fid {
   // specific frequency extraction methods
   double CalcFreq();
   
-  // diagnostic function
-  void PrintDiagnosticInfo();
-  void PrintDiagnosticInfo(std::iostream out);
-
   // utility functions
   void SaveData(std::string filename);
   void SavePlot(std::string filename, std::string title="");
@@ -151,17 +148,10 @@ class Fid {
   std::vector<double> temp_; // for random transformations
 
   // Private Member Functions  
-  // init function to be called after wf_ and tm_ are set.
-  void Init();
-  void LoadParams();
-  void SaveGraph(std::string filename, std::string title);
-  void LoadTextData(std::string filename); 
-
   // internal utility functions
-  void CalcNoise();
-  void CalcMaxAmp();			
-  void CenterFid();
-  void FindFidRange();
+  void InitHook();
+  void SaveGraph(std::string filename, std::string title);
+
   void CalcPowerEnvAndPhase();
   void CalcFftFreq();
   void GuessFitParams();
