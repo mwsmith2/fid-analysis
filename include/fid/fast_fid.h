@@ -53,29 +53,35 @@ class FastFid {
   void PrintDiagnosticInfo(std::iostream out);
 
   // accessors
-  const bool isgood() const { return health_ > 0.0; };
   const std::vector<double>& wf() const { return wf_; };
   const std::vector<double>& tm() const { return tm_; };
   const double& freq() const {  return freq_;  }
   const double& freq_err() const { return freq_err_; };
-  const ushort &health() const { return health_; };
+
   const double fid_time() const { return tm_[f_wf_] - tm_[i_wf_]; };
   const double snr() const { return pow(max_amp_ / noise_, 2); };
-  const TGraph& gr_time_series() const { return gr_time_series_; };
+  const bool isgood() const { return health_ > 0.0; };
+  const ushort &health() const { return health_; };
+
   const unsigned int& i_wf() { return i_wf_; };
   const unsigned int& f_wf() { return f_wf_; };
+
+  const TGraph& gr_time_series() const { return gr_time_series_; };
 
  private:
   
   // Private Member Variables
   unsigned int i_wf_; // start and stop of relevant data
   unsigned int f_wf_;
-  ushort health_; // percentage between 0 and 100.
+
+  // Waveform characteristics
+  double mean_;
   double noise_;
   double max_amp_;
-  double mean_;
+
   double freq_;
   double freq_err_;
+  ushort health_; // percentage between 0 and 100.
 
   // Load default (or user configured params)
   int fit_width_;
@@ -103,10 +109,10 @@ class FastFid {
   // Private Member Functions  
   // init function to be called after wf_ and tm_ are set.
   void Init();
-  void LoadParams();
-  void LoadTextData(std::string filename);
 
   // internal utility functions
+  void LoadTextData(std::string filename);
+  void LoadParams();
   void CalcNoise();
   void CalcMaxAmp();      
   void CenterFid();

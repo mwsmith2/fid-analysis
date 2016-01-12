@@ -10,6 +10,7 @@ FastFid::FastFid(const std::string& fid_file)
   Init();
 }
 
+
 FastFid::FastFid(const char* fid_file)
 {
   // Convert the char pointer toa string.
@@ -22,8 +23,7 @@ FastFid::FastFid(const char* fid_file)
 }
 
 
-FastFid::FastFid(const std::vector<double>& wf, 
-                 const std::vector<double>& tm)
+FastFid::FastFid(const std::vector<double>& wf, const std::vector<double>& tm)
 {
   // Copy the waveform and time to member vectors.
   wf_ = wf;
@@ -51,6 +51,7 @@ void FastFid::Init()
   temp_.reserve(wf_.size());
 
   // Initialize the FastFid for analysis
+  LoadParams();
   CenterFid();
   CalcNoise();
   CalcMaxAmp();
@@ -64,25 +65,15 @@ void FastFid::Init()
 
   }
   
+  // Else calculate a health based on signal to noise.
   if (max_amp_ < noise_ * snr_thresh_) {
     health_ *= max_amp_ / (noise_ * snr_thresh_);
   }
 
+  // And factor fid duration into health.
   if (f_wf_ - i_wf_ < wf_.size() * len_thresh_) {
     health_ *= (f_wf_ - i_wf_) / (wf_.size() * len_thresh_);
   }
-}
-
-
-double FastFid::GetFreq()
-{
-  return freq_;
-}
-
-
-double FastFid::GetFreqError()
-{
-  return freq_err_;
 }
 
 
@@ -129,15 +120,21 @@ void FastFid::CalcNoise()
   noise_ = (tail < head) ? (tail) : (head);
 }
 
+
 void FastFid::CalcMaxAmp() 
 {
   auto mm = std::minmax_element(wf_.begin(), wf_.end());
+
   if (std::abs(*mm.first) > std::abs(*mm.second)) {
+
     max_amp_ = std::abs(*mm.first);
+
   } else {
+
     max_amp_ = std::abs(*mm.second);
   }
 }
+
 
 void FastFid::FindFidRange()
 {
@@ -147,13 +144,22 @@ void FastFid::FindFidRange()
 
   // Find the first element with magnitude larger than thresh
   auto it_1 = wf_.begin() + edge_ignore_;
+
   while (!checks_out) {
 
+    // Check if the point is above threshold.
     auto it_i = std::find_if(it_1, wf_.end(), 
-        [thresh](double x){return std::abs(x) > thresh;});
+      [thresh](double x) { 
+        return std::abs(x) > thresh; 
+    });
 
-    if (it_i != wf_.end() && it_i+1 != wf_.end()) {
-      checks_out = std::abs(*(it_i+1)) > thresh;
+    // Make sure the point is not with one of the vector's end.
+    if ((it_i != wf_.end()) && (it_i + 1 != wf_.end())) {
+
+      // Check if the next point is also over threshold.
+      checks_out = std::abs(*(it_i + 1)) > thresh;
+
+      // Increase the comparison starting point.
       it_1 = it_i + 1;
 
       // Turn the iterator into an index
@@ -162,24 +168,31 @@ void FastFid::FindFidRange()
       }
 
     } else {
-        i_wf_ = std::distance(wf_.begin(), wf_.end());
-        break;
+
+      // If we have reached the end, mark it as the last.
+      i_wf_ = std::distance(wf_.begin(), wf_.end());
+      break;
     }
   }
 
   // Find the next element with magnitude lower than thresh
-  checks_out = false;
   auto it_2 = wf_.begin() + i_wf_ + edge_ignore_;
+  checks_out = false;
+
   while (!checks_out) {
 
-    // Find a range above threshold
+    // Find the range around a peak.
     auto it_i = std::find_if(it_2, wf_.end(), 
-      [thresh](double x){return std::abs(x) > 0.9 * thresh;});
+      [thresh](double x) {
+        return std::abs(x) > 0.8 * thresh;
+    });
 
-    auto it_f = std::find_if(it_i + 1, wf_.end(), 
-      [thresh](double x){return std::abs(x) < 0.9 * thresh;});
+    auto it_f = std::find_if(it_i + 1, wf_.end(),
+      [thresh](double x) {
+        return std::abs(x) < 0.8 * thresh;
+    });
 
-    // Now check if it actually made it over threshold.
+    // Now check if the peak actually made it over threshold.
     if ((it_i != wf_.end()) && (it_f != wf_.end())) {
 
       auto mm = std::minmax_element(it_i, it_f);
@@ -207,14 +220,15 @@ void FastFid::FindFidRange()
 
   // Gradients can cause a waist in the amplitude.
   // Mark the signal as bad if it didn't find signal above threshold.
-  if (i_wf_ > wf_.size() * 0.9 || i_wf_ >= f_wf_) {
+  if (i_wf_ > wf_.size() * 0.95 || i_wf_ >= f_wf_) {
 
-    health_ = false;
+    health_ = 0.0;
+
     i_wf_ = 0;
     f_wf_ = wf_.size() * 0.01;
-
   } 
 }
+
 
 double FastFid::CalcFreq()
 {
@@ -225,15 +239,6 @@ double FastFid::CalcFreq()
   bool pos = wf_[i_wf_] >= 0.0;
   bool hyst = false;
   
-  auto mm = std::minmax_element(wf_.begin(), wf_.end()); // returns {&min, &max}
-
-  double max = *mm.second;
-  if (std::abs(*mm.first) > max) max = std::abs(*mm.first);
-  
-  //  double max = (-(*mm.first) > *mm.second) ? -(*mm.first) : *mm.second;
-  //  double thresh = hyst_thresh_ * max;
-  //  thresh = 10 * noise_;
-
   int i_zero = -1;
   int f_zero = -1;
   double thresh = hyst_thresh_ * start_thresh_ * max_amp_; 
@@ -275,12 +280,25 @@ double FastFid::CalcFreq()
   return freq_;
 }
 
+
+double FastFid::GetFreq()
+{
+  return freq_;
+}
+
+
+double FastFid::GetFreqError()
+{
+  return freq_err_;
+}
+
+
 void FastFid::PrintDiagnosticInfo()
 {
   using std::cout;
   using std::endl;
 
-  cout << std::string(80, '<') << endl;
+  cout << endl << std::string(80, '<') << endl;
   cout << "Printing Diagostic Information for FastFid @ " << this << endl;
   cout << "noise level: " << noise_ << endl;
   cout << "waveform start, stop: " << i_wf_ << ", " << f_wf_ << endl;
