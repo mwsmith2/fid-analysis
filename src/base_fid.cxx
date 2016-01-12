@@ -16,6 +16,8 @@ void BaseFid::Init()
   CalcNoise();
   CalcMaxAmp();
   FindFidRange();
+  InitHook();
+
   CalcFreq();
 
   // Flag the FID as bad if it's negative.
