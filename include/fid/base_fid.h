@@ -19,7 +19,9 @@ notes:
 #include <cmath>
 
 //--- other includes --------------------------------------------------------//
+#include "TCanvas.h"
 #include "TGraph.h"
+#include "TF1.h"
 
 //--- project includes ------------------------------------------------------//
 #include "fid/params.h"
@@ -57,14 +59,30 @@ class BaseFid {
 
   const unsigned int& i_wf() { return i_wf_; };
   const unsigned int& f_wf() { return f_wf_; };
+  const unsigned int& i_fft() { return i_fft_; };
+  const unsigned int& f_fft() { return f_fft_; };
 
+  const double& chi2() const { return chi2_; };
+  const TF1&    f_fit() const { return f_fit_; };
   const TGraph& gr_time_series() const { return gr_time_series_; };
+  const TGraph& gr_freq_series() const { return gr_freq_series_; };
+
+  // Utility functions
+  void SaveData(std::string filename);
+  void SaveGraph(std::string filename, std::string title);
+  void SavePlot(std::string filename, std::string title="");
+  void SaveTimeFit(std::string filename, std::string title="");
+  void SaveFreqFit(std::string filename, std::string title="");
+  void SaveTimeRes(std::string filename, std::string title="");
+  void SaveFreqRes(std::string filename, std::string title="");
 
  protected:
   
   // Private Member Variables
   unsigned int i_wf_; // start and stop of relevant data
   unsigned int f_wf_;
+  unsigned int i_fft_;
+  unsigned int f_fft_;
 
   // Waveform characteristics
   double mean_;
@@ -73,6 +91,7 @@ class BaseFid {
 
   double freq_;
   double freq_err_;
+  double chi2_; // Store the most recent chi2
   ushort health_; // percentage between 0 and 100.
 
   // Load default (or user configured params)
@@ -89,13 +108,20 @@ class BaseFid {
   double len_thresh_;
   Method freq_method_;
 
+  // For fits.
   std::vector<double> guess_;
+  TF1 f_fit_;  
   TGraph gr_time_series_;
   TGraph gr_freq_series_;
+
+  // For general plotting.
+  TCanvas c1_;
+  TGraph gr_;
   
   // bigger data arrays
   std::vector<double> wf_;
   std::vector<double> tm_;
+  std::vector<double> res_;
   std::vector<double> temp_; // for random transformations
 
   // Private Member Functions  

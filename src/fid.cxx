@@ -142,8 +142,8 @@ void Fid::CalcPowerEnvAndPhase()
   //  
 
   // Now we can get power, envelope and phase.
-  power_ = dsp::norm(fid_fft);
-  phase_ = dsp::phase(wf_, wf_im);
+  psd_ = dsp::norm(fid_fft);
+  phi_ = dsp::phase(wf_, wf_im);
   env_ = dsp::envelope(wf_, wf_im);
 }
 
@@ -163,17 +163,17 @@ void Fid::GuessFitParams()
   double den;
 
   // find max index and set the fit window
-  int max_idx = std::distance(power_.begin(),
-    std::max_element(power_.begin(), power_.end()));
+  int max_idx = std::distance(psd_.begin(),
+    std::max_element(psd_.begin(), psd_.end()));
 
   i_fft_ = max_idx - fit_width_;
   if (max_idx - fit_width_ < 0) i_fft_ = 0;  
 
   f_fft_ = max_idx + fit_width_;
-  if (f_fft_ > power_.size()) f_fft_ = power_.size();
+  if (f_fft_ > psd_.size()) f_fft_ = psd_.size();
 
-  auto it_pi = power_.begin() + i_fft_; // to shorten subsequent lines
-  auto it_pf = power_.begin() + f_fft_;
+  auto it_pi = psd_.begin() + i_fft_; // to shorten subsequent lines
+  auto it_pf = psd_.begin() + f_fft_;
   auto it_fi = fftfreq_.begin() + i_fft_;
 
   // Compute some moments
@@ -194,7 +194,7 @@ void Fid::GuessFitParams()
   guess_[1] = std::sqrt(f_mean2 - f_mean * f_mean);
 
   // amplitude
-  guess_[2] = power_[max_idx];
+  guess_[2] = psd_[max_idx];
 
   // background
   guess_[3] = noise_;
@@ -209,7 +209,7 @@ void Fid::GuessFitParams()
 void Fid::FreqFit(TF1& func)
 {
   // Make a TGraph to fit
-  gr_freq_series_ = TGraph(f_fft_ - i_fft_, &fftfreq_[i_fft_], &power_[i_fft_]);
+  gr_freq_series_ = TGraph(f_fft_ - i_fft_, &fftfreq_[i_fft_], &psd_[i_fft_]);
 
   gr_freq_series_.Fit(&func, "QMRSEX0", "C", fftfreq_[i_fft_], fftfreq_[f_fft_]);
 
@@ -218,7 +218,7 @@ void Fid::FreqFit(TF1& func)
 
   res_.resize(0);
   for (unsigned int i = i_fft_; i < f_fft_ + 1; ++i){
-    res_.push_back(power_[i] - func.Eval(fftfreq_[i]));
+    res_.push_back(psd_[i] - func.Eval(fftfreq_[i]));
   }
 
   return;
@@ -285,17 +285,17 @@ double Fid::CalcZeroCountFreq()
 double Fid::CalcCentroidFreq()
 {
   // Find the peak power
-  double thresh = *std::max_element(power_.begin(), power_.end());
+  double thresh = *std::max_element(psd_.begin(), psd_.end());
   thresh *= centroid_thresh_;
 
   // Find the indices for a window around the max
-  int it_i = std::distance(power_.begin(), 
-    std::find_if(power_.begin(), power_.end(), 
+  int it_i = std::distance(psd_.begin(), 
+    std::find_if(psd_.begin(), psd_.end(), 
       [thresh](double x) {return x > thresh;}));
 
   // reverse the iterators
-  int it_f = -1 * std::distance(power_.rend(),
-    std::find_if(power_.rbegin(), power_.rend(), 
+  int it_f = -1 * std::distance(psd_.rend(),
+    std::find_if(psd_.rbegin(), psd_.rend(), 
       [thresh](double x) {return x > thresh;}));
 
   // Now compute the power weighted average
@@ -304,9 +304,9 @@ double Fid::CalcCentroidFreq()
   double pwsum = 0.0;
 
   for (int i = it_i; i < it_f; i++){
-    pwfreq += power_[i] * fftfreq_[i];
-    pwfreq2 += power_[i] * power_[i] * fftfreq_[i];
-    pwsum  += power_[i];
+    pwfreq += psd_[i] * fftfreq_[i];
+    pwfreq2 += psd_[i] * psd_[i] * fftfreq_[i];
+    pwsum  += psd_[i];
   }
 
   freq_err_ = sqrt(pwfreq2 / pwsum - pow(pwfreq / pwsum, 2.0));
@@ -405,7 +405,7 @@ double Fid::CalcExponentialFreq()
 
 double Fid::CalcPhaseFreq(int poln)
 {
-  gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &phase_[i_wf_]);
+  gr_time_series_ = TGraph(f_wf_ - i_wf_, &tm_[i_wf_], &phi_[i_wf_]);
 
   // Now set up the polynomial phase fit
   char fcn[20];
@@ -424,7 +424,7 @@ double Fid::CalcPhaseFreq(int poln)
 
   res_.resize(0);
   for (unsigned int idx = i; idx <= f; ++idx){
-    res_.push_back(phase_[idx] - f_fit_.Eval(tm_[idx]));
+    res_.push_back(phi_[idx] - f_fit_.Eval(tm_[idx]));
   }
 
   freq_ = f_fit_.GetParameter(1) / kTau;
@@ -463,7 +463,7 @@ double Fid::CalcSinusoidFreq()
   f_fit_.SetParameter(1, 1.0);
 
   // Need to reduce phase to proper range.
-  auto tmp = fmod(phase_[i_wf_], kTau);
+  auto tmp = fmod(phi_[i_wf_], kTau);
 
   if (tmp <= 0.0) {
 
@@ -556,137 +556,6 @@ Method Fid::ParseMethod(const std::string& m)
   std::cout << "Method not changed." << std::endl;
 
   return freq_method_;
-}
-
-
-// Save the interanl TGraph.
-void Fid::SaveGraph(std::string filename, std::string title)
-{ 
-  gr_.SetTitle(title.c_str());
-  gr_.Draw();
-  c1_.Print(filename.c_str());
-}
-
-
-// Save a plot of FID waveform.
-void Fid::SavePlot(std::string filename, std::string title)
-{
-  // If no title supplied give a reasonable default.
-  if (title == "") {
-
-    title = std::string("FID; time [ms]; amplitude [a.u.]");
-
-  } else {
-
-    // In case they didn't append x/y labels.
-    title.append("; time [ms]; amplitude [a.u.]");
-  }
-
-  gr_ = TGraph(wf_.size(), &tm_[0], &wf_[0]);
-
-  SaveGraph(filename, title);
-}
-
-
-// Print the time series fit from an FID.
-void Fid::SaveTimeFit(std::string filename, std::string title)
-{
-  if (title == "") {
-
-    title = std::string("Time Series Fit; time [ms]; amplitude [a.u.]");
-
-  } else {
-
-    // In case they didn't append x/y labels.
-    title.append("; time [ms]; amplitude [a.u.]");
-  }  
-
-  // Copy the current time fit graph.
-  gr_ = gr_time_series_;
-  SaveGraph(filename, title);
-}
-
-// Print the time series fit from an FID.
-void Fid::SaveFreqFit(std::string filename, std::string title)
-{
-  if (title == "") {
-
-    title = std::string("Frequency Series Fit; time [ms]; amplitude [a.u.]");
-
-  } else {
-
-    // In case they didn't append x/y labels.
-    title.append("; time [ms]; amplitude [a.u.]");
-  }  
-
-  // Copy the current time fit graph.
-  gr_ = gr_freq_series_;
-  SaveGraph(filename, title);
-}
-
-void Fid::SaveTimeRes(std::string filename, std::string title)
-{
-  if (title == "") {
-
-    title = std::string("Time Series Fit Residuals; time [ms]; amplitude [a.u.]");
-
-  } else {
-
-    // In case they didn't append x/y labels.
-    title.append("; time [ms]; amplitude [a.u.]");
-  }  
-
-  // Copy the current time fit.
-  gr_ = gr_time_series_;
-
-  // Set the points
-  for (uint i = 0; i < res_.size(); ++i){
-    static double x, y;
-
-    gr_.GetPoint(i, x, y);
-    gr_.SetPoint(i, x, res_[i]); 
-  }
-
-  SaveGraph(filename, title);
-}
-
-
-void Fid::SaveFreqRes(std::string filename, std::string title)
-{
-  if (title == "") {
-
-    title = std::string("Freq Series Fit Residuals; time [ms]; amplitude [a.u.]");
-
-  } else {
-
-    // In case they didn't append x/y labels.
-    title.append("; time [ms]; amplitude [a.u.]");
-  }  
-
-  // Copy the current time fit.
-  gr_ = gr_freq_series_;
-
-  // Set the points
-  for (uint i = 0; i < res_.size(); ++i){
-    static double x, y;
-
-    gr_.GetPoint(i, x, y);
-    gr_.SetPoint(i, x, res_[i]); 
-  }
-
-  SaveGraph(filename, title);
-}
-
-
-// Save the FID data to a text file as "<time> <amp>".
-void Fid::SaveData(std::string filename)
-{
-  // open the file first
-  std::ofstream out(filename);
-
-  for (int i = 0; i < tm_.size(); ++i) {
-    out << tm_[i] << " " << wf_[i] << std::endl;
-  }
 }
 
 

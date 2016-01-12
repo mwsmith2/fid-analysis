@@ -223,6 +223,137 @@ double BaseFid::GetFreqError()
 }
 
 
+// Save the interanl TGraph.
+void BaseFid::SaveGraph(std::string filename, std::string title)
+{ 
+  gr_.SetTitle(title.c_str());
+  gr_.Draw();
+  c1_.Print(filename.c_str());
+}
+
+
+// Save a plot of FID waveform.
+void BaseFid::SavePlot(std::string filename, std::string title)
+{
+  // If no title supplied give a reasonable default.
+  if (title == "") {
+
+    title = std::string("FID; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }
+
+  gr_ = TGraph(wf_.size(), &tm_[0], &wf_[0]);
+
+  SaveGraph(filename, title);
+}
+
+
+// Print the time series fit from an FID.
+void BaseFid::SaveTimeFit(std::string filename, std::string title)
+{
+  if (title == "") {
+
+    title = std::string("Time Series Fit; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }  
+
+  // Copy the current time fit graph.
+  gr_ = gr_time_series_;
+  SaveGraph(filename, title);
+}
+
+// Print the time series fit from an FID.
+void BaseFid::SaveFreqFit(std::string filename, std::string title)
+{
+  if (title == "") {
+
+    title = std::string("Frequency Series Fit; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }  
+
+  // Copy the current time fit graph.
+  gr_ = gr_freq_series_;
+  SaveGraph(filename, title);
+}
+
+void BaseFid::SaveTimeRes(std::string filename, std::string title)
+{
+  if (title == "") {
+
+    title = std::string("Time Series Fit Residuals; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }  
+
+  // Copy the current time fit.
+  gr_ = gr_time_series_;
+
+  // Set the points
+  for (uint i = 0; i < res_.size(); ++i){
+    static double x, y;
+
+    gr_.GetPoint(i, x, y);
+    gr_.SetPoint(i, x, res_[i]); 
+  }
+
+  SaveGraph(filename, title);
+}
+
+
+void BaseFid::SaveFreqRes(std::string filename, std::string title)
+{
+  if (title == "") {
+
+    title = std::string("Freq Series Fit Residuals; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }  
+
+  // Copy the current time fit.
+  gr_ = gr_freq_series_;
+
+  // Set the points
+  for (uint i = 0; i < res_.size(); ++i){
+    static double x, y;
+
+    gr_.GetPoint(i, x, y);
+    gr_.SetPoint(i, x, res_[i]); 
+  }
+
+  SaveGraph(filename, title);
+}
+
+
+// Save the FID data to a text file as "<time> <amp>".
+void BaseFid::SaveData(std::string filename)
+{
+  // open the file first
+  std::ofstream out(filename);
+
+  for (int i = 0; i < tm_.size(); ++i) {
+    out << tm_[i] << " " << wf_[i] << std::endl;
+  }
+}
+
+
 void BaseFid::PrintDiagnosticInfo()
 {
   using std::cout;
