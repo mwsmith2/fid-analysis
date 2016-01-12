@@ -99,7 +99,7 @@ class BaseFid {
   // Load default (or user configured params)
   double edge_width_;
   double edge_ignore_;
-  double start_thresh_;
+  double start_amplitude_;
   double max_phase_jump_;
   double low_pass_freq_;
   double fft_peak_width_;

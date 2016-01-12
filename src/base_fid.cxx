@@ -63,7 +63,7 @@ void BaseFid::LoadParams()
 {
   edge_width_ = params::edge_width;
   edge_ignore_ = params::edge_ignore; 
-  start_thresh_ = params::start_thresh; 
+  start_amplitude_ = params::start_amplitude; 
   max_phase_jump_ = params::max_phase_jump; 
   low_pass_freq_ = params::low_pass_freq; 
   fft_peak_width_ = params::fft_peak_width;
@@ -119,7 +119,7 @@ void BaseFid::CalcMaxAmp()
 void BaseFid::FindFidRange()
 {
   // Find the starting and ending points
-  double thresh = start_thresh_ * max_amp_;
+  double thresh = start_amplitude_ * max_amp_;
   bool checks_out = false;
 
   // Find the first element with magnitude larger than thresh

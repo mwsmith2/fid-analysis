@@ -37,11 +37,10 @@ extern std::string logdir;
 // general fid analysis parameters
 namespace params {
 
-  // Limits given as fractions (of amplitude or num_samples probably).
   extern double edge_width;      // size of window used to calculate FID noise
   extern double edge_ignore;     // samples to ignore when doing phase fits
+  extern double start_amplitude; // threshold above noise to define start of FID
   extern double fft_peak_width;  // fit width used by spectral peak fits
-  extern double start_thresh;    // threshold above noise to define start of FID
   extern double max_phase_jump;  // maximum change allowed when unwrapping phase
   extern double low_pass_freq;   // low pass frequency used by FID
   extern double centroid_thresh; // threshold of values included in centroid

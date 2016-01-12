@@ -53,7 +53,7 @@ double FastFid::CalcFreq()
   
   int i_zero = -1;
   int f_zero = -1;
-  double thresh = hyst_thresh_ * start_thresh_ * max_amp_; 
+  double thresh = hyst_thresh_ * start_amplitude_ * max_amp_; 
 
   // iterate over vector
   for (unsigned int i = i_wf_; i < f_wf_; i++){
