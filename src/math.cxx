@@ -186,11 +186,7 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
   
   // Now unwrap the phase
   double thresh = params::max_phase_jump;
-  double m_avg = 0.0;
-  double m_std = 0.0;
   double m = 0.0;
-  double a = 0.001;
-  bool phase_trend = false;
 
   int k = 0; // to track the winding number
   for (auto it = phase.begin() + 1; it != phase.end(); ++it) {
