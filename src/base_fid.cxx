@@ -61,23 +61,23 @@ void BaseFid::LoadTextData(std::string filename)
 // Load all the current parameters in the fid::params namespace.
 void BaseFid::LoadParams()
 {
-  freq_method_ = params::freq_method;
-  len_thresh_ = params::len_thresh;
-  snr_thresh_ = params::snr_thresh;
-  hyst_thresh_ = params::hyst_thresh; 
-  centroid_thresh_ = params::centroid_thresh; 
-  low_pass_freq_ = params::low_pass_freq; 
-  max_phase_jump_ = params::max_phase_jump; 
-  start_thresh_ = params::start_thresh; 
+  edge_width_ = params::edge_width;
   edge_ignore_ = params::edge_ignore; 
-  zc_width_ = params::zc_width;
+  start_thresh_ = params::start_thresh; 
+  max_phase_jump_ = params::max_phase_jump; 
+  low_pass_freq_ = params::low_pass_freq; 
   fft_peak_width_ = params::fft_peak_width;
+  centroid_thresh_ = params::centroid_thresh; 
+  hyst_thresh_ = params::hyst_thresh; 
+  snr_thresh_ = params::snr_thresh;
+  len_thresh_ = params::len_thresh;
+  freq_method_ = params::freq_method;
 }
 
 
 void BaseFid::CenterFid()
 {
-  int w = zc_width_;
+  int w = edge_width_;
   double sum  = std::accumulate(wf_.begin(), wf_.begin() + w, 0.0);
   double avg = sum / w; // to pass into lambda
   mean_ = avg; // save to class
@@ -90,7 +90,7 @@ void BaseFid::CalcNoise()
 { 
   // Grab a new handle to the noise window width for aesthetics.
   int i = edge_ignore_;
-  int f = zc_width_ + i;
+  int f = edge_width_ + i;
 
   // Find the noise level in the head and tail.
   double head = stdev(wf_.begin() + i, wf_.begin() + f);

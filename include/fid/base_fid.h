@@ -97,12 +97,12 @@ class BaseFid {
   ushort health_; // percentage between 0 and 100.
 
   // Load default (or user configured params)
-  int fft_peak_width_;
-  int zc_width_;
-  int edge_ignore_;
+  double edge_width_;
+  double edge_ignore_;
   double start_thresh_;
   double max_phase_jump_;
   double low_pass_freq_;
+  double fft_peak_width_;
   double centroid_thresh_;
   double hyst_thresh_;
   double snr_thresh_;

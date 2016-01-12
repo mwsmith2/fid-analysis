@@ -10,9 +10,9 @@ std::string logdir("/var/log/fid/");
 // general fid analysis parameters
 namespace params {
 
-  int fft_peak_width = 20;
-  int zc_width = 100;
-  int edge_ignore = 50;
+  double fft_peak_width = 20;
+  double edge_width = 100;
+  double edge_ignore = 50;
   double start_thresh = 0.37;
   double max_phase_jump = 4.71;
   double low_pass_freq = 2000.0;
@@ -86,7 +86,7 @@ void load_params(std::string conf_file)
   // analysis parameters
   fft_peak_width = pt.get<int>("params.fft_peak_width", fft_peak_width);
   edge_ignore = pt.get<int>("params.edge_ignore", edge_ignore);
-  zc_width = pt.get<int>("params.zc_width", zc_width);
+  edge_width = pt.get<int>("params.edge_width", edge_width);
   start_thresh = pt.get<double>("params.start_thresh", start_thresh);
   max_phase_jump = pt.get<double>("params.max_phase_jump", max_phase_jump);
   low_pass_freq = pt.get<double>("params.low_pass_freq", low_pass_freq);
