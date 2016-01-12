@@ -60,4 +60,4 @@ uninstall:
 	rm -rf $(patsubst include/%,$(PREFIX)/include/%,$(HEADERS))
 
 clean:
-	rm -f $(TARGETS) build/* 
+	rm -f $(TARGETS) build/* lib/*
