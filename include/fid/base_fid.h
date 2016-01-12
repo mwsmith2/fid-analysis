@@ -45,7 +45,7 @@ class BaseFid {
   
   // diagnostic function
   void PrintDiagnosticData(std::ostream& out=std::cout);
-  void DumpDiagnosticData(std::string dirname=logfile, 
+  void DumpDiagnosticData(std::string dirname=logdir, 
                           std::string filestub="");
 
   // accessors
@@ -97,11 +97,10 @@ class BaseFid {
   ushort health_; // percentage between 0 and 100.
 
   // Load default (or user configured params)
-  int fit_width_;
+  int fft_peak_width_;
   int zc_width_;
   int edge_ignore_;
   double start_thresh_;
-  double zc_alpha_;
   double max_phase_jump_;
   double low_pass_freq_;
   double centroid_thresh_;

@@ -31,16 +31,15 @@ enum Method { ZC, CN, AN, LZ, EX, PH, SN,
 // constants
 const double kTau = 2 * M_PI;
 
-extern std::string logfile;
+extern std::string logdir;
 
 // general fid analysis parameters
 namespace params {
 
-  extern int fit_width;  // fit width used by spectral peak fits
+  extern int fft_peak_width;  // fit width used by spectral peak fits
   extern int zc_width;   // size of window used to calculate FID noise
   extern int edge_ignore; // samples to ignore when doing phase fits
   extern double start_thresh; // threshold above noise to define start of FID
-  extern double zc_alpha; // parameter used by exponential moving average
   extern double max_phase_jump; // maximum change allowed when unwrapping phase
   extern double low_pass_freq; // low pass frequency used by FID
   extern double centroid_thresh; // threshold of values included in centroid

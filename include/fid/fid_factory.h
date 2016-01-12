@@ -73,7 +73,7 @@ class FidFactory
   void SetOmegaR(const double o) { omega_r_ = o; };
   void SetTPulse(const double t) { t_pulse_ = t; };
 
-  void SetWithNoise(bool whith_noise) { with_noise_ = whith_noise; };
+  void SetWithNoise(bool with_noise) { with_noise_ = with_noise; };
   void SetDiscretize(bool discretize) { discretize_ = discretize; };
 
   void PrintDiagnosticInfo();

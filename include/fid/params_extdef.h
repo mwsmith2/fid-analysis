@@ -5,19 +5,18 @@
 
 namespace fid {
 
-std::string logfile("/var/log/fid/");
+std::string logdir("/var/log/fid/");
 
 // general fid analysis parameters
 namespace params {
 
-  int fit_width = 20;  
-  int zc_width = 100;   
-  int edge_ignore = 50; 
-  double start_thresh = 0.37; 
-  double zc_alpha = 0.8;
-  double max_phase_jump = 4.71; 
+  int fft_peak_width = 20;
+  int zc_width = 100;
+  int edge_ignore = 50;
+  double start_thresh = 0.37;
+  double max_phase_jump = 4.71;
   double low_pass_freq = 2000.0;
-  double centroid_thresh = 0.01; 
+  double centroid_thresh = 0.01;
   double hyst_thresh = 0.7;
   double snr_thresh = 10.0;  // max_amp_ / noise_
   double len_thresh = 0.025;  // fraction of signal
@@ -85,11 +84,10 @@ void load_params(std::string conf_file)
   delta_time = pt.get<double>("delta_time", delta_time);  
 
   // analysis parameters
-  fit_width = pt.get<int>("params.fit_width", fit_width);
+  fft_peak_width = pt.get<int>("params.fft_peak_width", fft_peak_width);
   edge_ignore = pt.get<int>("params.edge_ignore", edge_ignore);
   zc_width = pt.get<int>("params.zc_width", zc_width);
   start_thresh = pt.get<double>("params.start_thresh", start_thresh);
-  zc_alpha = pt.get<double>("params.zc_alpha", zc_alpha);
   max_phase_jump = pt.get<double>("params.max_phase_jump", max_phase_jump);
   low_pass_freq = pt.get<double>("params.low_pass_freq", low_pass_freq);
   centroid_thresh = pt.get<double>("params.centroid_thresh", centroid_thresh);

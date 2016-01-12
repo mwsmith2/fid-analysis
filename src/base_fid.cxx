@@ -68,11 +68,10 @@ void BaseFid::LoadParams()
   centroid_thresh_ = params::centroid_thresh; 
   low_pass_freq_ = params::low_pass_freq; 
   max_phase_jump_ = params::max_phase_jump; 
-  zc_alpha_ = params::zc_alpha; 
   start_thresh_ = params::start_thresh; 
   edge_ignore_ = params::edge_ignore; 
   zc_width_ = params::zc_width;
-  fit_width_ = params::fit_width;
+  fft_peak_width_ = params::fft_peak_width;
 }
 
 

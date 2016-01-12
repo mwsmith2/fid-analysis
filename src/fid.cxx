@@ -166,10 +166,10 @@ void Fid::GuessFitParams()
   int max_idx = std::distance(psd_.begin(),
     std::max_element(psd_.begin(), psd_.end()));
 
-  i_fft_ = max_idx - fit_width_;
-  if (max_idx - fit_width_ < 0) i_fft_ = 0;  
+  i_fft_ = max_idx - fft_peak_width_;
+  if (max_idx - fft_peak_width_ < 0) i_fft_ = 0;  
 
-  f_fft_ = max_idx + fit_width_;
+  f_fft_ = max_idx + fft_peak_width_;
   if (f_fft_ > psd_.size()) f_fft_ = psd_.size();
 
   auto it_pi = psd_.begin() + i_fft_; // to shorten subsequent lines
