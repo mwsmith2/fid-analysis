@@ -60,9 +60,9 @@ int main(int argc, char **argv)
   for (auto &step : stepsizes) {
 
     dt = step;
-    sim::dt_integration = dt;
-    cout << "sim::dt_integration = " << sim::dt_integration << endl;
-    cout << "sim::dt_int @ " << &sim::dt_integration << endl;
+    sim::integration_step = dt;
+    cout << "sim::integration_step = " << sim::integration_step << endl;
+    cout << "sim::dt_int @ " << &sim::integration_step << endl;
     // Make FidFactory
     FidFactory ff;
     ff.PrintDiagnosticInfo();

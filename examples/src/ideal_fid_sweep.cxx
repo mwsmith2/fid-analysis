@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 
   } else {
 
-    snrs.push_back(sim::snr);
+    snrs.push_back(sim::signal_to_noise);
   }
 
   // begin sweeps

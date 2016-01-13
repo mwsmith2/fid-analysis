@@ -48,7 +48,7 @@ int main(int argc, char **argv)
   FidFactory ff;
   ff.SetSignalToNoise(100 * 100);
   ff.SetMixdownPhi(0.0);
-  ff.SetWithNoise(true);
+  ff.SetAddNoise(true);
 
   for (int i = 0; i < nfids; ++i) {
       
