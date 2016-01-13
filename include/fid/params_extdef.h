@@ -47,8 +47,8 @@ namespace sim {
   double gamma_2 = 0.05;  
   double gamma_g = 1.0;  
 
-  double rf_omega = 50.0;  
-  double rf_duration = 0.005; 
+  double pulse_freq = 50.0;  
+  double pulse_time = 0.005; 
 
   bool addnoise = true;
   bool discrete = false;
@@ -107,8 +107,8 @@ void load_params(std::string conf_file)
   lowpass_ratio = pt.get<double>("sim.lowpass_ratio", lowpass_ratio);
   mixdown_phi = pt.get<double>("sim.mixdown_phi", mixdown_phi);
 
-  rf_omega = pt.get<double>("sim.rf_omega", rf_omega);
-  rf_duration = pt.get<double>("sim.rf_duration", rf_duration);
+  pulse_freq = pt.get<double>("sim.pulse_freq", pulse_freq);
+  pulse_time = pt.get<double>("sim.pulse_time", pulse_time);
   addnoise = pt.get<bool>("sim.addnoise", addnoise);
   discrete = pt.get<bool>("sim.discrete", discrete);
 

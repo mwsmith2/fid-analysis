@@ -84,8 +84,8 @@ void FidFactory::LoadParams()
   gamma_1_ = sim::gamma_1;
   gamma_2_ = sim::gamma_2;
   gamma_g_ = sim::gamma_g;
-  rf_omega_ = sim::rf_omega;
-  rf_duration_ = sim::rf_duration;
+  pulse_freq_ = sim::pulse_freq;
+  pulse_time_ = sim::pulse_time;
 }
 
 
@@ -105,9 +105,9 @@ void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm)
 
   for (auto it = tm.begin(); it != tm.end(); ++it){
 
-    if (*it >= rf_duration_){
+    if (*it >= pulse_time_){
 
-      temp = amp * std::exp(-(*it - rf_duration_) / tau);
+      temp = amp * std::exp(-(*it - pulse_time_) / tau);
       temp *= std::sin((*it) * w + phi);
       wf.push_back(temp + base);
 
@@ -248,7 +248,7 @@ std::vector<double> FidFactory::Bfield(const double& t)
   static std::vector<double> b = {0., 0., 0.}; // time dependent B field
 
   // Return static external field if after the pulsed field.
-  if (t >= rf_duration_){
+  if (t >= pulse_time_){
     return a;
 
   // Set the fields if the simulation is just starting.
@@ -263,8 +263,8 @@ std::vector<double> FidFactory::Bfield(const double& t)
   if (t < 0.0) return a;
 
   // If none of the above, return the time-dependent, pulsed field.
-  b[0] = rf_omega_ * cos(kTau * mixdown_freq_ * t);
-  b[1] = rf_omega_ * sin(kTau * mixdown_freq_ * t);
+  b[0] = pulse_freq_ * cos(kTau * mixdown_freq_ * t);
+  b[1] = pulse_freq_ * sin(kTau * mixdown_freq_ * t);
   return b;
 }
 

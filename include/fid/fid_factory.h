@@ -61,20 +61,45 @@ class FidFactory
   void SetDeltaTime(const double dt) { sample_time_ = dt; };
   void SetNumSamples(int n) { num_samples_ = n; };
 
-  void SetFreqLarmor(const double f) { larmor_freq_ = f; };
-  void SetFreqRef(const double f) { mixdown_freq_ = f; };
-  void SetFreqCutRatio(const double ratio) { lowpass_ratio_ = ratio; };
+  void SetLarmorFreq(const double f) { larmor_freq_ = f; };
+  void SetMixdownFreq(const double f) { mixdown_freq_ = f; };
+  void SetLowpassRatio(const double r) { lowpass_ratio_ = r; };
   void SetMixdownPhi(const double phi) { mixdown_phi_ = phi; };
   void SetInitialSpin(const std::vector<double>& s) { spin_0_ = s; };
 
   void SetGamma1(const double g) { gamma_1_ = g; };
   void SetGamma2(const double g) { gamma_2_ = g; };
   void SetGammaG(const double g) { gamma_g_ = g; };
-  void SetOmegaR(const double o) { rf_omega_ = o; };
-  void SetTPulse(const double t) { rf_duration_ = t; };
+  void SetRfOmega(const double o) { pulse_freq_ = o; };
+  void SetRfDuration(const double t) { pulse_time_ = t; };
 
-  void SetWithNoise(bool addnoise) { addnoise_ = addnoise; };
-  void SetDiscretize(bool discrete) { discrete_ = discrete; };
+  void SetAddNoise(bool addnoise) { addnoise_ = addnoise; };
+  void SetDiscrete(bool discrete) { discrete_ = discrete; };
+
+  // accessors
+  const int& seed() { return seed_; };
+  const int& num_samples() { return num_samples_; };
+  const double& start_time() { return start_time_; };
+  const double& sample_time() { return sample_time_; };
+  const double& integration_step() { return integration_step_; };
+
+  const double& signal_to_noise() { return signal_to_noise_; };
+  const double& amplitude() { return amplitude_; };
+  const double& baseline() { return baseline_; };
+
+  const double& mixdown_freq() { return mixdown_freq_; };
+  const double& mixdown_phi() { return mixdown_phi_; };
+  const double& lowpass_ratio() { return lowpass_ratio_; };
+  const double& gamma_1() { return gamma_1_; };
+  const double& gamma_2() { return gamma_2_; };
+  const double& gamma_g() { return gamma_g_; };
+  const double& pulse_freq() { return pulse_freq_; };
+  const double& pulse_time() { return pulse_time_; };
+
+  const std::vector<double>& spin_0() { return spin_0_; };
+
+  const bool& discrete() { return discrete_; };
+  const bool& addnoise() { return addnoise_; };
 
   void PrintDiagnosticInfo();
 
@@ -96,14 +121,14 @@ class FidFactory
 
   // Simulation parameters (loaded from fid::sim namespace).
   int seed_;
+  int num_samples_;
+  double start_time_;
+  double sample_time_;
   double integration_step_;
+
   double signal_to_noise_;
   double amplitude_;
   double baseline_;
-
-  double start_time_;
-  double sample_time_;
-  int num_samples_;
 
   double mixdown_freq_;
   double larmor_freq_;
@@ -115,8 +140,8 @@ class FidFactory
   double gamma_2_;
   double gamma_g_;
 
-  double rf_omega_;
-  double rf_duration_;
+  double pulse_freq_;
+  double pulse_time_;
 
   bool discrete_;
   bool addnoise_;

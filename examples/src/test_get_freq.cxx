@@ -46,14 +46,14 @@ int main(int argc, char **argv)
   tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   FidFactory ff;
-  ff.SetSNR(100 * 100);
+  ff.SetSignalToNoise(100 * 100);
   ff.SetMixdownPhi(0.0);
   ff.SetWithNoise(true);
 
   for (int i = 0; i < nfids; ++i) {
       
     // Make ideal Fid waveform
-    ff.SetFreqLarmor(rand_flat_dist(gen) + sim::mixdown_freq);
+    ff.SetLarmorFreq(rand_flat_dist(gen) + sim::mixdown_freq);
     ff.IdealFid(wf, tm);
 
     Fid myfid(wf, tm);

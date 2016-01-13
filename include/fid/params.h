@@ -75,8 +75,8 @@ namespace sim {
   extern double gamma_2;  // relaxation time gamma_2
   extern double gamma_g;  // gyromagnetic ratio of proton
 
-  extern double rf_omega;     // strength of rf-pulse
-  extern double rf_duration;  // length of nmr pulse
+  extern double pulse_freq;     // strength of rf-pulse
+  extern double pulse_time;  // length of nmr pulse
 
   extern bool addnoise; // add noise to the waveform
   extern bool discrete; // discrete the result

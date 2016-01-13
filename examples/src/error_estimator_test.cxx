@@ -69,12 +69,12 @@ int main(int argc, char **argv)
 
   FidFactory ff;
   ff.SetMixdownPhi(0.0);
-  ff.SetSNR(100 * 100);
+  ff.SetSignalToNoise(100 * 100);
 
   for (int i = 0; i < 2000; ++i) {
     
     // Make ideal Fid waveform
-    ff.SetFreqLarmor(rand_flat_dist(gen));
+    ff.SetLarmorFreq(rand_flat_dist(gen));
     ff.IdealFid(wf, tm);
 
     Fid myfid(wf, tm);

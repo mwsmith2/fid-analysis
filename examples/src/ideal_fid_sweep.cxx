@@ -118,9 +118,9 @@ int main(int argc, char **argv)
           if (phases.size() > 1) out << p << ", ";
           if (snrs.size() > 1) out << s << ", ";
 
-          ff.SetFreqLarmor(f);
+          ff.SetLarmorFreq(f);
           ff.SetMixdownPhi(p);
-          ff.SetSNR(s);
+          ff.SetSignalToNoise(s);
 
           ff.IdealFid(wf, tm);
           Fid my_fid(wf, tm);

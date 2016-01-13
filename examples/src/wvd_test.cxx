@@ -51,7 +51,7 @@ int main(int argc, char** argv)
   }
 
   FidFactory ff;
-  ff.SetFreqLarmor(ftruth + sim::mixdown_freq);
+  ff.SetLarmorFreq(ftruth + sim::mixdown_freq);
   ff.IdealFid(wf, tm);
 
   for (int i = 0; i < wf.size(); ++i) {
