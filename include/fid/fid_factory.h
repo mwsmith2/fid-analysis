@@ -63,6 +63,7 @@ class FidFactory
 
   void SetLarmorFreq(const double f) { larmor_freq_ = f; };
   void SetMixdownFreq(const double f) { mixdown_freq_ = f; };
+  void SetFidFreq(const double f) { larmor_freq_ = mixdown_freq_ + f; };
   void SetLowpassRatio(const double r) { lowpass_ratio_ = r; };
   void SetMixdownPhi(const double phi) { mixdown_phi_ = phi; };
   void SetInitialSpin(const std::vector<double>& s) { spin_0_ = s; };
