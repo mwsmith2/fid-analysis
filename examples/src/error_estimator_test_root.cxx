@@ -90,8 +90,8 @@ int main(int argc, char **argv)
   std::vector<double> wf;
   std::vector<double> tm;
 
-  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  tm = construct_range(sim::start_time, final_time, sim::delta_time);
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   // Create random number engine/distribution.
   std::default_random_engine gen;
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 
     // Make ideal Fid waveform
     double freq = rand_flat_dist(gen);
-    sim::freq_larmor = freq;
+    sim::larmor_freq = freq;
     sim::mixdown_phi = 0.0;
     sim::snr = 100 * 100;
 

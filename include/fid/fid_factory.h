@@ -52,29 +52,29 @@ class FidFactory
 
   // Functions to set simulation parameters.
   void SetSeed(const int seed) { seed_ = seed; };
-  void SetDtIntegration(const double step) { dt_integration_ = step; };
+  void SetIntegrationStep(const double step) { integration_step_ = step; };
 
-  void SetSNR(const double snr) { snr_ = snr; };
+  void SetSignalToNoise(const double snr) { signal_to_noise_ = snr; };
   void SetAmplitude(const double amp) { amplitude_ = amp; };
   void SetBaseline(const double baseline) { baseline_ = baseline; };
-  void SetStartTime(const double start_time) { start_time_ = start_time; };
-  void SetDeltaTime(const double delta_time) { delta_time_ = delta_time; };
+  void SetStartTime(const double t0) { start_time_ = t0; };
+  void SetDeltaTime(const double dt) { sample_time_ = dt; };
   void SetNumSamples(int n) { num_samples_ = n; };
 
-  void SetFreqLarmor(const double f) { freq_larmor_ = f; };
-  void SetFreqRef(const double f) { freq_ref_ = f; };
-  void SetFreqCutRatio(const double ratio) { freq_cut_ratio_ = ratio; };
+  void SetFreqLarmor(const double f) { larmor_freq_ = f; };
+  void SetFreqRef(const double f) { mixdown_freq_ = f; };
+  void SetFreqCutRatio(const double ratio) { lowpass_ratio_ = ratio; };
   void SetMixdownPhi(const double phi) { mixdown_phi_ = phi; };
   void SetInitialSpin(const std::vector<double>& s) { spin_0_ = s; };
 
   void SetGamma1(const double g) { gamma_1_ = g; };
   void SetGamma2(const double g) { gamma_2_ = g; };
   void SetGammaG(const double g) { gamma_g_ = g; };
-  void SetOmegaR(const double o) { omega_r_ = o; };
-  void SetTPulse(const double t) { t_pulse_ = t; };
+  void SetOmegaR(const double o) { rf_omega_ = o; };
+  void SetTPulse(const double t) { rf_duration_ = t; };
 
-  void SetWithNoise(bool with_noise) { with_noise_ = with_noise; };
-  void SetDiscretize(bool discretize) { discretize_ = discretize; };
+  void SetWithNoise(bool addnoise) { addnoise_ = addnoise; };
+  void SetDiscretize(bool discrete) { discrete_ = discrete; };
 
   void PrintDiagnosticInfo();
 
@@ -96,18 +96,18 @@ class FidFactory
 
   // Simulation parameters (loaded from fid::sim namespace).
   int seed_;
-  double dt_integration_;
-  double snr_;
+  double integration_step_;
+  double signal_to_noise_;
   double amplitude_;
   double baseline_;
 
   double start_time_;
-  double delta_time_;
+  double sample_time_;
   int num_samples_;
 
-  double freq_ref_;
-  double freq_larmor_;
-  double freq_cut_ratio_;
+  double mixdown_freq_;
+  double larmor_freq_;
+  double lowpass_ratio_;
   double mixdown_phi_;
   std::vector<double> spin_0_;
 
@@ -115,11 +115,11 @@ class FidFactory
   double gamma_2_;
   double gamma_g_;
 
-  double omega_r_;
-  double t_pulse_;
+  double rf_omega_;
+  double rf_duration_;
 
-  bool discretize_;
-  bool with_noise_;
+  bool discrete_;
+  bool addnoise_;
   
   // Low pass filter to extract mixed down signal.
   std::vector<double> LowPassFilter(std::vector<double>& s);

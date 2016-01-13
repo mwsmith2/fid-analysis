@@ -38,10 +38,10 @@ int main(int argc, char **argv)
   double delta_b;
   double max_grad = 500; // in ppb
   int num_fids = 100;
-  double freq_0 = sim::freq_larmor;
+  double freq_0 = sim::larmor_freq;
 
-  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  tm = construct_range(sim::start_time, final_time, sim::delta_time);
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   // Set up the ROOT tree to hold the results
   TFile pf("sim_fids.root", "recreate");
@@ -57,9 +57,9 @@ int main(int argc, char **argv)
   for (int i = -1 * num_fids / 2; i < num_fids / 2 + 1; ++i){
 
     delta_b = max_grad * 2.0 * i / num_fids;
-    sim::freq_larmor = (1.0 + 1.0e-9 * delta_b) * freq_0;
+    sim::larmor_freq = (1.0 + 1.0e-9 * delta_b) * freq_0;
 
-    std::cout << sim::freq_larmor << std::endl;
+    std::cout << sim::larmor_freq << std::endl;
 
     // Make FidFactory
     FidFactory ff;

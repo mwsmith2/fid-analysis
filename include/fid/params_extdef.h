@@ -28,18 +28,18 @@ namespace params {
 namespace sim {
 
   int seed = 0;
-  double dt_integration = 2.0e-5;
-  double snr = 90000.0;   
+  double integration_step = 2.0e-5;
+  double signal_to_noise = 90000.0;   
   double amplitude = 2000.0;
   double baseline = 21000.0;
 
   int num_samples = 10000;
   double start_time = -1.0; 
-  double delta_time = 0.001; 
+  double sample_time = 0.001; 
 
-  double freq_ref = 950.0;    
-  double freq_larmor = 997.0; 
-  double freq_cut_ratio = 0.1;
+  double mixdown_freq = 950.0;    
+  double larmor_freq = 997.0; 
+  double lowpass_ratio = 0.1;
   double mixdown_phi = 0.0; 
   std::vector<double> spin_0 = {0.0, 0.0, 1.0};         
 
@@ -47,11 +47,11 @@ namespace sim {
   double gamma_2 = 0.05;  
   double gamma_g = 1.0;  
 
-  double omega_r = 50.0;  
-  double t_pulse = 0.005; 
+  double rf_omega = 50.0;  
+  double rf_duration = 0.005; 
 
-  bool with_noise = true;
-  bool discretize = false;
+  bool addnoise = true;
+  bool discrete = false;
 
 } // ::sim
 
@@ -81,7 +81,7 @@ void load_params(std::string conf_file)
   // general fid parameters
   num_samples = pt.get<int>("num_samples", num_samples);
   start_time = pt.get<double>("start_time", start_time);
-  delta_time = pt.get<double>("delta_time", delta_time);  
+  sample_time = pt.get<double>("sample_time", sample_time);  
 
   // analysis parameters
   fft_peak_width = pt.get<int>("params.fft_peak_width", fft_peak_width);
@@ -95,22 +95,22 @@ void load_params(std::string conf_file)
 
   // sim parameters
   seed = pt.get<int>("sim.seed", seed);
-  dt_integration = pt.get<double>("sim.dt_integration", dt_integration);
-  snr  = pt.get<double>("sim.snr", snr);
+  integration_step = pt.get<double>("sim.integration_step", integration_step);
+  signal_to_noise  = pt.get<double>("sim.signal_to_noise", signal_to_noise);
 
   gamma_1 = pt.get<double>("sim.gamma_1", gamma_1);
   gamma_2 = pt.get<double>("sim.gamma_2", gamma_2);
   gamma_g = pt.get<double>("sim.gamma_g", gamma_g);
 
-  freq_larmor = pt.get<double>("sim.freq_larmor", freq_larmor);
-  freq_ref = pt.get<double>("sim.freq_ref", freq_ref);
-  freq_cut_ratio = pt.get<double>("sim.freq_cut_ratio", freq_cut_ratio);
+  larmor_freq = pt.get<double>("sim.larmor_freq", larmor_freq);
+  mixdown_freq = pt.get<double>("sim.mixdown_freq", mixdown_freq);
+  lowpass_ratio = pt.get<double>("sim.lowpass_ratio", lowpass_ratio);
   mixdown_phi = pt.get<double>("sim.mixdown_phi", mixdown_phi);
 
-  omega_r = pt.get<double>("sim.omega_r", omega_r);
-  t_pulse = pt.get<double>("sim.t_pulse", t_pulse);
-  with_noise = pt.get<bool>("sim.with_noise", with_noise);
-  discretize = pt.get<bool>("sim.discretize", discretize);
+  rf_omega = pt.get<double>("sim.rf_omega", rf_omega);
+  rf_duration = pt.get<double>("sim.rf_duration", rf_duration);
+  addnoise = pt.get<bool>("sim.addnoise", addnoise);
+  discrete = pt.get<bool>("sim.discrete", discrete);
 
   // gradient fid file parameters
   grad::root_file = pt.get<std::string>("grad.root_file", grad::root_file);

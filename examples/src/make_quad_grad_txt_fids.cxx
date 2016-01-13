@@ -40,8 +40,8 @@ int main(int argc, char **argv)
   std::vector<double> grad_0;
   std::vector<double> gradient;
 
-  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  tm = construct_range(sim::start_time, final_time, sim::delta_time);
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   grads = construct_range(grad_min, grad_max, dgrad);
 

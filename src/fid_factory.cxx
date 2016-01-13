@@ -8,26 +8,26 @@ FidFactory::FidFactory()
 
   // Set the start/stop times.
   ti_ = start_time_;
-  tf_ = ti_ + delta_time_ * num_samples_;
+  tf_ = ti_ + sample_time_ * num_samples_;
 
   // Calculate the decimation ratio.
-  sim_to_fid_ = (tf_ - ti_) / (dt_integration_ * num_samples_) + 0.5; 
+  sim_to_fid_ = (tf_ - ti_) / (integration_step_ * num_samples_) + 0.5; 
 
   // If zero, more less integration steps than sampling times were requested.
   if (sim_to_fid_ == 0) {
 
     std::cout << "WARNING: The given integration step was larger than the ";
-    std::cout << "sampling time, so the sampling time, " << delta_time_;
+    std::cout << "sampling time, so the sampling time, " << sample_time_;
     std::cout << ", will be used instead." << std::endl;
 
     sim_to_fid_ = 1;
-    dt_ = delta_time_;
+    dt_ = sample_time_;
 
   } else {
 
-    dt_ = delta_time_ / sim_to_fid_;
+    dt_ = sample_time_ / sim_to_fid_;
   
-    if (dt_ != dt_integration_) {
+    if (dt_ != integration_step_) {
       std::cout << "WARNING: The given integration time step was not an even";
       std::cout << " divisor of the sampling rate, so it has been rounded to ";
       std::cout << dt_ << std::endl;
@@ -66,26 +66,26 @@ FidFactory::~FidFactory()
 void FidFactory::LoadParams()
 {
   seed_ = sim::seed;
-  dt_integration_ = sim::dt_integration;
-  snr_ = sim::snr;
+  integration_step_ = sim::integration_step;
+  signal_to_noise_ = sim::signal_to_noise;
   amplitude_ = sim:: amplitude;
   baseline_ = sim::baseline;
 
   num_samples_ = sim::num_samples;
   start_time_ = sim::start_time;
-  delta_time_ = sim::delta_time;
+  sample_time_ = sim::sample_time;
 
-  freq_ref_ = sim::freq_ref;
-  freq_larmor_ = sim::freq_larmor;
-  freq_cut_ratio_ = sim::freq_cut_ratio;
+  mixdown_freq_ = sim::mixdown_freq;
+  larmor_freq_ = sim::larmor_freq;
+  lowpass_ratio_ = sim::lowpass_ratio;
   mixdown_phi_ = sim::mixdown_phi;
   spin_0_ = sim::spin_0;
 
   gamma_1_ = sim::gamma_1;
   gamma_2_ = sim::gamma_2;
   gamma_g_ = sim::gamma_g;
-  omega_r_ = sim::omega_r;
-  t_pulse_ = sim::t_pulse;
+  rf_omega_ = sim::rf_omega;
+  rf_duration_ = sim::rf_duration;
 }
 
 
@@ -97,7 +97,7 @@ void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm)
 
   // Define the waveform
   double temp;
-  double w = kTau * (freq_larmor_ - freq_ref_);
+  double w = kTau * (larmor_freq_ - mixdown_freq_);
   double phi = mixdown_phi_;
   double tau = 1.0 / gamma_1_;
   double amp = amplitude_;
@@ -105,9 +105,9 @@ void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm)
 
   for (auto it = tm.begin(); it != tm.end(); ++it){
 
-    if (*it >= t_pulse_){
+    if (*it >= rf_duration_){
 
-      temp = amp * std::exp(-(*it - t_pulse_) / tau);
+      temp = amp * std::exp(-(*it - rf_duration_) / tau);
       temp *= std::sin((*it) * w + phi);
       wf.push_back(temp + base);
 
@@ -118,9 +118,9 @@ void FidFactory::IdealFid(std::vector<double>& wf, std::vector<double>& tm)
     }
   } 
 
-  if (with_noise_) addnoise(wf, snr_);
+  if (addnoise_) addwhitenoise(wf, signal_to_noise_);
 
-  if (discretize_) floor(wf);
+  if (discrete_) floor(wf);
 }
 
 
@@ -157,8 +157,8 @@ void FidFactory::SimulateFid(std::vector<double>& wf, std::vector<double>& tm)
   }
 
   // Take care of optional effects.
-  if (with_noise_) addnoise(wf, snr_);
-  if (discretize_) floor(wf);
+  if (addnoise_) addwhitenoise(wf, signal_to_noise_);
+  if (discrete_) floor(wf);
 }
 
 
@@ -195,8 +195,8 @@ void FidFactory::GradientFid(const std::vector<double>& grad,
   }
 
   // Take care of optional effects.
-  if (with_noise_) addnoise(wf, snr_);
-  if (discretize_) floor(wf);
+  if (addnoise_) addwhitenoise(wf, signal_to_noise_);
+  if (discrete_) floor(wf);
 }
 
 
@@ -248,14 +248,14 @@ std::vector<double> FidFactory::Bfield(const double& t)
   static std::vector<double> b = {0., 0., 0.}; // time dependent B field
 
   // Return static external field if after the pulsed field.
-  if (t >= t_pulse_){
+  if (t >= rf_duration_){
     return a;
 
   // Set the fields if the simulation is just starting.
   } else if (t <= ti_ + dt_) {
 
-    a[2] = kTau * freq_larmor_;
-    b[2] = kTau * freq_larmor_;
+    a[2] = kTau * larmor_freq_;
+    b[2] = kTau * larmor_freq_;
 
   }
 
@@ -263,8 +263,8 @@ std::vector<double> FidFactory::Bfield(const double& t)
   if (t < 0.0) return a;
 
   // If none of the above, return the time-dependent, pulsed field.
-  b[0] = omega_r_ * cos(kTau * freq_ref_ * t);
-  b[1] = omega_r_ * sin(kTau * freq_ref_ * t);
+  b[0] = rf_omega_ * cos(kTau * mixdown_freq_ * t);
+  b[1] = rf_omega_ * sin(kTau * mixdown_freq_ * t);
   return b;
 }
 
@@ -279,7 +279,7 @@ void FidFactory::Printer(std::vector<double> const &s , double t)
     double val;
 
     for (int i = 0; i < sim_length_; i++){
-      val = cos(kTau * freq_ref_ * temp + mixdown_phi_);
+      val = cos(kTau * mixdown_freq_ * temp + mixdown_phi_);
       cos_cache_.push_back(val);
       temp += dt_;
     }
@@ -313,7 +313,7 @@ std::vector<double> FidFactory::LowPassFilter(std::vector<double>& s)
 {
   // Allocate the filter and set the central frequency.
   std::vector<double> filter;
-  double freq_cut = freq_cut_ratio_ * freq_larmor_;
+  double freq_cut = lowpass_ratio_ * larmor_freq_;
 
   // Define the filter if not defined.  Using 3rd order Butterworth filter.
   if (filter.size() == 0) {

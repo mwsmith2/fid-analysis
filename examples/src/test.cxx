@@ -50,7 +50,7 @@ int main(int argc, char** argv)
   }
 
   FidFactory ff;
-  ff.SetLarmorFreq(ftruth + sim::freq_ref);
+  ff.SetLarmorFreq(ftruth + sim::mixdown_freq);
   ff.IdealFid(wf, tm);
 
   Fid my_fid(wf, tm);

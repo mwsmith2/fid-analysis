@@ -37,8 +37,8 @@ int main(int argc, char **argv)
 
   FidFactory ff;
 
-  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  tm = construct_range(sim::start_time, sim::delta_time, final_time);
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  tm = construct_range(sim::start_time, sim::sample_time, final_time);
 
   std::ofstream out;
   out.precision(10);
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 
   } else {
 
-    freqs.push_back(sim::freq_larmor - sim::freq_ref);
+    freqs.push_back(sim::larmor_freq - sim::mixdown_freq);
   }
 
   pt = conf.get_child("sweep.phase");

@@ -110,7 +110,7 @@ inline double stdev(const T& begin, const T& end) {
 
 // Add white noise to an array.
 template <typename T>
-void addnoise(std::vector<T>& wf, T snr) {
+void addwhitenoise(std::vector<T>& wf, T snr) {
   static std::default_random_engine gen(clock());
   std::normal_distribution<T> nrm;
 

@@ -42,8 +42,8 @@ int main(int argc, char **argv)
   std::default_random_engine gen;
   std::uniform_real_distribution<double> rand_flat_dist(35.0, 40.0);
 
-  double final_time = sim::start_time + sim::num_samples * sim::delta_time;
-  tm = construct_range(sim::start_time, final_time, sim::delta_time);
+  double final_time = sim::start_time + sim::num_samples * sim::sample_time;
+  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   FidFactory ff;
   ff.SetSNR(100 * 100);
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
   for (int i = 0; i < nfids; ++i) {
       
     // Make ideal Fid waveform
-    ff.SetFreqLarmor(rand_flat_dist(gen) + sim::freq_ref);
+    ff.SetFreqLarmor(rand_flat_dist(gen) + sim::mixdown_freq);
     ff.IdealFid(wf, tm);
 
     Fid myfid(wf, tm);

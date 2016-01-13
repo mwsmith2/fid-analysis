@@ -35,8 +35,8 @@ int main(int argc, char **argv)
 
   // some necessary parameters
   std::vector<double> wf;
-  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  std::vector<double> tm(construct_range(sim::start_time, sim::delta_time, final_time));
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  std::vector<double> tm(construct_range(sim::start_time, sim::sample_time, final_time));
 
   std::vector<double> freqs;
   std::vector<double> phases;
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
   } else {
 
-    freqs.push_back(sim::freq_larmor - sim::freq_ref);
+    freqs.push_back(sim::larmor_freq - sim::mixdown_freq);
   }
 
   pt = conf.get_child("sweep.phase");
