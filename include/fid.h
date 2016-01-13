@@ -14,8 +14,8 @@ notes:
 \*===========================================================================*/
 
 //--- project includes ------------------------------------------------------//
-#include "fid/fast_fid.h"
 #include "fid/fid.h"
+#include "fid/fast_fid.h"
 #include "fid/fid_factory.h"
 #include "fid/math.h"
 

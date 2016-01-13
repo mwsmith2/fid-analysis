@@ -39,10 +39,10 @@ class BaseFid {
   ~BaseFid() {};
   
   // Simplified frequency extraction
+  double GetFreq() { return freq_; };
+  double GetFreqError() { return freq_err_; };
   virtual double CalcFreq() = 0;
-  double GetFreq();
-  double GetFreqError();
-  
+
   // diagnostic function
   void PrintDiagnosticData(std::ostream& out=std::cout);
   void DumpDiagnosticData(std::string dirname=logdir, 

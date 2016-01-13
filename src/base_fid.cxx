@@ -210,18 +210,6 @@ void BaseFid::FindFidRange()
 }
 
 
-double BaseFid::GetFreq()
-{
-  return freq_;
-}
-
-
-double BaseFid::GetFreqError()
-{
-  return freq_err_;
-}
-
-
 // Save the interanl TGraph.
 void BaseFid::SaveGraph(std::string filename, std::string title)
 { 

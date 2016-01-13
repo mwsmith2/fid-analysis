@@ -46,6 +46,7 @@ class Fid : public BaseFid {
   Fid(const std::vector<double>& wf);
 
   // Simplified frequency extraction
+  using BaseFid::GetFreq; // Prevent base method from being hidden.
   double GetFreq(const std::string& method_name);
   double GetFreq(const char* method_name);
   double GetFreq(const Method m);
