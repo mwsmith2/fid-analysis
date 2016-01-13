@@ -101,6 +101,9 @@ class FidFactory
   const bool& discrete() { return discrete_; };
   const bool& addnoise() { return addnoise_; };
 
+  // utility accessors
+  double freq() { return mixdown_freq_ - larmor_freq_; };
+
   void PrintDiagnosticInfo();
 
  private:
