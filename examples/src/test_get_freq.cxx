@@ -4,23 +4,18 @@ author: Matthias W. Smith
 email:  mwsmith2@uw.edu
 date:   2014/12/02
 
-notes: Tests the frequency extraction ability at different sampling 
-      frequencies.
+notes: Tests the functionality of selecting methods through GetFreq
 
 usage:
 
-./sampling_rate_test <output>
-
-The parameters in brackets are optional.  The default output is 
-sampling_rate_data.csv.
+./test_get_freq
 
 \*===========================================================================*/
 
+
 //--- std includes ----------------------------------------------------------//
-#include <fstream>
 
 //--- other includes --------------------------------------------------------//
-#include <boost/filesystem.hpp>
 
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
@@ -28,6 +23,7 @@ sampling_rate_data.csv.
 using namespace fid;
 using std::cout;
 using std::endl;
+
 
 int main(int argc, char **argv)
 {
@@ -47,13 +43,11 @@ int main(int argc, char **argv)
 
   FidFactory ff;
   ff.SetSignalToNoise(100 * 100);
-  ff.SetMixdownPhi(0.0);
-  ff.SetAddNoise(true);
 
   for (int i = 0; i < nfids; ++i) {
       
     // Make ideal Fid waveform
-    ff.SetLarmorFreq(rand_flat_dist(gen) + sim::mixdown_freq);
+    ff.SetFidFreq(rand_flat_dist(gen));
     ff.IdealFid(wf, tm);
 
     Fid myfid(wf, tm);
