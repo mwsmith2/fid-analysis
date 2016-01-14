@@ -163,7 +163,12 @@ inline std::vector<T> construct_range(const std::vector<T> &range_vec) {
 template<typename T>
 inline std::vector<T> construct_linspace(const T& i, const T& f, const int& n=0) {
     std::vector<T> res;
-    if (n == 0) n = f - i;
+    int N;
+    if (n == 0) {
+      N = f - i;
+    } else {
+      N = n;
+    }
     double d = (f - i) / (n - 1);
     for (int j = 0; j < n; ++j) {
         res.push_back(i + j*d);
