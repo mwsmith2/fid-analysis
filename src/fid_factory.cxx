@@ -86,6 +86,9 @@ void FidFactory::LoadParams()
   gamma_g_ = sim::gamma_g;
   pulse_freq_ = sim::pulse_freq;
   pulse_time_ = sim::pulse_time;
+
+  addnoise_ = sim::addnoise;
+  discrete_ = sim::discrete;
 }
 
 
