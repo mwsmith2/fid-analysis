@@ -341,11 +341,11 @@ void BaseFid::SaveData(std::string filename)
 }
 
 
-void BaseFid::PrintDiagnosticData(std::ostream& out)
+void BaseFid::DiagnosticInfo(std::ostream& out)
 {
   using std::endl;
 
-  out << std::string(80, '<') << endl;
+  out << std::string(80, '<') << endl << std::string(32, ' ');
   out << "Diagostic Information for Fid @ " << this << endl;
   out << std::string(80, '<') << endl;
 
@@ -359,23 +359,32 @@ void BaseFid::PrintDiagnosticData(std::ostream& out)
   out << std::string(80, '>') << endl << std::string(80, '>') << endl;
 }
 
-void BaseFid::DumpDiagnosticData(std::string dirname, std::string filestub)
+
+void BaseFid::DiagnosticPlot(std::string dirname, std::string filestub)
 {
   boost::filesystem::path dir(dirname);
   boost::filesystem::create_directories(dir);
 
+  SaveFreqFit(dir.string() + filestub + std::string("_freq_fit.png"));
+  SaveTimeFit(dir.string() + filestub + std::string("_time_fit.png"));
+  SaveFreqRes(dir.string() + filestub + std::string("_freq_res.png"));
+  SaveTimeRes(dir.string() + filestub + std::string("_time_res.png"));
+}
+
+
+void BaseFid::DiagnosticDump(std::string dirname, std::string filestub)
+{
+  // Make the plots first, that will create the directory if needed.
+  DiagnosticPlot(dirname, filestub);
+
   std::ofstream out;
+  boost::filesystem::path dir(dirname);
+
   std::string str = dir.string() + std::string("libfid.log");
   out.open(str , std::ofstream::out | std::ofstream::app);
 
-  PrintDiagnosticData(out);
+  DiagnosticInfo(out);
   out.close();
-
-  SaveFreqFit(dirname + filestub + std::string("_freq_fit.png"));
-  SaveTimeFit(dirname + filestub + std::string("_time_fit.png"));
-  SaveFreqRes(dirname + filestub + std::string("_freq_res.png"));
-  SaveTimeRes(dirname + filestub + std::string("_time_res.png"));
-
 }
 
 } // fid

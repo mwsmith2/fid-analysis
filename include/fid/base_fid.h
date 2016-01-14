@@ -44,9 +44,11 @@ class BaseFid {
   virtual double CalcFreq() = 0;
 
   // diagnostic function
-  void PrintDiagnosticData(std::ostream& out=std::cout);
-  void DumpDiagnosticData(std::string dirname=logdir, 
-                          std::string filestub="");
+  void DiagnosticInfo(std::ostream& out=std::cout);
+  void DiagnosticPlot(std::string dirname=logdir, 
+                      std::string filestub="fid_diagnostics");
+  void DiagnosticDump(std::string dirname=logdir, 
+                      std::string filestub="fid_diagnostics");
 
   // accessors
   const std::vector<double>& wf() const { return wf_; };
