@@ -20,8 +20,7 @@ data/ and the directory will be created if not present.
 
 //--- std includes ----------------------------------------------------------//
 #include <fstream>
-#include <cassert>
-using std::string;
+#include <iostream>
 
 //--- other includes --------------------------------------------------------//
 #include <boost/filesystem.hpp>
@@ -29,77 +28,82 @@ using std::string;
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
 
+using std::string;
+using std::cout;
+using std::endl;
 using namespace fid;
 
 int main(int argc, char **argv)
 {
+  string datafile;
+  string outdir;
+  string outfile;
+  string figdir;
+
+  std::ofstream out;
+  out.precision(10);
+
   // Make sure a data file was specified and get the file handle.
   if (argc < 2) {
-    std::cout << "Insufficient arguments: input data must be specified.";
-    std::cout << std::endl;
-    std::cout << "Usage: ./single_fid_analyzer <input-file>" << std::endl;
+    cout << "Insufficient arguments: input data must be specified." << endl;
+    cout << "Usage: ./single_fid_analyzer <input-file> [output-dir]" << endl;
     exit(1);
   }
 
   // Load the data.
-  string data_file(argv[1]);
+  datafile = string(argv[1]);
 
   // Now check for an optional output directory.
-  string out_dir;
-
   if (argc > 2){
 
-    out_dir = string(argv[2]);
+    outdir = string(argv[2]);
 
   } else {
 
-    out_dir = string("data/");
+    outdir = string("data/");
   }
 
   // Create an output file handle.
-  string out_file(out_dir + string("single_fid_data.csv"));
+  outfile = outdir + string("single_fid_data.csv");
 
   // Make a string to hold the location of the figure output directory.
-  string fig_dir(out_dir + string("fig/"));
+  figdir = outdir + string("fig/");
 
   // Make certain that the directory exists by creating it.
-  boost::filesystem::path dir(fig_dir);
+  boost::filesystem::path dir(figdir);
   boost::filesystem::create_directories(dir);
 
   // Read the Fid data and create Fid object.
-  Fid my_fid(data_file);
+  Fid my_fid(datafile);
 
   // Open the output filestream.
-  std::ofstream out;
-  out.precision(10);
-  out.open(out_file);
-
-  // Test all methods and save the frequency results
+  out.open(outfile);
   my_fid.WriteFreqCsv(out);
 
   // Make plots of the fits and residuals.
   string title("Fid Fit");
   my_fid.GetFreq("analytical");
-  my_fid.SaveFreqFit(fig_dir + string("analytical_fit.pdf"), title);
-  my_fid.SaveFreqRes(fig_dir + string("analytical_res.pdf"), title);  
+  my_fid.SaveFreqFit(dir.string() + string("analytical_fit.png"), title);
+  my_fid.SaveFreqRes(dir.string() + string("analytical_res.png"), title);  
 
   my_fid.GetFreq("lorentzian");
-  my_fid.SaveFreqFit(fig_dir + string("lorentzian_fit.pdf"), title);
-  my_fid.SaveFreqRes(fig_dir + string("lorentzian_res.pdf"), title);  
+  my_fid.SaveFreqFit(dir.string() + string("lorentzian_fit.png"), title);
+  my_fid.SaveFreqRes(dir.string() + string("lorentzian_res.png"), title);  
 
   my_fid.GetFreq("exponential");
-  my_fid.SaveFreqFit(fig_dir + string("exponential_fit.pdf"), title);
-  my_fid.SaveFreqRes(fig_dir + string("exponential_res.pdf"), title);  
+  my_fid.SaveFreqFit(dir.string() + string("exponential_fit.png"), title);
+  my_fid.SaveFreqRes(dir.string() + string("exponential_res.png"), title);  
 
   my_fid.GetFreq("phase");
-  my_fid.SaveTimeFit(fig_dir + string("lin_phase_fit.pdf"), title);
-  my_fid.SaveTimeRes(fig_dir + string("lin_phase_res.pdf"), title);  
+  my_fid.SaveTimeFit(dir.string() + string("lin_phase_fit.png"), title);
+  my_fid.SaveTimeRes(dir.string() + string("lin_phase_res.png"), title);  
 
   my_fid.GetFreq("sinusoid");
-  my_fid.SaveTimeFit(fig_dir + string("sinusoid_fit.pdf"), title);
-  my_fid.SaveTimeRes(fig_dir + string("sinusoid_res.pdf"), title);  
+  my_fid.SaveTimeFit(dir.string() + string("sinusoid_fit.png"), title);
+  my_fid.SaveTimeRes(dir.string() + string("sinusoid_res.png"), title);  
 
   // Close the output filestream
   out.close();
+
   return 0;
 }
