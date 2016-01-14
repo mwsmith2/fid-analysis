@@ -345,18 +345,28 @@ void BaseFid::DiagnosticInfo(std::ostream& out)
 {
   using std::endl;
 
-  out << std::string(80, '<') << endl << std::string(32, ' ');
+  // Save the flags, set them to defaults.
+  auto flags = out.flags();
+  std::ofstream testout;
+  out.flags(testout.flags());
+
+  out << std::string(80, '<') << endl << std::string(4, ' ');
   out << "Diagostic Information for Fid @ " << this << endl;
   out << std::string(80, '<') << endl;
 
-  out << "Fid Waveform Characterics" << endl;
-  out << "    mean:       " << mean_ << endl;
-  out << "    amplitude:  " << max_amp_ << endl;
-  out << "    noise:      " << noise_ << endl;
-  out << "    start time: " << i_wf_ << "(" << tm_[i_wf_] << " ms)" << endl;
-  out << "    stop time:  " << f_wf_ << "(" << tm_[f_wf_] << " ms)" << endl;
-  out << "    health:     " << health_ << endl;
-  out << std::string(80, '>') << endl << std::string(80, '>') << endl;
+  out << "    Fid Waveform Characteristics" << endl;
+  out << "        mean:       " << mean_ << endl;
+  out << "        amplitude:  " << max_amp_ << endl;
+  out << "        noise:      " << noise_ << endl;
+  out << "        start time: " << i_wf_;
+  out << " (" << tm_[i_wf_] << " ms)" << endl;
+  out << "        stop time:  " << f_wf_ - 1;
+  out << " (" << tm_[f_wf_ - 1] << " ms)" << endl;
+  out << "        health:     " << health_ << endl;
+  out << std::string(80, '>') << endl << endl;
+  
+  // Restore set flags.
+  out.flags(flags);
 }
 
 
