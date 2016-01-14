@@ -267,7 +267,7 @@ void BaseFid::SaveFreqFit(std::string filename, std::string title)
   } else {
 
     // In case they didn't append x/y labels.
-    title.append("; time [ms]; amplitude [a.u.]");
+    title.append("; freq [kHz]; amplitude [a.u.]");
   }  
 
   // Copy the current time fit graph.
@@ -311,7 +311,7 @@ void BaseFid::SaveFreqRes(std::string filename, std::string title)
   } else {
 
     // In case they didn't append x/y labels.
-    title.append("; time [ms]; amplitude [a.u.]");
+    title.append("; freq [kHz]; amplitude [a.u.]");
   }  
 
   // Copy the current time fit.
