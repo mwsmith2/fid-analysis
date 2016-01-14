@@ -21,16 +21,11 @@ Detail: This is a new test program for my Fid libraries
 #include "fid.h"
 
 using std::vector;
-using std::cout;
 using std::endl;
 using namespace fid;
 
 int main(int argc, char** argv)
 {
-  // set precision
-  cout.precision(10);
-  cout.setf(std::ios::fixed, std:: ios::floatfield);
-
   std::ofstream out;
   out.precision(10);
 
@@ -43,18 +38,19 @@ int main(int argc, char** argv)
   vector<double> wf(0.0, fid_length);
   vector<double> tm(0.0, fid_length);
 
-  for (int i = 0; i < fid_length; i++){
-    tm.push_back(i * dt + ti);
-  }
+  tm = construct_range(ti, ti + fid_length * dt, dt);
 
   FidFactory ff;
-  ff.SetLarmorFreq(ftruth + sim::mixdown_freq);
+  ff.SetFidFreq(ftruth);
   ff.IdealFid(wf, tm);
 
   Fid my_fid(wf, tm);
 
-  my_fid.PrintDiagnosticData();
-  my_fid.DumpDiagnosticData("test/");
+  my_fid.GetFreq("lz");
+  my_fid.GetFreq("ph");
+
+  my_fid.DiagnosticInfo();
+  my_fid.DiagnosticPlot("test/");
 
   return 0;
 }
