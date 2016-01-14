@@ -136,7 +136,7 @@ class BaseFid {
   void CalcMaxAmp();      
   void CenterFid();
   void FindFidRange();
-  void virtual InitHook() {};
+  void virtual InitHook() = 0;
   
 }; // BaseFid
  

@@ -52,7 +52,7 @@ class Fid : public BaseFid {
   double GetFreq(const Method m);
   
   // specific frequency extraction methods
-  double CalcFreq();
+  double CalcFreq() override;
   
   // utility functions
   void WriteFreqCsv(std::ofstream& out);
@@ -85,7 +85,7 @@ class Fid : public BaseFid {
   std::vector<double> fftfreq_;
 
   // Private Member Functions  
-  void InitHook();
+  void InitHook() override;
 
   // Utility functions
   void CalcPowerEnvAndPhase();

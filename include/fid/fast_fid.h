@@ -48,6 +48,8 @@ class FastFid : public BaseFid {
   double CalcFreq();
   
  private:
+
+  void InitHook() {};
   
 }; // FastFid
  

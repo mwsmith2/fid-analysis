@@ -42,11 +42,11 @@ Fid::Fid(const std::vector<double>& wf)
 }
 
 
-void Fid::InitHook() 
+void Fid::InitHook()
 {
-  void CalcPowerEnvAndPhase();
-  void CalcFftFreq();
-  void GuessFitParams();
+  CalcPowerEnvAndPhase();
+  CalcFftFreq();
+  GuessFitParams();
 }
 
 
