@@ -2,7 +2,7 @@
 
 author: Matthias W. Smith
 email:  mwsmith2@uw.edu
-file:   generate_fids.cxx
+file:   generate_fids_csv.cxx
 
 about: This is a new test program for my Fid libraries 
 
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
   std::vector<double> snrs;
 
   // Set the ranges.
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  double final_time = sim::start_time + sim::num_samples * sim::sample_time;
   tm = construct_range(sim::start_time, sim::sample_time, final_time);
   freqs = construct_range(23.0, 24.0, 0.1);
   snrs = construct_range(10000.0, 100000.0, 30000.0);
