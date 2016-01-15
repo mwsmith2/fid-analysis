@@ -16,15 +16,12 @@ error_estimator_data.csv.
 
 \*===========================================================================*/
 
+
 //--- std includes ----------------------------------------------------------//
 #include <iostream>
 #include <fstream>
 #include <random>
 #include <string>
-using std::cout;
-using std::endl;
-using std::string;
-using std::to_string;
 
 //--- other includes --------------------------------------------------------//
 #include <boost/filesystem.hpp>
@@ -37,39 +34,47 @@ using std::to_string;
 #define FID_LEN 10000
 #define FREQ_METHOD 6
 
+using std::cout;
+using std::endl;
+using std::string;
+using std::to_string;
 using namespace fid;
+
+struct fid_data {
+  Double_t i_wf;
+  Double_t f_wf;
+  Double_t i_psd;
+  Double_t f_psd;
+  Double_t freq_def;
+  Double_t wf[FID_LEN];
+  Double_t psd[FID_LEN/2];
+  Double_t phi[FID_LEN];
+  Double_t freq_ext[FREQ_METHOD];
+  Double_t freq_err[FREQ_METHOD];
+  Double_t fit[FREQ_METHOD][FID_LEN];
+};
+
 
 int main(int argc, char **argv)
 {
-  // filenames
-  string out_file;
-  string out_dir;
-  string fig_dir;
+  // Necessary variables.
+  int rounds = 10;
+  std::vector<double> wf;
+  std::vector<double> tm;
+
+  // Ouput filename.
+  string outfile;
 
   // now get optional output file
   if (argc > 1) {
 
-    out_file = string(argv[1]);
+    outfile = string(argv[1]);
 
   } else {
 
-    out_file = string("error_estimator_data.root");
+    outfile = string("data/error_estimator_data.root");
 
   }
-
-  struct fid_data {
-    Double_t i_wf;
-    Double_t f_wf;
-    Double_t i_psd;
-    Double_t f_psd;
-    Double_t freq_def;
-    Double_t wf[FID_LEN];
-    Double_t psd[FID_LEN/2];
-    Double_t phi[FID_LEN];
-    Double_t freq_ext[FREQ_METHOD];
-    Double_t freq_err[FREQ_METHOD];
-    Double_t fit[FREQ_METHOD][FID_LEN];
-  };
 
   fid_data myfid_data;
 
@@ -82,13 +87,9 @@ int main(int argc, char **argv)
   br_vars += "freq_err[" + to_string(FREQ_METHOD) + "]/D:";
   br_vars += "fit[" + to_string(FREQ_METHOD) + "][" + to_string(FID_LEN) + "]/D";
 
-  TFile pf(out_file.c_str(), "RECREATE");
+  TFile pf(outfile.c_str(), "RECREATE");
   TTree pt("t", "fid_fits");
   pt.Branch("fid_data", &myfid_data, br_vars.c_str());
-
-  // some necessary parameters
-  std::vector<double> wf;
-  std::vector<double> tm;
 
   double final_time = sim::start_time + sim::num_samples*sim::sample_time;
   tm = construct_range(sim::start_time, final_time, sim::sample_time);
@@ -98,12 +99,11 @@ int main(int argc, char **argv)
   std::uniform_real_distribution<double> rand_flat_dist(35.0, 40.0);
 
   FidFactory ff;
-  ff.SetAddNoise(true);
 
-  for (int i = 0; i < 1000; ++i) {
+  for (int i = 0; i < rounds; ++i) {
     
-    if (i % 250 == 0) {
-      cout << "Processing round " << i << "." << endl;
+    if (i % (rounds / 5) == 0) {
+      cout << "Processing round " << i << " of " << rounds << "." << endl;
     }
 
     // Make ideal Fid waveform
