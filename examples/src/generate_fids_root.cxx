@@ -33,8 +33,8 @@ int main(int argc, char **argv)
   if (argc > 1) load_params(argv[1]);
 
   // Standard variables.
-  std::vector<double> wf(0.0, sim::num_samples);
-  std::vector<double> tm(0.0, sim::num_samples);
+  std::vector<double> wf(sim::num_samples, 0.0);
+  std::vector<double> tm(sim::num_samples, 0.0);
 
   int num_fids = 10;
   double max_grad = 500; // in ppb
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
   tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   // Set up the ROOT tree to hold the results
-  TFile pf("sim_fids.root", "recreate");
+  TFile pf("data/sim_fids.root", "recreate");
   TTree pt("t", "Fid Tree");
   cout.precision(12);
 
