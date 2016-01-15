@@ -28,17 +28,83 @@ std::vector<double> normalized_gradient(int npoints, int poln)
   return grad;
 }
 
-
-std::vector<std::complex<double>> dsp::fft(const std::vector<double> &wf)
+std::vector<cdouble> dsp::fft(const std::vector<cdouble> &v)
 {
   // Grab some useful constants.
-  int N = wf.size();  
+  int N = v.size();  
   int n = N / 2 + 1;  // size of rfft
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
-  std::vector<std::complex<double>> fft_vec(n, 0.0);
-  auto wf_vec = wf; // copy waveform since fftw destroys it
+  std::vector<cdouble> fft_vec(n, cdouble(0.0, 0.0));
+  auto wfm_vec = v; // copy waveform since fftw destroys it
+
+  // Plan and execute the fft.
+  fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
+  fftw_complex *wfm_ptr = reinterpret_cast<fftw_complex *>(&wfm_vec[0]);  
+
+  fftw_plan wf_to_fft = fftw_plan_dft_1d(N, 
+                                         fft_ptr,
+                                         wfm_ptr,
+                                         FFTW_FORWARD,
+                                         FFTW_ESTIMATE);  
+
+  fftw_execute(wf_to_fft);
+  fftw_destroy_plan(wf_to_fft);
+
+  for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
+    *it /= Nroot;
+  }
+
+  return fft_vec;
+}
+
+
+std::vector<cdouble> dsp::ifft(const std::vector<cdouble>& v)
+{
+  // Grab some useful constants.
+  int n = v.size();
+  int N = 2 * (n - 1);
+  double Nroot = std::sqrt(N);
+
+  // Instantiate the result vector.
+  std::vector<cdouble> ifft_vec(N, cdouble(0.0, 0.0));
+
+  fftw_complex *fft_ptr = new fftw_complex[n];
+  fftw_complex *wfm_ptr;
+
+  memcpy(fft_ptr, &v[0], sizeof(fftw_complex) * n);
+  wfm_ptr = reinterpret_cast<fftw_complex *>(&ifft_vec[0]);  
+
+  // Plan and execute the fft.
+  fftw_plan fft_to_wf = fftw_plan_dft_1d(N, 
+                                         fft_ptr,
+                                         wfm_ptr,
+                                         FFTW_BACKWARD,
+                                         FFTW_ESTIMATE);  
+
+  fftw_execute(fft_to_wf);
+  fftw_destroy_plan(fft_to_wf);
+
+  // fftw is unnormalized, so we need to fix that.
+  for (auto it = ifft_vec.begin(); it != ifft_vec.end(); ++it) {
+    *it /= Nroot;
+  }
+
+  delete[] fft_ptr;
+
+  return ifft_vec;
+}
+std::vector<cdouble> dsp::rfft(const std::vector<double> &v)
+{
+  // Grab some useful constants.
+  int N = v.size();  
+  int n = N / 2 + 1;  // size of rfft
+  double Nroot = std::sqrt(N);
+
+  // Instantiate the result vector.
+  std::vector<cdouble> fft_vec(n, 0.0);
+  auto wf_vec = v; // copy waveform since fftw destroys it
 
   // Plan and execute the fft.
   fftw_plan wf_to_fft;
@@ -55,7 +121,7 @@ std::vector<std::complex<double>> dsp::fft(const std::vector<double> &wf)
 }
 
 
-std::vector<double> dsp::ifft(const std::vector<std::complex<double>>& fft)
+std::vector<double> dsp::irfft(const std::vector<cdouble>& fft)
 {
   // Grab some useful constants.
   int n = fft.size();
@@ -83,51 +149,51 @@ std::vector<double> dsp::ifft(const std::vector<std::complex<double>>& fft)
   return ifft_vec;
 }
 
-std::vector<double> dsp::hilbert(const std::vector<double>& wf)
+std::vector<double> dsp::hilbert(const std::vector<double>& v)
 {
 	// Return the call to the fft version.
-	auto fft_vec = dsp::fft(wf);
+	auto fft_vec = dsp::rfft(v);
 
   // Multiply in the -i.
   for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
-    *it = std::complex<double>((*it).imag(), -(*it).real());
+    *it = cdouble((*it).imag(), -(*it).real());
   }
 
   // Reverse the fft.
-  return ifft(fft_vec);
+  return irfft(fft_vec);
 }
 
-std::vector<double> dsp::psd(const std::vector<double>& wf)
+std::vector<double> dsp::psd(const std::vector<double>& v)
 {
   // Perform fft on the original data.
-	auto fft_vec = dsp::fft(wf);
+	auto fft_vec = dsp::rfft(v);
 
   // Get the norm of the fft as that is the power.
 	return dsp::norm(fft_vec);
 }
 
-std::vector<double> dsp::norm(const std::vector<double>& wf)
+std::vector<double> dsp::norm(const std::vector<double>& v)
 {
   // Allocate the memory
   std::vector<double> res;
-  res.reserve(wf.size());
+  res.reserve(v.size());
 
   // Iterate and push back the norm.
-  for (auto it = wf.begin(); it < wf.end(); ++it) {
+  for (auto it = v.begin(); it < v.end(); ++it) {
     res.push_back(std::norm(*it));
   }
 
   return res;
 }
 
-std::vector<double> dsp::norm(const std::vector<std::complex<double>>& wf)
+std::vector<double> dsp::norm(const std::vector<cdouble>& v)
 {
   // Allocate the memory
   std::vector<double> res;
-  res.reserve(wf.size());
+  res.reserve(v.size());
 
   // Iterate and push back the norm.
-  for (auto it = wf.begin(); it < wf.end(); ++it) {
+  for (auto it = v.begin(); it < v.end(); ++it) {
     res.push_back(std::norm(*it));
   }
 
@@ -170,9 +236,9 @@ std::vector<double> dsp::fftfreq(const int N, const double dt)
 }
 
 // Calculates the phase by assuming the real signal is harmonic.
-std::vector<double> dsp::phase(const std::vector<double>& wf)
+std::vector<double> dsp::phase(const std::vector<double>& v)
 {
-	return dsp::phase(wf, dsp::hilbert(wf));
+	return dsp::phase(v, dsp::hilbert(v));
 }
 
 std::vector<double> dsp::phase(const std::vector<double>& wf_re, 
@@ -258,9 +324,9 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
   return phase;
 }
 
-std::vector<double> dsp::envelope(const std::vector<double>& wf)
+std::vector<double> dsp::envelope(const std::vector<double>& v)
 {
-	return dsp::envelope(wf, dsp::hilbert(wf));
+	return dsp::envelope(v, dsp::hilbert(v));
 }
 
 std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::vector<double>& wf_im)
@@ -274,18 +340,18 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
 	return env;
 }
 
-arma::cx_mat dsp::wvd_cx(const std::vector<double>& wf, bool upsample)
+arma::cx_mat dsp::wvd_cx(const std::vector<double>& v, bool upsample)
 {
   int M, N;
   if (upsample) {
 
-    M = 2 * wf.size();
-    N = wf.size();
+    M = 2 * v.size();
+    N = v.size();
 
   } else {
 
-    M = wf.size();
-    N = wf.size();
+    M = v.size();
+    N = v.size();
   }
 
   // Initiate the return matrix
@@ -295,7 +361,7 @@ arma::cx_mat dsp::wvd_cx(const std::vector<double>& wf, bool upsample)
   std::vector<double> wf_re(M, 0.0);
 
   auto it1 = wf_re.begin();
-  for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
+  for (auto it2 = v.begin(); it2 != v.end(); ++it2) {
     *(it1++) = *it2;
     if (upsample) {
       *(it1++) = *it2;
@@ -303,37 +369,36 @@ arma::cx_mat dsp::wvd_cx(const std::vector<double>& wf, bool upsample)
   }
 
   // Make the signal harmonic
-  arma::cx_vec v(M);
+  arma::cx_vec v2(M);
   arma::vec phase(M);
 
   auto wf_im = dsp::hilbert(wf_re);
 
   for (uint i = 0; i < M; ++i) {
-    v[i] = arma::cx_double(wf_re[i], wf_im[i]);
+    v2[i] = arma::cx_double(wf_re[i], wf_im[i]);
     phase[i] = (1.0 * i) / M * M_PI;
   }
 
   // Now compute the Wigner-Ville Distribution
   for (int idx = 0; idx < N; ++idx) {
-    res.col(idx) = arma::fft(dsp::rconvolve(v, idx));
-    //    res.col(idx) = res.col(idx) % (arma::cos(phase * idx) + 1j * arma::sin(phase * idx));
+    res.col(idx) = arma::fft(dsp::rconvolve(v2, idx));
   }
 
   return res;
 }
 
-arma::mat dsp::wvd(const std::vector<double>& wf, bool upsample)
+arma::mat dsp::wvd(const std::vector<double>& v, bool upsample)
 {
   int M, N;
   if (upsample) {
 
-    M = 2 * wf.size();
-    N = wf.size();
+    M = 2 * v.size();
+    N = v.size();
 
   } else {
 
-    M = wf.size();
-    N = wf.size();
+    M = v.size();
+    N = v.size();
   }
 
   // Instiate the return matrix
@@ -343,7 +408,7 @@ arma::mat dsp::wvd(const std::vector<double>& wf, bool upsample)
   std::vector<double> wf_re(M, 0.0);
 
   auto it1 = wf_re.begin();
-  for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
+  for (auto it2 = v.begin(); it2 != v.end(); ++it2) {
     *(it1++) = *it2;
     if (upsample) {
       *(it1++) = *it2;
@@ -351,58 +416,58 @@ arma::mat dsp::wvd(const std::vector<double>& wf, bool upsample)
   }
 
   // Make the signal harmonic
-  arma::cx_vec v(M);
+  arma::cx_vec v2(M);
 
   auto wf_im = dsp::hilbert(wf_re);
 
   for (int i = 0; i < M; ++i) {
-    v[i] = arma::cx_double(wf_re[i], wf_im[i]);
+    v2[i] = arma::cx_double(wf_re[i], wf_im[i]);
   }
 
   // Now compute the Wigner-Ville Distribution
   for (int idx = 0; idx < N; ++idx) {
-    res.col(idx) = arma::real(arma::fft(dsp::rconvolve(v, idx))) ;
+    res.col(idx) = arma::real(arma::fft(dsp::rconvolve(v2, idx))) ;
   }
 
   return res;
 }
 
-std::vector<double> dsp::savgol3(const std::vector<double>& wf)
+std::vector<double> dsp::savgol3(const std::vector<double>& v)
 {
-  std::vector<double> res(0, wf.size());
+  std::vector<double> res(0, v.size());
   std::vector<double> filter = {-2.0, 3.0, 6.0, 7.0, 6.0, 3.0, -2.0};
   filter = (1.0 / 21.0) * filter;
 
-  if (dsp::convolve(wf, filter, res) == 0) {
+  if (dsp::convolve(v, filter, res) == 0) {
 
     return res;
 
   } else {
 
-    return wf;
+    return v;
   }
 }
 
-std::vector<double> dsp::savgol5(const std::vector<double>& wf)
+std::vector<double> dsp::savgol5(const std::vector<double>& v)
 {
-  std::vector<double> res(0, wf.size());
+  std::vector<double> res(0, v.size());
   std::vector<double> filter = {15.0, -55.0, 30.0, 135.0, 179.0, 135.0, 30.0, -55.0, 15.0};
   filter = (1.0 / 429.0) * filter;
 
-  if (dsp::convolve(wf, filter, res) == 0) {
+  if (dsp::convolve(v, filter, res) == 0) {
 
     return res;
 
   } else {
 
-    return wf;
+    return v;
   }
 }
 
-int dsp::convolve(const std::vector<double>& wf, const std::vector<double>& filter, std::vector<double>& res)
+int dsp::convolve(const std::vector<double>& v, const std::vector<double>& filter, std::vector<double>& res)
 {
   int k = filter.size();
-  int N = wf.size();
+  int N = v.size();
   res.resize(N);
 
   // Check to make sure we can do something.
@@ -417,31 +482,31 @@ int dsp::convolve(const std::vector<double>& wf, const std::vector<double>& filt
 
     for (int j = i; j < i + k; ++j) {
 
-      res[i] += wf[abs(j - k/2)] * filter[j - i];
-      res[N - 1 - i] += wf[N - 1 - abs(k/2 - j)] * filter[j - i];
+      res[i] += v[abs(j - k/2)] * filter[j - i];
+      res[N - 1 - i] += v[N - 1 - abs(k/2 - j)] * filter[j - i];
     }
   }
 
   // Now the rest of the elements.
-  for (auto it = wf.begin(); it != wf.end() - k; ++it) {
+  for (auto it = v.begin(); it != v.end() - k; ++it) {
     double val = std::inner_product(it, it + k, filter.begin(), 0.0);
-    res[std::distance(wf.begin(), it + k/2)] = val;
+    res[std::distance(v.begin(), it + k/2)] = val;
   }
 
   return 0;
 }
 
-std::vector<double> dsp::convolve(const std::vector<double>& wf, const std::vector<double>& filter)
+std::vector<double> dsp::convolve(const std::vector<double>& v, const std::vector<double>& filter)
 {
-  std::vector<double> res(0.0, wf.size());
+  std::vector<double> res(0.0, v.size());
 
-  if (dsp::convolve(wf, filter, res) == 0) {
+  if (dsp::convolve(v, filter, res) == 0) {
 
     return res;
 
   } else {
 
-    return wf;
+    return v;
   }
 }
  

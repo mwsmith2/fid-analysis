@@ -31,6 +31,9 @@ notes:
 
 namespace fid
 {
+// An alias
+typedef std::complex<double> cdouble;
+
 //--- linalg template functions ---------------------------------------------//
 
 // A template function to handle vector addition.
@@ -84,14 +87,14 @@ inline void cross(const std::vector<T>& u,
 
 // Standard deviation calculation based on whole vector.
 template <typename T>
-inline double stdev(const T& wf) {
-    auto x1 = std::accumulate(wf.begin(), wf.end(), 0.0, 
+inline double stdev(const T& v) {
+    auto x1 = std::accumulate(v.begin(), v.end(), 0.0, 
         [](double x, double y) { return x + y; });
 
-	auto x2 = std::accumulate(wf.begin(), wf.end(), 0.0, 
+	auto x2 = std::accumulate(v.begin(), v.end(), 0.0, 
 		[](double x, double y) { return x + y*y; });
 
-  double N = (double) std::distance(wf.begin(), wf.end());
+  double N = (double) std::distance(v.begin(), v.end());
 	return std::sqrt(x2/N - (x1/N) * (x1/N));
 }
 
@@ -110,14 +113,14 @@ inline double stdev(const T& begin, const T& end) {
 
 // Add white noise to an array.
 template <typename T>
-void addwhitenoise(std::vector<T>& wf, T snr) {
+void addwhitenoise(std::vector<T>& v, T snr) {
   static std::default_random_engine gen(clock());
   std::normal_distribution<T> nrm;
 
   T mean = 0.0;
   T min = 0.0;
   T max = 0.0;
-  for (auto it = wf.begin(); it != wf.end(); ++it) {
+  for (auto it = v.begin(); it != v.end(); ++it) {
 
     if (*it > max) { 
       max = *it;
@@ -128,14 +131,14 @@ void addwhitenoise(std::vector<T>& wf, T snr) {
   }
 
   // normalize to mean
-  mean /= wf.size();
+  mean /= v.size();
   max -= mean;
   min = std::abs(min - mean);
 
   T amp = max > min ? max : min;
   T scale = amp / sqrt(snr);
 
-  for (auto &x : wf){
+  for (auto &x : v){
     x += nrm(gen) * scale;
   }
 }
@@ -192,44 +195,50 @@ std::vector<double> normalized_gradient(int npoints, int poln=1);
 
 namespace dsp
 {
-std::vector<std::complex<double>> fft(const std::vector<double>& wf);
-std::vector<double> ifft(const std::vector<std::complex<double>>& fft_vec);
+std::vector<cdouble> 
+fft(const std::vector<cdouble>& v);
 
-std::vector<double> hilbert(const std::vector<double>& wf);
-std::vector<double> psd(const std::vector<double>& wf);
+std::vector<cdouble> 
+ifft(const std::vector<cdouble>& v);
 
-std::vector<double> norm(const std::vector<double>& wf);
-std::vector<double> norm(const std::vector<std::complex<double>>& wf);
+std::vector<cdouble> rfft(const std::vector<double>& v);
+std::vector<double> irfft(const std::vector<cdouble>& v);
+
+std::vector<double> hilbert(const std::vector<double>& v);
+std::vector<double> psd(const std::vector<double>& v);
+
+std::vector<double> norm(const std::vector<double>& v);
+std::vector<double> norm(const std::vector<cdouble>& v);
 
 std::vector<double> fftfreq(const std::vector<double>& tm);
 std::vector<double> fftfreq(const int N, const double dt);
 
-std::vector<double> phase(const std::vector<double>& wf);
+std::vector<double> phase(const std::vector<double>& v);
 std::vector<double> phase(const std::vector<double>& wf_re, 
                           const std::vector<double>& wf_im);
 
-std::vector<double> envelope(const std::vector<double>& wf);
+std::vector<double> envelope(const std::vector<double>& v);
 std::vector<double> envelope(const std::vector<double>& wf_re, 
                              const std::vector<double>& wf_im);	
 
-arma::cx_mat wvd_cx(const std::vector<double>& wf, bool upsample=false);
-arma::mat wvd(const std::vector<double>& wf, bool upsample=false);
+arma::cx_mat wvd_cx(const std::vector<double>& v, bool upsample=false);
+arma::mat wvd(const std::vector<double>& v, bool upsample=false);
 
-std::vector<double> savgol3(const std::vector<double>& wf);
-std::vector<double> savgol5(const std::vector<double>& wf);
-std::vector<double> convolve(const std::vector<double>& wf, 
+std::vector<double> savgol3(const std::vector<double>& v);
+std::vector<double> savgol5(const std::vector<double>& v);
+std::vector<double> convolve(const std::vector<double>& v, 
                              const std::vector<double>& filter);
-int convolve(const std::vector<double>& wf, 
+int convolve(const std::vector<double>& v, 
              const std::vector<double>& filter, 
              std::vector<double>& res);
 
 template <typename T>
-std::vector<T> lowpass(const std::vector<T>& wf, double cut_idx=-1, int n=3) {
+std::vector<T> lowpass(const std::vector<T>& v, double cut_idx=-1, int n=3) {
 	// A simple Butterworth n-order filter.
-	if (cut_idx == -1) cut_idx = wf.size() / 2;
-	std::vector<T> filtered_wf = wf;
+	if (cut_idx == -1) cut_idx = v.size() / 2;
+	std::vector<T> filtered_wf = v;
 
-	std::transform(wf.begin(), wf.end(), filtered_wf.begin(), // lambda filter
+	std::transform(v.begin(), v.end(), filtered_wf.begin(), // lambda filter
 				  [cut_idx, n](double x) { 
 				  	return sqrt(1.0 / (1.0 + pow(x / cut_idx, 2*n))); 
 				  });
