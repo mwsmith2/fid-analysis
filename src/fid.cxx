@@ -131,7 +131,7 @@ double Fid::CalcFreq()
 void Fid::CalcPowerEnvAndPhase()
 {
   // Get the fft of the waveform first.
-  auto fid_fft = dsp::fft(wf_);
+  auto fid_fft = dsp::rfft(wf_);
 
   // Now get the imaginary harmonic complement to the waveform.
   auto wf_im = dsp::hilbert(wf_);
