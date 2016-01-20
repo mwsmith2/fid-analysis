@@ -156,7 +156,11 @@ void BaseFid::FindFidRange()
   }
 
   // Find the next element with magnitude lower than thresh
-  auto it_2 = wf_.begin() + i_wf_ + edge_ignore_;
+  auto it_2 = std::find_if(wf_.begin() + i_wf_, wf_.end(),
+      [thresh](double x) {
+        return std::abs(x) < 0.8 * thresh;
+  });
+
   checks_out = false;
 
   while (!checks_out) {
