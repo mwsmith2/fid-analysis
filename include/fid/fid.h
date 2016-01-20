@@ -61,7 +61,7 @@ class Fid : public BaseFid {
   // accessors
   const std::vector<double>& res() const { return res_; };
   const std::vector<double>& psd() const { return psd_; };
-  const std::vector<double>& phi() const { return phi_ ;}
+  const std::vector<double>& phi() const { return phi_; };
   const std::vector<double>& env() const { return env_; };
   const std::vector<double>& fftfreq() const { return fftfreq_; };
 
