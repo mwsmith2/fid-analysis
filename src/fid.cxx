@@ -563,6 +563,53 @@ void Fid::WriteFreqCsv(std::ofstream& out)
   out << CalcSinusoidFreq() << ", " << chi2_ << std::endl;
 }
 
+void Fid::WriteMethodCsv(std::ofstream& out)
+{
+  using namespace std::chrono;
+
+  // Test all the frequency extraction methods and
+  // write the freq, ferr, chi2 and calculation time.
+
+  long dt;
+  auto t0 = high_resolution_clock::now();
+
+  t0 = high_resolution_clock::now();
+  GetFreq("ZC");
+  dt = duration_cast<microseconds>(high_resolution_clock::now() - t0).count();
+  out << freq_ << ", " << freq_err_ << ", " << chi2_ << ", " << dt << ", ";
+
+  t0 = high_resolution_clock::now();
+  GetFreq("CN");
+  dt = duration_cast<microseconds>(high_resolution_clock::now() - t0).count();
+  out << freq_ << ", " << freq_err_ << ", " << chi2_ << ", " << dt << ", ";
+
+  t0 = high_resolution_clock::now();
+  GetFreq("AN");
+  dt = duration_cast<microseconds>(high_resolution_clock::now() - t0).count();
+  out << freq_ << ", " << freq_err_ << ", " << chi2_ << ", " << dt << ", ";
+
+  t0 = high_resolution_clock::now();
+  GetFreq("LZ");
+  dt = duration_cast<microseconds>(high_resolution_clock::now() - t0).count();
+  out << freq_ << ", " << freq_err_ << ", " << chi2_ << ", " << dt << ", ";
+
+  t0 = high_resolution_clock::now();
+  GetFreq("EX");
+  dt = duration_cast<microseconds>(high_resolution_clock::now() - t0).count();
+  out << freq_ << ", " << freq_err_ << ", " << chi2_ << ", " << dt << ", ";
+
+  t0 = high_resolution_clock::now();
+  GetFreq("PH");
+  dt = duration_cast<microseconds>(high_resolution_clock::now() - t0).count();
+  out << freq_ << ", " << freq_err_ << ", " << chi2_ << ", " << dt << ", ";
+
+  t0 = high_resolution_clock::now();
+  GetFreq("SN");
+  dt = duration_cast<microseconds>(high_resolution_clock::now() - t0).count();
+  out << freq_ << ", " << freq_err_ << ", " << chi2_ << ", " << dt;
+  out << std::endl;
+
+}
 
 // Test all the frequency extraction methods using the phase
 void Fid::WritePhaseFreqCsv(std::ofstream& out)

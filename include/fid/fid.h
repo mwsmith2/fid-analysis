@@ -20,6 +20,7 @@ notes:
 #include <random>
 #include <complex>
 #include <cmath>
+#include <chrono>
 
 //--- other includes --------------------------------------------------------//
 #include <boost/algorithm/string.hpp>
@@ -56,6 +57,7 @@ class Fid : public BaseFid {
   
   // utility functions
   void WriteFreqCsv(std::ofstream& out);
+  void WriteMethodCsv(std::ofstream& out);
   void WritePhaseFreqCsv(std::ofstream& out);
 
   // accessors
