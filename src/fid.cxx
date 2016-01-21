@@ -460,22 +460,10 @@ double Fid::CalcSinusoidFreq()
 
   // Guess parameters
   f_fit_.SetParameter(0, kTau * CalcZeroCountFreq());
-  f_fit_.SetParameter(1, 1.0);
-
-  // Need to reduce phase to proper range.
-  auto tmp = fmod(phi_[i_wf_], kTau);
-
-  if (tmp <= 0.0) {
-
-    f_fit_.SetParameter(2, tmp + kTau);
-
-  } else {
-
-    f_fit_.SetParameter(2, tmp);
-  }
-
-  f_fit_.SetParLimits(1, 0.9, 1.1); // Should be exactly 1.0
-  f_fit_.SetParLimits(2, 0.0, kTau); // it's a phase
+  f_fit_.SetParameter(1, 0.5);
+  f_fit_.SetParameter(2, 0.5);
+  f_fit_.SetParLimits(1, 0.0, 1.1);
+  f_fit_.SetParLimits(2, 0.0, 1.1);
 
   // Adjust to ignore the edges
   int i = i_wf_ + edge_ignore_;
