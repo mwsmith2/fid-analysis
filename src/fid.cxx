@@ -318,13 +318,15 @@ double Fid::CalcCentroidFreq()
 
 double Fid::CalcAnalyticalFreq()
 {
-  // @todo check the algebra on this guy
-  // Set the fit function
-  using std::string;
-  string fcn("[2] * ([0]^2 - 0.5 * [1] * [0] * sin(2 *[4])");
-  fcn += string(" + (0.5 * [1])^2 + x^2 - [0]^2 * sin([4])^2) / ");
-  fcn += string("((0.5 * [1])^2 + 2 * (x^2 - [0]^2) * (x^2 + [0]^2)");
-  fcn += string(" + (x^2 - [0]^2)^2) + [3]");
+  // Set the fit function:
+  // p0 -> fid frequency
+  // p1 -> decay gamma
+  // p2 -> amplitude
+  // p3 -> baseline offset
+  // p4 -> phi
+  std::string fcn("[3]  + [2] * (([0] * cos([4]) + [1] * sin([4]))^2 ");
+  fcn += std::string("+ (x * sin([1]))^2) / (([1]^2 + [0]^2 - x^2)^2 ");
+  fcn += std::string("+ 4 * x^2 * [1]^2)");
 
   f_fit_ = TF1("f_fit_", fcn.c_str(), fftfreq_[i_fft_], fftfreq_[f_fft_]);
 
