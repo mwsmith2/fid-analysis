@@ -177,8 +177,9 @@ vec phase(const vec& wf_re, const vec& wf_im);
 vec envelope(const vec& wf);
 vec envelope(const vec& wf_re, const vec& wf_im);	
 
-arma::cx_mat wvd_cx(const vec& wf, bool upsample=false);
+arma::cx_mat wvd_cx(const vec& wf, bool upsample=false, const int window=0);
 arma::mat wvd(const vec& wf, bool upsample=false);
+arma::cx_vec acorrelation(const arma::cx_vec &v, const int idx,  const int window);
 
 vec savgol3(const vec& wf);
 vec savgol5(const vec& wf);

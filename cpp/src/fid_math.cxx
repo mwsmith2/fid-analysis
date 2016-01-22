@@ -132,7 +132,7 @@ vec dsp::phase(const vec& wf)
 
 vec dsp::phase(const vec& wf_re, const vec& wf_im)
 {
-	vec phase(wf_re.size(), 0.0);
+    vec phase(wf_re.size(), 0.0);
 
 	// Calculate the modulo-ed phase
   	std::transform(wf_re.begin(), wf_re.end(), wf_im.begin(), phase.begin(),
@@ -162,22 +162,70 @@ vec dsp::phase(const vec& wf_re, const vec& wf_im)
 
 vec dsp::envelope(const vec& wf)
 {
-	return dsp::envelope(wf, dsp::hilbert(wf));
+     return dsp::envelope(wf, dsp::hilbert(wf));
 }
 
 vec dsp::envelope(const vec& wf_re, const vec& wf_im)
 {
- 	// Set the envelope function
-	vec env(wf_re.size(), 0.0);
-
+    // Set the envelope function
+    vec env(wf_re.size(), 0.0);
+    
 	std::transform(wf_re.begin(), wf_re.end(), wf_im.begin(), env.begin(),
     			   [](double r, double i) { return std::sqrt(r*r + i*i); });
-
+    
 	return env;
 }
+  
+arma::cx_vec dsp::acorrelation(const arma::cx_vec &v, int idx = 0, int window=0)
+{
+  int N = v.size();
+  cout<< "Size of v is "<< N << endl;
+  //Define Window function, with odd length to ensure even/odd symmetry
+  arma::vec win_func(window);
+  win_func.ones();
 
+  arma::cx_vec acf(N);
+  acf.zeros();
+  cout << "size of acf vector is "<<acf.size()<<endl;
 
-arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
+  int taumax = std::min({idx, (N-1)-idx, window});
+  //make sure taumax is odd
+  if ((taumax % 2 ==0) &(taumax !=0)) taumax -= 1;
+  cout<< taumax<< endl;
+
+  for (int i =-taumax; i <taumax; i++) {
+    cout<< "correlation variable is " <<i <<" idx is "<< idx<<endl;
+    if ((i<=0)&(idx+taumax<N-1)) {
+      acf(i+taumax) = v(idx-i-1)*conj(v(idx+i+1));//starts filling at index 0
+      //current problem is v(idx-i+1) goes out of bounds for initial i and idx=4823.
+    }   
+    if (i>0) {
+      acf(N-taumax+i) = v(idx-i)*conj(v(idx+i));
+    }
+  }
+ 
+  //even odd symmetry test
+  double even=0.0, odd=0.0, sum=0.0;
+  for (int i =1; i< N/2; i++) {
+    even += (acf(i).real()-acf((N-1)-(i-1)).real());
+    odd += (acf(i).imag()+acf((N-1)-(i-1)).imag());
+    sum += abs(acf(i).imag()); 
+  }
+  
+  // cout<< "running sum of imaginary part is "<< sum<< endl;
+
+  /*  if ( odd>.00001) {
+    cout<<"The amount of un-even-ness in the real part is: "<<even<<endl;
+    cout<<"The amount of un-odd-ness in the imaginary part is "<<odd<<endl;
+    
+    exit(EXIT_FAILURE);
+    }*/
+  
+
+  return acf;
+}
+  
+arma::cx_mat dsp::wvd_cx(const vec& wf,  bool upsample, const int window)
 {
   int M, N;
   if (upsample) {
@@ -191,8 +239,8 @@ arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
     N = wf.size();
   }
 
-  // Instiate the return matrix
-  arma::cx_mat res(M, N, arma::fill::zeros);
+  // Initiate the return matrix
+  arma::cx_mat res(M/2, N, arma::fill::zeros);
 
   // Artificially double the sampling rate by repeating each sample.
   vec wf_re(M, 0.0);
@@ -217,10 +265,12 @@ arma::cx_mat dsp::wvd_cx(const vec& wf, bool upsample)
   }
 
   // Now compute the Wigner-Ville Distribution
-  for (int idx = 0; idx < N; ++idx) {
-    res.col(idx) = arma::fft(dsp::rconvolve(v, idx));
+  for (int idx = 0; idx < M; ++idx) {
+    res.col(idx) = arma::fft(dsp::acorrelation(v, idx, window),M/2);
     //    res.col(idx) = res.col(idx) % (arma::cos(phase * idx) + 1j * arma::sin(phase * idx));
   }
+
+  //I do need to give the WVD proper frequency dimensionality
 
   return res;
 }
