@@ -39,7 +39,7 @@ int main(int argc, char **argv)
   int rounds = 10;
 
   std::vector<double> wf;
-  std::vector<double> tm;
+  std::vector<double> tm = time_vector();
 
   // Ouput filestream.
   std::ofstream out;
@@ -54,10 +54,6 @@ int main(int argc, char **argv)
 
     out.open("data/error_estimator_data.csv");
   }
-
-  tm = construct_range(sim::start_time, 
-  					   sim::start_time + sim::num_samples*sim::sample_time,
-  					   sim::sample_time);
 
   // Create random number engine/distribution.
   std::default_random_engine gen;

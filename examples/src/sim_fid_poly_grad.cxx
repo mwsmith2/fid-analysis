@@ -42,8 +42,7 @@ int main(int argc, char **argv)
   std::vector<double> grad_0;
   std::vector<double> gradient;
 
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
-  tm = construct_range(sim::start_time, final_time, sim::sample_time);
+  tm = time_vector(); // default params in ::fid
 
   // Make FidFactory
   FidFactory ff;

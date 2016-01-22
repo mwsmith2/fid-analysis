@@ -34,15 +34,12 @@ int main(int argc, char **argv)
 
   // Standard variables.
   std::vector<double> wf(sim::num_samples, 0.0);
-  std::vector<double> tm(sim::num_samples, 0.0);
+  std::vector<double> tm = time_vector(); // default time vector in fid::
 
   int num_fids = 10;
   double max_grad = 500; // in ppb
   double delta_b = 0.0;
   double center_b = 47.0;
-
-  double final_time = sim::start_time + sim::num_samples * sim::sample_time;
-  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   // Set up the ROOT tree to hold the results
   TFile pf("data/sim_fids.root", "recreate");

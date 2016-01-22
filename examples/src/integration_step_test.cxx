@@ -31,14 +31,9 @@ int main(int argc, char **argv)
   if (argc > 1) load_params(argv[1]);
 
   // some necessary parameters
-  std::vector<double> wf;
-  std::vector<double> tm;
-  wf.reserve(sim::num_samples);
-  tm.reserve(sim::num_samples);
   double dt;
-
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
-  tm = construct_range(sim::start_time, final_time, sim::sample_time);
+  std::vector<double> wf(0.0, sim::num_samples);
+  std::vector<double> tm = time_vector();
 
   // Set up the ROOT tree to hold the results
   TFile pf("dt_test_fids.root", "recreate");

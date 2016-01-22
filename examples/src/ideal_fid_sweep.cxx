@@ -33,12 +33,9 @@ int main(int argc, char **argv)
 
   // some necessary parameters
   std::vector<double> wf;
-  std::vector<double> tm;
+  std::vector<double> tm = time_vector(); // default time params in fid::
 
   FidFactory ff;
-
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
-  tm = construct_range(sim::start_time, sim::sample_time, final_time);
 
   std::ofstream out;
   out.precision(10);

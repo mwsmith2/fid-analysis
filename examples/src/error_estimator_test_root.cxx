@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   // Necessary variables.
   int rounds = 10;
   std::vector<double> wf;
-  std::vector<double> tm;
+  std::vector<double> tm = time_vector(); // default time vector in fid::
 
   // Ouput filename.
   string outfile;
@@ -90,9 +90,6 @@ int main(int argc, char **argv)
   TFile pf(outfile.c_str(), "RECREATE");
   TTree pt("t", "fid_fits");
   pt.Branch("fid_data", &myfid_data, br_vars.c_str());
-
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
-  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   // Create random number engine/distribution.
   std::default_random_engine gen;
