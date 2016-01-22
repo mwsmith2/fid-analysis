@@ -27,12 +27,16 @@ notes:
 #include "fftw3.h"
 
 //--- project includes ------------------------------------------------------//
-#include "fid/params.h"
+
 
 namespace fid
 {
-// An alias
+// Aliases
 typedef std::complex<double> cdouble;
+
+// constants
+const double kTau = 2 * M_PI;
+const double kMaxPhaseJump = 4.71;
 
 //--- linalg template functions ---------------------------------------------//
 

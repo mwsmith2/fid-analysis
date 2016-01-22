@@ -64,7 +64,6 @@ void BaseFid::LoadParams()
   edge_width_ = params::edge_width;
   edge_ignore_ = params::edge_ignore; 
   start_amplitude_ = params::start_amplitude; 
-  max_phase_jump_ = params::max_phase_jump; 
   low_pass_freq_ = params::low_pass_freq; 
   fft_peak_width_ = params::fft_peak_width;
   centroid_thresh_ = params::centroid_thresh; 

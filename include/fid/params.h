@@ -13,8 +13,14 @@ about: This header file holds the projects parameter namespace.  These
 
 \*---------------------------------------------------------------------------*/
 
+
+//--- other includes --------------------------------------------------------//
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+
+//--- project includes ------------------------------------------------------//
+#include "fid/math.h"
+
 
 namespace fid {
 
@@ -29,9 +35,6 @@ enum Method { ZC, CN, AN, LZ, EX, PH, SN,
               SINUSOID 
 };
 
-// constants
-const double kTau = 2 * M_PI;
-
 extern std::string logdir;
 
 // general fid analysis parameters
@@ -41,7 +44,6 @@ namespace params {
   extern double edge_ignore;     // samples to ignore when doing phase fits
   extern double start_amplitude; // threshold above noise to define start of FID
   extern double fft_peak_width;  // fit width used by spectral peak fits
-  extern double max_phase_jump;  // maximum change in phase unwrapping
   extern double low_pass_freq;   // low pass frequency used by FID
   extern double centroid_thresh; // threshold of values included in centroid
   extern double hyst_thresh;     // hysteris threshold used for zero counting
@@ -95,6 +97,11 @@ namespace grad {
 
 // header implementation of load_params
 void load_params(std::string conf_file);
+
+std::vector<double> time_vector() {
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  return construct_range(sim::start_time, final_time, sim::sample_time);
+}
 
 } // ::fid
 

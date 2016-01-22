@@ -14,7 +14,6 @@ namespace params {
   double edge_width = 100;
   double edge_ignore = 50;
   double start_amplitude = 0.37;
-  double max_phase_jump = 4.71;
   double low_pass_freq = 2000.0;
   double centroid_thresh = 0.01;
   double hyst_thresh = 0.7;
@@ -88,7 +87,6 @@ void load_params(std::string conf_file)
   edge_ignore = pt.get<int>("params.edge_ignore", edge_ignore);
   edge_width = pt.get<int>("params.edge_width", edge_width);
   start_amplitude = pt.get<double>("params.start_amplitude", start_amplitude);
-  max_phase_jump = pt.get<double>("params.max_phase_jump", max_phase_jump);
   low_pass_freq = pt.get<double>("params.low_pass_freq", low_pass_freq);
   centroid_thresh = pt.get<double>("params.centroid_thresh", centroid_thresh);
   hyst_thresh = pt.get<double>("params.hyst_thresh", hyst_thresh);

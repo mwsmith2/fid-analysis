@@ -102,7 +102,6 @@ class BaseFid {
   double edge_width_;
   double edge_ignore_;
   double start_amplitude_;
-  double max_phase_jump_;
   double low_pass_freq_;
   double fft_peak_width_;
   double centroid_thresh_;
