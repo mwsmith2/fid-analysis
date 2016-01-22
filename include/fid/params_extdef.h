@@ -128,6 +128,12 @@ void load_params(std::string conf_file)
 
 } // load_params
 
+std::vector<double> time_vector() {
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  return construct_range(sim::start_time, final_time, sim::sample_time);
+}
+
+
 } // ::fid
 
 #endif

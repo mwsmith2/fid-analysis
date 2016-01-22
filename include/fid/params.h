@@ -98,10 +98,7 @@ namespace grad {
 // header implementation of load_params
 void load_params(std::string conf_file);
 
-std::vector<double> time_vector() {
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
-  return construct_range(sim::start_time, final_time, sim::sample_time);
-}
+std::vector<double> time_vector();
 
 } // ::fid
 
