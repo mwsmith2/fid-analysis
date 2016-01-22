@@ -251,7 +251,6 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
                  [](double re, double im) { return std::atan2(im, re); });
   
   // Now unwrap the phase
-  double thresh = params::max_phase_jump;
   double m = 0.0;
 
   int k = 0; // to track the winding number
@@ -262,11 +261,11 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
     m = *(it) - *(it - 1);
     
     // Check for large jumps, both positive and negative.
-    while (std::abs(m) > thresh) {
+    while (std::abs(m) > kMaxPhaseJump) {
       
-      if (-m > thresh) {
+      if (-m > kMaxPhaseJump) {
         
-        if (m + kTau > thresh) {
+        if (m + kTau > kMaxPhaseJump) {
           std::cout << "Warning: jump over threshold." << std::endl;
           break;
         }
@@ -274,9 +273,9 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
         k++;
         *it += kTau;
         
-      } else if (m > thresh) {
+      } else if (m > kMaxPhaseJump) {
         
-        if (m - kTau < -thresh) {
+        if (m - kTau < -kMaxPhaseJump) {
           std::cout << "Warning: jump over threshold." << std::endl;
           break;
         }
