@@ -17,6 +17,7 @@ about: This header file holds the projects parameter namespace.  These
 //--- other includes --------------------------------------------------------//
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include "TFile.h"
 
 //--- project includes ------------------------------------------------------//
 #include "fid/math.h"
@@ -25,7 +26,7 @@ about: This header file holds the projects parameter namespace.  These
 namespace fid {
 
 // Enumerate the different methods of frequency extraction
-enum Method { ZC, CN, AN, LZ, EX, PH, SN,
+enum Method { ZC=0, CN=1, AN=2, LZ=3, EX=4, PH=5, SN=6,
               ZEROCOUNT,
               CENTROID,
               ANALYTICAL,
@@ -33,6 +34,19 @@ enum Method { ZC, CN, AN, LZ, EX, PH, SN,
               EXPONENTIAL,
               PHASE,
               SINUSOID 
+};
+
+// Create a struct, useful for interfacing with ROOT trees
+struct fid_t {
+  Double_t wf[10000]; // this is our default
+  Double_t tm[10000];
+  Double_t freq[7];
+  Double_t ferr[7];
+  Double_t chi2[7];
+  Double_t snr;
+  Double_t len;
+  UShort_t health;
+  UShort_t method;
 };
 
 extern std::string logdir;
