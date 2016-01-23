@@ -60,6 +60,8 @@ class Fid : public BaseFid {
   void WriteMethodCsv(std::ofstream& out);
   void WritePhaseFreqCsv(std::ofstream& out);
   void CopyStruct(fid_t& f);
+  void CopyStruct(fid_freq_t& f);
+  void CopyStruct(fid_t& f, fid_freq_t& freq);
 
   // accessors
   const std::vector<double>& res() const { return res_; };

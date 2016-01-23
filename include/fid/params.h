@@ -38,10 +38,14 @@ enum Method { ZC=0, CN=1, AN=2, LZ=3, EX=4, PH=5, SN=6,
               SINUSOID 
 };
 
-// Create a struct, useful for interfacing with ROOT trees
+// A struct useful for saving simulation results
 struct fid_t {
-  Double_t wf[DEFAULT_FID_LN]; // this is our default
+  Double_t wf[DEFAULT_FID_LN];
   Double_t tm[DEFAULT_FID_LN];
+};
+
+// A struct useful for saving analysis results
+struct fid_freq_t {
   Double_t freq[7];
   Double_t ferr[7];
   Double_t chi2[7];
@@ -50,8 +54,10 @@ struct fid_t {
   UShort_t health;
 };
 
-const char * const fid_str = 
-"wf[10000]/D:tm[10000]/D:freq[7]/D:ferr[7]/D:chi2[7]/D:snr/D:len/D:health/s";
+const char * const fid_str = "wf[10000]/D:tm[10000]/D";
+
+const char * const fid_freq_str =
+"freq[7]/D:ferr[7]/D:chi2[7]/D:snr/D:len/D:health/s";
 
 extern std::string logdir;
 

@@ -628,7 +628,10 @@ void Fid::CopyStruct(fid_t& f)
 {
   std::copy(&wf_[0], &wf_[DEFAULT_FID_LN], f.wf);
   std::copy(&tm_[0], &tm_[DEFAULT_FID_LN], f.tm);
+}
 
+void Fid::CopyStruct(fid_freq_t& f)
+{
   for (int i = 0; i < 7; ++i) {
     freq_method_ = static_cast<Method>(i);
     GetFreq();
@@ -640,6 +643,12 @@ void Fid::CopyStruct(fid_t& f)
   f.snr = pow(max_amp_ / noise_, 2);
   f.len = tm_[f_wf_] - tm_[i_wf_];
   f.health = health_;
+}
+
+void Fid::CopyStruct(fid_t& f, fid_freq_t& freq)
+{
+  CopyStruct(f);
+  CopyStruct(freq);
 }
 
 } // fid
