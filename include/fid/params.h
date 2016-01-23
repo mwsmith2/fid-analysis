@@ -22,6 +22,8 @@ about: This header file holds the projects parameter namespace.  These
 //--- project includes ------------------------------------------------------//
 #include "fid/math.h"
 
+#define DEFAULT_FID_LN 10000
+
 
 namespace fid {
 
@@ -38,16 +40,18 @@ enum Method { ZC=0, CN=1, AN=2, LZ=3, EX=4, PH=5, SN=6,
 
 // Create a struct, useful for interfacing with ROOT trees
 struct fid_t {
-  Double_t wf[10000]; // this is our default
-  Double_t tm[10000];
+  Double_t wf[DEFAULT_FID_LN]; // this is our default
+  Double_t tm[DEFAULT_FID_LN];
   Double_t freq[7];
   Double_t ferr[7];
   Double_t chi2[7];
   Double_t snr;
   Double_t len;
   UShort_t health;
-  UShort_t method;
 };
+
+const char * const fid_str = 
+"wf[10000]/D:tm[10000]/D:freq[7]/D:ferr[7]/D:chi2[7]/D:snr/D:len/D:health/s";
 
 extern std::string logdir;
 

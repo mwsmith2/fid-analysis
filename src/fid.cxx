@@ -623,4 +623,23 @@ void Fid::WritePhaseFreqCsv(std::ofstream& out)
   out << CalcSinusoidFreq() << ", " << chi2_ << std::endl;
 }
 
+// Copy data into the simple fid data structure.
+void Fid::CopyStruct(fid_t& f)
+{
+  std::copy(&wf_[0], &wf_[DEFAULT_FID_LN], f.wf);
+  std::copy(&tm_[0], &tm_[DEFAULT_FID_LN], f.tm);
+
+  for (int i = 0; i < 7; ++i) {
+    freq_method_ = static_cast<Method>(i);
+    GetFreq();
+    f.freq[i] = freq_;
+    f.ferr[i] = freq_err_;
+    f.chi2[i] = chi2_;
+  }
+
+  f.snr = pow(max_amp_ / noise_, 2);
+  f.len = tm_[f_wf_] - tm_[i_wf_];
+  f.health = health_;
+}
+
 } // fid
