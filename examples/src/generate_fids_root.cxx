@@ -8,12 +8,11 @@ notes: This is a new test program for my Fid libraries
 
 \*===========================================================================*/
 
+
 //--- std includes ----------------------------------------------------------//
 #include <fstream>
 #include <iostream>
 #include <vector>
-using std::cout;
-using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -23,28 +22,30 @@ using std::endl;
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
 
+using std::cout;
+using std::endl;
 using namespace fid;
+
 
 int main(int argc, char **argv)
 {
-  // initialize the configurable parameters
+  // Initialize the configurable parameters.
   if (argc > 1) load_params(argv[1]);
 
-  // some necessary parameters
-  std::vector<double> wf;
-  std::vector<double> tm;
-  wf.reserve(sim::num_samples);
-  tm.reserve(sim::num_samples);
-  double delta_b;
-  double max_grad = 500; // in ppb
-  int num_fids = 100;
-  double freq_0 = sim::larmor_freq;
+  // Standard variables.
+  std::vector<double> wf(sim::num_samples, 0.0);
+  std::vector<double> tm(sim::num_samples, 0.0);
 
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  int num_fids = 10;
+  double max_grad = 500; // in ppb
+  double delta_b = 0.0;
+  double center_b = 47.0;
+
+  double final_time = sim::start_time + sim::num_samples * sim::sample_time;
   tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   // Set up the ROOT tree to hold the results
-  TFile pf("sim_fids.root", "recreate");
+  TFile pf("data/sim_fids.root", "recreate");
   TTree pt("t", "Fid Tree");
   cout.precision(12);
 
@@ -52,17 +53,17 @@ int main(int argc, char **argv)
   pt.Branch("fid", &wf[0], TString::Format("fid[%d]/D", sim::num_samples));
   pt.Branch("tm", &tm[0], TString::Format("time[%d]/D", sim::num_samples));
 
-  // begin grad sims
+  FidFactory ff;
+
+  // Begin simulating FIDs.
   cout << "num_fids: " << num_fids << endl;
-  for (int i = -1 * num_fids / 2; i < num_fids / 2 + 1; ++i){
 
+  for (int i = -1 * num_fids / 2; i < num_fids / 2 + 1; ++i) {
+
+  	// Set the FID frequency.
     delta_b = max_grad * 2.0 * i / num_fids;
-    sim::larmor_freq = (1.0 + 1.0e-9 * delta_b) * freq_0;
 
-    std::cout << sim::larmor_freq << std::endl;
-
-    // Make FidFactory
-    FidFactory ff;
+    ff.SetFidFreq((1.0 + 1.0e-9 * delta_b) * center_b);
     ff.SimulateFid(wf, tm);
 
     pt.Fill();

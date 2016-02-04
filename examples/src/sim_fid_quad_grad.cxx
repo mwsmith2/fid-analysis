@@ -5,7 +5,7 @@ Email:  mwsmith2@uw.edu
 Date:   15/04/14
 
 Detail: The program is meant to test the effects of field gradients
-        on the FID frequency extraction.  The sweep parameters are
+        on the Fid frequency extraction.  The sweep parameters are
         set in a separate config file here, but the user need not rely
         on the config parameters.  All that needs to be done is the
         defining of a gradient vector.
@@ -13,7 +13,11 @@ Detail: The program is meant to test the effects of field gradients
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
+#include <iostream>
 #include <fstream>
+#include <string>        
+using std::cout;
+using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -34,17 +38,17 @@ int main(int argc, char **argv)
   double dgrad = 1.0;
 
   // allocate some necessary parameters
-  vec wf;
+  std::vector<double> wf;
 
-  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  vec tm = construct_range(sim::start_time, final_time, sim::delta_time);
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  std::vector<double> tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
-  vec grads = construct_range(grad_min, grad_max, dgrad);
-  vec grad_0;
-  construct_quadratic_gradient(20, grad_0);
+  std::vector<double> grads = construct_range(grad_min, grad_max, dgrad);
+  std::vector<double> grad_0;
+  grad_0 = normalized_gradient(20, 2);
 
   // Make FidFactory
-  GradientFidFactory gff;
+  FidFactory ff;
 
   // csv output
   std::ofstream out;
@@ -59,21 +63,20 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < num_fids; ++i){
 
-      vec gradient;
+      std::vector<double> gradient;
 
       for (auto val : grad_0){
         gradient.push_back(val * g);
       }
 
-      gff.ConstructFid(gradient, wf);
-      FID my_fid(wf, tm);
-
-      calc_freq_write_csv(my_fid, out);
+      ff.GradientFid(gradient, wf);
+      Fid my_fid(wf, tm);
+      my_fid.WriteFreqCsv(out);
 
       if (i == 0){
         static char str[60];
         sprintf(str, "data/fig/fid_quad_grad_%03dppb.pdf", (int)g);
-        draw_fid(my_fid, str, string("Test FID")); 
+        my_fid.SavePlot(str, "Test Fid"); 
       }
     }
   } // grad

@@ -4,14 +4,18 @@ Author: Matthias W. Smith
 Email:  mwsmith2@uw.edu
 Date:   2015/01/08
 
-Detail: The program is meant to generate a set of example gradient FIDs in
+Detail: The program is meant to generate a set of example gradient Fids in
         plaintext format.
 
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
-#include <fstream>
 #include <iostream>        
+#include <fstream>
+#include <vector>
+#include <string>
+using std::cout;
+using std::endl;        
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -30,20 +34,20 @@ int main(int argc, char **argv)
   char str[60];
 
   // some necessary parameters
-  vec wf;
-  vec tm;
-  vec grads;
-  vec grad_0;
-  vec gradient;
+  std::vector<double> wf;
+  std::vector<double> tm;
+  std::vector<double> grads;
+  std::vector<double> grad_0;
+  std::vector<double> gradient;
 
-  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  tm = construct_range(sim::start_time, final_time, sim::delta_time);
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   grads = construct_range(grad_min, grad_max, dgrad);
 
   // Make FidFactory
-  GradientFidFactory gff;
-  construct_quadratic_gradient(20, grad_0);
+  FidFactory ff;
+  grad_0 = normalized_gradient(20, 2);
 
   // csv output
   std::ofstream out;
@@ -62,7 +66,7 @@ int main(int argc, char **argv)
       gradient.push_back(val * g);
     }
 
-    gff.ConstructFid(gradient, wf);
+    ff.GradientFid(gradient, wf);
 
     for (int i = 0; i < tm.size(); ++i){
 

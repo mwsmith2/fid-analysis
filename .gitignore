@@ -1,3 +1,4 @@
-work
-boost-python
-cython
+!/lib
+/lib/*
+!/build
+/build/*

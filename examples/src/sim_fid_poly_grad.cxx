@@ -5,7 +5,7 @@ Email:  mwsmith2@uw.edu
 Date:   2015/01/08
 
 Detail: The program is meant to test the effects of field gradients
-        on the FID frequency extraction.  The sweep parameters are
+        on the Fid frequency extraction.  The sweep parameters are
         set in a separate config file here, but the user need not rely
         on the config parameters.  All that needs to be done is the
         defining of a gradient vector.
@@ -13,7 +13,11 @@ Detail: The program is meant to test the effects of field gradients
 \*===========================================================================*/
 
 //--- std includes ----------------------------------------------------------//
+#include <iostream>
 #include <fstream>
+#include <string>        
+using std::cout;
+using std::endl;
 
 //--- other includes --------------------------------------------------------//
 #include "TFile.h"
@@ -32,17 +36,17 @@ int main(int argc, char **argv)
   int num_fids = 100;
 
   // some necessary parameters
-  vec wf;
-  vec tm;
-  vec grads;
-  vec grad_0;
-  vec gradient;
+  std::vector<double> wf;
+  std::vector<double> tm;
+  std::vector<double> grads;
+  std::vector<double> grad_0;
+  std::vector<double> gradient;
 
-  double final_time = sim::start_time + sim::num_samples*sim::delta_time;
-  tm = construct_range(sim::start_time, final_time, sim::delta_time);
+  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
+  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   // Make FidFactory
-  GradientFidFactory gff;
+  FidFactory ff;
 
   // construct a normalized, centered polynomial gradient
   sprintf(str, "pol%d", grad::poln_order);
@@ -92,14 +96,14 @@ int main(int argc, char **argv)
         gradient.push_back(val * g);
       }
 
-      gff.ConstructFid(gradient, wf);
-      FID my_fid(wf, tm);
+      ff.GradientFid(gradient, wf);
+      Fid my_fid(wf, tm);
 
-      calc_freq_write_csv(my_fid, out);
+      my_fid.WriteFreqCsv(out);
 
       if (i == 0){
         sprintf(str, "data/fig/fid_pol%d_grad_%03dppb.pdf", grad::poln_order, (int)g);
-        draw_fid(my_fid, str, string("Test FID")); 
+        my_fid.SavePlot(str, "Test Fid"); 
       }
     }
   } // grad
