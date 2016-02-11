@@ -32,25 +32,19 @@ std::vector<cdouble> dsp::fft(const std::vector<cdouble> &v)
 {
   // Grab some useful constants.
   int N = v.size();  
-  int n = N / 2 + 1;  // size of rfft
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
-  std::vector<cdouble> fft_vec(n, cdouble(0.0, 0.0));
+  std::vector<cdouble> fft_vec(N, cdouble(0.0, 0.0));
   auto wfm_vec = v; // copy waveform since fftw destroys it
 
-  // Plan and execute the fft.
+  // Plan and execute the fft (-1 == exponent).
   fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
   fftw_complex *wfm_ptr = reinterpret_cast<fftw_complex *>(&wfm_vec[0]);  
 
-  fftw_plan wf_to_fft = fftw_plan_dft_1d(N, 
-                                         fft_ptr,
-                                         wfm_ptr,
-                                         FFTW_FORWARD,
-                                         FFTW_ESTIMATE);  
-
-  fftw_execute(wf_to_fft);
-  fftw_destroy_plan(wf_to_fft);
+  auto plan = fftw_plan_dft_1d(N, wfm_ptr, fft_ptr, -1, FFTW_ESTIMATE);  
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
 
   for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
     *it /= Nroot;
@@ -59,42 +53,32 @@ std::vector<cdouble> dsp::fft(const std::vector<cdouble> &v)
   return fft_vec;
 }
 
-
 std::vector<cdouble> dsp::ifft(const std::vector<cdouble>& v)
 {
   // Grab some useful constants.
-  int n = v.size();
-  int N = 2 * (n - 1);
+  int N = v.size();
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
-  std::vector<cdouble> ifft_vec(N, cdouble(0.0, 0.0));
+  std::vector<cdouble> wfm_vec(N, cdouble(0.0, 0.0));
+  auto fft_vec = v;
 
-  fftw_complex *fft_ptr = new fftw_complex[n];
-  fftw_complex *wfm_ptr;
+  fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);  
+  fftw_complex *wfm_ptr = reinterpret_cast<fftw_complex *>(&wfm_vec[0]);  
 
-  memcpy(fft_ptr, &v[0], sizeof(fftw_complex) * n);
-  wfm_ptr = reinterpret_cast<fftw_complex *>(&ifft_vec[0]);  
-
-  // Plan and execute the fft.
-  fftw_plan fft_to_wf = fftw_plan_dft_1d(N, 
-                                         fft_ptr,
-                                         wfm_ptr,
-                                         FFTW_BACKWARD,
-                                         FFTW_ESTIMATE);  
-
-  fftw_execute(fft_to_wf);
-  fftw_destroy_plan(fft_to_wf);
+  // Plan and execute the inverse fft (+1 == exponent).
+  auto plan = fftw_plan_dft_1d(N, fft_ptr, wfm_ptr, +1, FFTW_ESTIMATE);  
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
 
   // fftw is unnormalized, so we need to fix that.
-  for (auto it = ifft_vec.begin(); it != ifft_vec.end(); ++it) {
+  for (auto it = wfm_vec.begin(); it != wfm_vec.end(); ++it) {
     *it /= Nroot;
   }
 
-  delete[] fft_ptr;
-
-  return ifft_vec;
+  return wfm_vec;
 }
+
 std::vector<cdouble> dsp::rfft(const std::vector<double> &v)
 {
   // Grab some useful constants.
@@ -104,14 +88,14 @@ std::vector<cdouble> dsp::rfft(const std::vector<double> &v)
 
   // Instantiate the result vector.
   std::vector<cdouble> fft_vec(n, 0.0);
-  auto wf_vec = v; // copy waveform since fftw destroys it
+  auto wfm_vec = v; // copy waveform since fftw destroys it
+
+  fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
 
   // Plan and execute the fft.
-  fftw_plan wf_to_fft;
-  fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
-  wf_to_fft = fftw_plan_dft_r2c_1d(N, &wf_vec[0], fft_ptr, FFTW_ESTIMATE);
-  fftw_execute(wf_to_fft);
-  fftw_destroy_plan(wf_to_fft);
+  auto plan = fftw_plan_dft_r2c_1d(N, &wfm_vec[0], fft_ptr, FFTW_ESTIMATE);
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
 
   for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
     *it /= Nroot;
@@ -129,24 +113,22 @@ std::vector<double> dsp::irfft(const std::vector<cdouble>& fft)
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
-  std::vector<double> ifft_vec(N, 0.0);
-  fftw_complex *fft_ptr = new fftw_complex[n];
-  memcpy(fft_ptr, &fft[0], sizeof(fftw_complex) * n);
+  std::vector<double> wfm_vec(N, 0.0);
+  std::vector<cdouble> fft_vec = fft;
+
+  fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
 
   // Plan and execute the fft.
-  fftw_plan fft_to_wf;
-  fft_to_wf = fftw_plan_dft_c2r_1d(N, fft_ptr, &ifft_vec[0], FFTW_ESTIMATE);
-  fftw_execute(fft_to_wf);
-  fftw_destroy_plan(fft_to_wf);
+  auto plan = fftw_plan_dft_c2r_1d(N, fft_ptr, &wfm_vec[0], FFTW_ESTIMATE);
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
 
   // fftw is unnormalized, so we need to fix that.
-  for (auto it = ifft_vec.begin(); it != ifft_vec.end(); ++it) {
+  for (auto it = wfm_vec.begin(); it != wfm_vec.end(); ++it) {
   	*it /= Nroot;
   }
 
-  delete[] fft_ptr;
-
-  return ifft_vec;
+  return wfm_vec;
 }
 
 std::vector<double> dsp::hilbert(const std::vector<double>& v)
