@@ -160,7 +160,15 @@ void BaseFid::FindFidRange()
         return std::abs(x) < 0.8 * thresh;
   });
 
-  checks_out = false;
+  if ((it_2 != wf_.end()) && (it_2 + 1 != wf_.end())) {
+
+    checks_out = false;
+
+  } else {
+
+    f_wf_ = std::distance(wf_.begin(), wf_.end());
+    checks_out = true;
+  }
 
   while (!checks_out) {
 
