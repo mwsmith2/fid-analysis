@@ -299,13 +299,13 @@ void BaseFid::SaveTimeRes(std::string filename, std::string title)
   }  
 
   // Copy the current time fit.
-  gr_ = gr_time_series_;
+  gr_ = TGraph(res_.size());
 
   // Set the points
   for (uint i = 0; i < res_.size(); ++i){
     static double x, y;
 
-    gr_.GetPoint(i, x, y);
+    gr_time_series_.GetPoint(i, x, y);
     gr_.SetPoint(i, x, res_[i]); 
   }
 
@@ -326,13 +326,13 @@ void BaseFid::SaveFreqRes(std::string filename, std::string title)
   }  
 
   // Copy the current time fit.
-  gr_ = gr_freq_series_;
+  gr_ = TGraph(res_.size());
 
   // Set the points
   for (uint i = 0; i < res_.size(); ++i){
     static double x, y;
 
-    gr_.GetPoint(i, x, y);
+    gr_freq_series_.GetPoint(i, x, y);
     gr_.SetPoint(i, x, res_[i]); 
   }
 
