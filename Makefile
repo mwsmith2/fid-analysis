@@ -11,8 +11,8 @@ LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
 PREFIX=/usr/local
 
 # Some optional flags
-DEBUG = -g -pg
-OPTIMIZE = -O3
+# DEBUG = -g -pg
+OPTIMIZE = -O2
 
 # Figure out the architecture
 UNAME_S = $(shell uname -s)
