@@ -1,4 +1,6 @@
 #include "fid/math.h"
+#include "TMultiGraph.h"
+#include "fid.h"
 
 namespace fid {
 
@@ -36,8 +38,10 @@ std::vector<cdouble> dsp::fft(const std::vector<cdouble> &v)
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
-  std::vector<cdouble> fft_vec(n, cdouble(0.0, 0.0));
+  std::vector<cdouble> fft_vec(N, cdouble(0.0, 0.0));
   auto wfm_vec = v; // copy waveform since fftw destroys it
+  //Note forward FFT's do not modify the input vector as long as its not
+  //the same as the ouput vector
 
   // Plan and execute the fft.
   fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
@@ -314,6 +318,7 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
   std::cout<< "Size of v is "<< N << std::endl;
   //Define Window function, with odd length to ensure even/odd symmetry
   arma::vec  win_func(window);
+  arma::cx_vec conj_v = arma::conj(v);
   win_func.ones();
 
   arma::cx_vec acf(N);
@@ -326,24 +331,25 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
   std::cout<<"correlation range is " <<taumax<< std::endl;
 
   for (int i =-taumax; i < (taumax+1) ; i++) {
-    std::cout<< "correlation variable is " <<i <<" idx is "<< idx<<std::endl;
-    if ((i<=0)&(idx+taumax<N-1)) {
-      acf(i+taumax) = v(idx-i)*conj(v(idx+i));//starts filling at index 0
+    //   std::cout<< "correlation variable is " <<i <<" idx is "<< idx<<std::endl;
+    if (i == 0) acf(i+taumax) = .5*(conj_v(idx-i)*v(idx+i)+conj_v(idx+i)*v(idx-i));
+    if ((i<0)&(idx+taumax<N-1)) {
+      acf(i+taumax) = conj_v(idx-i)*v(idx+i);//starts filling at index 1
     }   
-    if (i >= 0) {
-      acf(N-1-taumax+i) = v(idx-i)*conj(v(idx+i));
+    if ((i > 0)&(idx+taumax<N-1)) {
+      acf(N-1-taumax+i) = conj_v(idx-i)*v(idx+i);
     }
   }
  
   //even odd symmetry test
-  double even=0.0, odd=0.0, sum=0.0, prev =0.0;
+  /* double even=0.0, odd=0.0, sum=0.0, prev =0.0;
   for (int i =0; i< N/2; i++) {
     even += (acf(i).real()-acf((N-1)-(i)).real());
     odd += (acf(i).imag()+acf((N-1)-(i)).imag());
     sum += abs(acf(i).imag()); 
   
     
-    if (even != prev){
+      if (even != prev){
       std::cout<< "running un-even-ness of real part is "<< even <<"   associated bin is"<<i<<std::endl;
     }
     prev=even;
@@ -354,13 +360,15 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
     std::cout<<"The amount of un-odd-ness in the imaginary part is "<<odd<<std::endl;
     
     // exit(EXIT_FAILURE);
-    //  }
+    //  }*/
   
 
   return acf;
 } 
 
-  arma::cx_mat fid::dsp::wvd_cx(const std::vector<double>& wf,  bool upsample, const int window)
+
+
+  std::vector<double> dsp::wvd(const std::vector<double>& wf,  bool upsample, const int window)
 {
   int M, N;
   if (upsample) {
@@ -376,6 +384,9 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
 
   // Initiate the return matrix
   arma::cx_mat res(M/2, N, arma::fill::zeros);
+  arma::vec re_fft_acorr(N);
+  std::vector<double> wvd(N, 0.0);
+  
 
   // Artificially double the sampling rate by repeating each sample.
   std::vector<double> wf_re(M, 0.0);
@@ -399,14 +410,62 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
     phase[i] = (1.0 * i) / M * M_PI;
   }
   
+  //Get Frequency dimensionality for FFT
+  //@ToDo give wvd proper frequency dimensionality functionability.
+  std::vector<double> freq= dsp::fftfreq(N, .001);
+
   // Now compute the Wigner-Ville Distribution
-  for (int idx = 0; idx < M/2; ++idx) {
-    res.col(idx) =  dsp::fft_arma(dsp::acorrelation(v, idx, window));
+  for (int idx =  window; idx < N-window; ++idx) {
+    re_fft_acorr =  arma::real(arma::fft(dsp::acorrelation(v, idx, window)));
+    arma::uword max_bin;
+    double max_val = re_fft_acorr.max(max_bin);
+
+    int i_range=0; int f_range = 0;
+    int n = re_fft_acorr.size();
+    for (int i =1 ; i<n+1; i++) {
+      if (re_fft_acorr[max_bin+i]>.15*re_fft_acorr[max_bin]) {
+        f_range= max_bin + i+1;
+        n = f_range-i_range;
+      }
+      if ((max_bin-i>0)&(re_fft_acorr[max_bin-i]>.15*re_fft_acorr[max_bin])) {
+        i_range = max_bin - i;
+      }else if (i_range <0){
+        i_range = 0;
+        f_range = 2*max_bin;
+      }
+    }
+    
+    //create vector of normalized peak.
+    double range = f_range - i_range;
+    arma::vec peak = arma::zeros(range);
+    double sum = 0;
+    double dx = freq[1]-freq[0];
+    for (int i=i_range; i<f_range+1; i++) {
+      sum += .5*(re_fft_acorr[i+1]+re_fft_acorr[i])*dx;
+    }
+  
+    for (int i = 0; i<peak.size(); i++) {
+      peak[i]=re_fft_acorr[i_range+i]/sum;
+    }
+    
+    //Now perform fit to Gaussian
+    std::string gaussian("[2]*exp(-(x-[0])^2/(2*[1]^2))");
+    TGraph gr3 = TGraph(range, &freq[i_range], &peak[0]);
+    TF1 fit_func = TF1("fit_func", gaussian.c_str(), freq[i_range],freq[f_range-1]);
+    
+    fit_func.SetParameter(0, freq[max_bin]);
+    fit_func.SetParameter(1, 2);
+    fit_func.SetParameter(2, peak.max());
+    //   fit_func.SetParameter(3, 0);
+    
+    gr3.Fit(&fit_func, "R");
+
+    std::cout<<"Center Frequency of FFT is: " << fit_func.GetParameter(0)/2<<std::endl;
+    
+    wvd[idx] = fit_func.GetParameter(0)/2;
   }
 
-  //I do need to give the WVD proper frequency dimensionality
-
-  return res;
+  return wvd;
 }
 
 arma::mat dsp::wvd(const std::vector<double>& v, bool upsample)
