@@ -167,6 +167,21 @@ std::vector<double> dsp::hilbert(const std::vector<double>& v)
   return irfft(fft_vec);
 }
 
+ std::vector<double> dsp::hilbert_rot(const std::vector<double>&v ,const cdouble i)
+{
+  //Return the call to the fft version.
+  auto fft_vec = dsp::rfft(v);
+
+  //Multiply by i^2.
+  for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
+    if (it ==fft_vec.begin()) *it = cdouble(0,0);
+    *it = i*(*it);//cdouble((*it).real(), (*it).imag());
+  }
+
+  // Reverse the fft.
+  return irfft(fft_vec);
+}
+
 std::vector<double> dsp::psd(const std::vector<double>& v)
 {
   // Perform fft on the original data.
@@ -316,6 +331,7 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
 {
   int N = v.size();
   std::cout<< "Size of v is "<< N << std::endl;
+
   //Define Window function, with odd length to ensure even/odd symmetry
   arma::vec  win_func(window);
   arma::cx_vec conj_v = arma::conj(v);
@@ -330,14 +346,15 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
   if ((taumax % 2 ==0) &(taumax !=0)) taumax -= 1;
   std::cout<<"correlation range is " <<taumax<< std::endl;
 
-  for (int i =-taumax; i < (taumax+1) ; i++) {
+  //@Todo: tune acf to give strictly real result and symmetric fft peak. 
+  for (int i =-taumax+1; i < (taumax) ; i++) {
     //   std::cout<< "correlation variable is " <<i <<" idx is "<< idx<<std::endl;
-    if (i == 0) acf(i+taumax) = .5*(conj_v(idx-i)*v(idx+i)+conj_v(idx+i)*v(idx-i));
-    if ((i<0)&(idx+taumax<N-1)) {
-      acf(i+taumax) = conj_v(idx-i)*v(idx+i);//starts filling at index 1
+    //  if (i == 0) acf[taumax] = .5*(conj_v(idx-i)*v(idx+i)+conj_v(idx+i)*v(idx-i));
+    if ((i < 0)&(idx+taumax<N)) {
+      acf(N+i) = conj_v(idx-i)*v(idx+i);//starts filling acf at index 0
     }   
-    if ((i > 0)&(idx+taumax<N-1)) {
-      acf(N-1-taumax+i) = conj_v(idx-i)*v(idx+i);
+    if ((i  >= 0 )&(idx+taumax<N)) {
+      acf(i) = conj_v(idx-i)*v(idx+i);
     }
   }
  
@@ -347,28 +364,55 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
     even += (acf(i).real()-acf((N-1)-(i)).real());
     odd += (acf(i).imag()+acf((N-1)-(i)).imag());
     sum += abs(acf(i).imag()); 
-  
-    
-      if (even != prev){
-      std::cout<< "running un-even-ness of real part is "<< even <<"   associated bin is"<<i<<std::endl;
-    }
-    prev=even;
   }
-
-  //  if ( odd>.00001) {
-    std::cout<<"The amount of un-even-ness in the real part is: "<<even<<std::endl;
-    std::cout<<"The amount of un-odd-ness in the imaginary part is "<<odd<<std::endl;
-    
-    // exit(EXIT_FAILURE);
-    //  }*/
-  
+  */
 
   return acf;
 } 
 
+std::vector<cdouble> dsp::wvd_prep(const std::vector<double>& wf, bool upsample, const int window)
+{
+  //Artificially double sampling rate if desired
+   int M, N;
+  if (upsample) {
 
+    M = 2 * wf.size();
+    N = wf.size();
 
-  std::vector<double> dsp::wvd(const std::vector<double>& wf,  bool upsample, const int window)
+  } else {
+
+    M = wf.size();
+    N = wf.size();
+  }
+  std::vector<double> wf_re(M, 0.0);
+
+  auto it1 = wf_re.begin();
+  for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
+    *(it1++) = *it2;
+    if (upsample) {
+      *(it1++) = *it2;
+    }
+  }
+
+  //Make signal analytic and centered about zero.
+  std::vector<double> wf_cen(M, 0.0);
+  cdouble r = cdouble(1.0, 0.0);
+  std::vector<double> wf_pi = dsp::hilbert_rot(wf_re,r);
+  std::transform( wf_re.begin(), wf_re.end(), wf_pi.begin(), wf_cen.begin(),
+                  [](double re, double pi) {return re - std::abs(re-pi);});
+
+  auto wf_im = dsp::hilbert(wf_cen);
+  std::vector<cdouble> v(M, cdouble(0.0,0.0));
+
+  for (int i = 0; i < wf_re.size(); ++i) {
+    v[i] = cdouble(wf_cen[i], wf_im[i]);
+    //  phase[i] = (1.0 * i) / M * M_PI;
+  }
+
+  return v;
+}
+
+std::vector<double> dsp::WvdFreqExt(const std::vector<double>& wf,  bool upsample, const int window)
 {
   int M, N;
   if (upsample) {
@@ -383,7 +427,6 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
   }
 
   // Initiate the return matrix
-  arma::cx_mat res(M/2, N, arma::fill::zeros);
   arma::vec re_fft_acorr(N);
   std::vector<double> wvd(N, 0.0);
   
@@ -404,6 +447,7 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
   arma::vec phase(M);
 
   auto wf_im = dsp::hilbert(wf_re);
+  // auto wf_re_cen = dsp::hilbert(wf_im);
 
   for (uint i = 0; i < M; ++i) {
     v[i] = arma::cx_double(wf_re[i], wf_im[i]);

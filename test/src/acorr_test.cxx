@@ -1,7 +1,7 @@
 /*===========================================================================*\
 
 Author: Ronaldo Ortez
-Email:  mwsmith2@uw.edu
+Email:  supron00@gmail.com
 Date:   1/23/16
 
 Detail: This is a test program which test the auto-correlation function I wrote  
@@ -35,10 +35,10 @@ int main(int argc, char** argv)
 
   // declare variables
   int fid_length = 5000;
-  int window = 200;
+  int window = 60;
   double ti = 0;
   double dt = 0.001;
-  double ftruth = 23.0;
+  double ftruth = 24.0; 
 
   vector<double> wf_re;
   vector<double> tm;
@@ -48,30 +48,43 @@ int main(int argc, char** argv)
   std::ofstream out;
   out.precision(10);
 
-
+  // Create Sample waveform.
   for (int i = 0; i < fid_length; i++){
   tm.push_back(i * dt + ti);
   } 
   
   FidFactory ff;
   ff.SetLarmorFreq(ftruth + sim::mixdown_freq);
-  // ff.IdealFid(wf_re, tm);
+  ff.IdealFid(wf_re, tm);
 
-  for (int i = 0; i < fid_length; ++i) {
+  /*  for (int i = 0; i < fid_length; ++i) {
     wf_re.push_back(cos(45.101 * tm[i]*2*M_PI));
-  }
+    }*/
 
   Fid my_fid(wf_re, tm);
 
-  auto wf_im = dsp::hilbert(wf_re);
+  // Extract Sinusoidal "FID" portion of the signal.
+  unsigned int fid_begin = my_fid.i_wf();
+  wf_re.erase(wf_re.begin(), wf_re.begin() + fid_begin);
+  int N = wf_re.size();
+
+  // Produce FID centered around zero.
+  std::vector<double> wf_cen(N, 0.0);
+  cdouble r = cdouble(1.0, 0.0);
+  std::vector<double> wf_pi = dsp::hilbert_rot(wf_re,r);
+  std::transform( wf_re.begin(), wf_re.end(), wf_pi.begin(), wf_cen.begin(),
+                  [](double re, double cen) {return re - std::abs(re-cen);});
+
+  // Make armadillo analytic version of wf_re
+  auto wf_im = dsp::hilbert(wf_cen);
   arma::cx_vec wf(wf_im.size());
 
   for (int i = 0; i < wf_re.size(); ++i) {
-    wf[i] = arma::cx_double(wf_re[i], wf_im[i]);
+    wf[i] = arma::cx_double(wf_cen[i], wf_im[i]);
   }
-  
+
   //Compute auto-correlation function.
-  arma::cx_vec wf_rc = dsp::acorrelation(wf, 1451, window);
+  arma::cx_vec wf_rc = dsp::acorrelation(wf, 100, window);
 
   //Print out text files of auto-correlation function
   out.open("test_data/acorr_test_real.txt");
@@ -86,23 +99,23 @@ int main(int argc, char** argv)
   }
   out.close();
 
-  //Compute the power spectrum of the waveform.
+  // Compute the power spectrum of the waveform.
   auto fft_wf = dsp::psd(wf_re);
   auto acorr = arma::conv_to<std::vector<cdouble>>::from(wf_rc);
   auto fft_acorr = dsp::fft(acorr);//returns vector of size N/2
 
-  //Define vectors to draw on first part of canvas.
+  // Define vectors to draw on first part of canvas.
   auto real = arma::conv_to<std::vector<double>>::from(arma::real(wf_rc));
   auto imag = arma::conv_to<std::vector<double>>::from(arma::imag(wf_rc));
 
   TMultiGraph mg;
   TGraph gr = TGraph(window, &tm[0], &real[0]);gr.SetLineColor(kBlue);
-  TGraph gi = TGraph(window, &tm[window], &real[fid_length-window]);gi.SetLineColor(kRed);
-  TCanvas c1;
+  TGraph gi = TGraph(window, &tm[window], &real[N-window]);gi.SetLineColor(kRed);
+  TCanvas c1; 
   c1.Divide(2,2);
-  c1.cd(1);
+  c1.cd(1);  
   mg.Add(&gr, "cp");
-  mg.Add(&gi, "cp");
+  mg.Add(&gi, "cp"); 
 
   mg.Draw("ap");
 
@@ -115,14 +128,14 @@ int main(int argc, char** argv)
   std::vector<double> freqs = dsp::fftfreq(wf.size(), dt);
 
   TMultiGraph mg1;
-  TGraph gr1 = TGraph(wf.size()/2, &freqs[0], &real_fft[0]);gr1.SetLineColor(kBlue);
-  TGraph gi1 = TGraph(wf.size()/2, &freqs[0], &imag_fft[0]);gi1.SetLineColor(kRed);
+  TGraph gr1 = TGraph(N/2, &freqs[0], &real_fft[0]);gr1.SetLineColor(kBlue);
+  TGraph gi1 = TGraph(N/2, &freqs[0], &imag_fft[0]);gi1.SetLineColor(kRed);
 
   mg1.Add(&gr1, "cp");
   mg1.Add(&gi1, "cp");
 
-  TPad *p1 = (TPad *)(c1.cd(2));
-  p1->SetLogy();
+  // TPad *p1 = (TPad *)(c1.cd(2));
+  // p1->SetLogy();
 
   mg1.Draw("a");
 
@@ -137,14 +150,14 @@ int main(int argc, char** argv)
   }
 
   TMultiGraph mg2;
-  TGraph gr2 = TGraph(wf.size()/2, &freqs[0], &fft_wf[0]);gr2.SetLineColor(kBlue);
-  TGraph gi2 = TGraph(wf.size()/2, &freqs[0], &fft_wf[0]);gi2.SetLineColor(kRed);
+  TGraph gr2 = TGraph(N/50, &tm[0], &wf_cen[0]);gr2.SetLineColor(kBlue);
+  TGraph gi2 = TGraph(N/50, &tm[0], &wf_im[0]);gi2.SetLineColor(kRed);
 
   mg2.Add(&gr2, "cp");
   mg2.Add(&gi2, "cp");
 
-  TPad *p2 = (TPad *)(c1.cd(3));
-  p2->SetLogy();
+  // TPad *p2 = (TPad *)(c1.cd(3));
+  // p2->SetLogy();
 
   c1.cd(3);
   mg2.Draw("ap");
@@ -156,11 +169,11 @@ int main(int argc, char** argv)
   int i_range=0; int f_range = 0;
   int n = real_fft.size();
   for (int i =1 ; i<n+1; i++) {
-    if (real_fft[max_bin+i]>.15*real_fft[max_bin]) {
+    if (real_fft[max_bin+i]>.1*real_fft[max_bin]) {
       f_range= max_bin + i+1;
       n = f_range-i_range;
     }
-    if ((real_fft[max_bin-i]>.15*real_fft[max_bin])&(max_bin-i>0)) {
+    if ((real_fft[max_bin-i]>.1*real_fft[max_bin])&(max_bin-i>0)) {
       i_range = max_bin - i;
       //   n=f_range-i_range;
     }else if (i_range <0){
@@ -193,12 +206,12 @@ int main(int argc, char** argv)
   
   std::cout<<" i_range is:  " << i_range<< "  f_range is:  "<<f_range<< std::endl;
 
-  std::string gaussian("[2]*exp(-(x-[0])^2/(2*[1]^2))");
+  std::string gaussian("[2]*exp(-(x-[0])^2/(2*[1]^2))+[3]");
   TF1 fit_func = TF1("fit_func", gaussian.c_str(), freqs[i_range],freqs[f_range-1]);
   fit_func.SetParameter(0, freqs[max_bin]);
   fit_func.SetParameter(1, 2);
   fit_func.SetParameter(2, peak.max());
-  // fit_func.SetParameter(3, 0);
+  fit_func.SetParameter(3, 0);
 
   gr3.Fit(&fit_func, "R");
 

@@ -205,6 +205,7 @@ std::vector<cdouble> rfft(const std::vector<double>& v);
 std::vector<double> irfft(const std::vector<cdouble>& v);
 
 std::vector<double> hilbert(const std::vector<double>& v);
+std::vector<double> hilbert_rot(const std::vector<double>& v, const cdouble i = cdouble(0.0, 0.0));
 std::vector<double> psd(const std::vector<double>& v);
 
 std::vector<double> norm(const std::vector<double>& v);
@@ -223,7 +224,8 @@ std::vector<double> envelope(const std::vector<double>& wf_re,
 
 
 arma::mat wvd(const std::vector<double>& wf, bool upsample=false);
-std::vector<double> wvd(const std::vector<double>& wf, bool upsample=false, const int window=0);
+ std::vector<cdouble> wvd_prep(const std::vector<double>& wf, bool upsample=false, const int window=0);
+std::vector<double> WvdFreqExt(const std::vector<double>& wf, bool upsample=false, const int window=0);
 arma::cx_vec acorrelation(const arma::cx_vec &v, const int idx,  const int window=0);
 
 std::vector<double> savgol3(const std::vector<double>& v);
