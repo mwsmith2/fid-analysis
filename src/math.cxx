@@ -346,9 +346,8 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
   if ((taumax % 2 ==0) &(taumax !=0)) taumax -= 1;
   std::cout<<"correlation range is " <<taumax<< std::endl;
 
-  //@Todo: tune acf to give strictly real result and symmetric fft peak. 
+  // Autocorrelation gives strictly real fft and produces nearly symmetric fft peaks. 
   for (int i =-taumax+1; i < (taumax) ; i++) {
-    //   std::cout<< "correlation variable is " <<i <<" idx is "<< idx<<std::endl;
     //  if (i == 0) acf[taumax] = .5*(conj_v(idx-i)*v(idx+i)+conj_v(idx+i)*v(idx-i));
     if ((i < 0)&(idx+taumax<N)) {
       acf(N+i) = conj_v(idx-i)*v(idx+i);//starts filling acf at index 0
@@ -369,48 +368,6 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
 
   return acf;
 } 
-
-std::vector<cdouble> dsp::wvd_prep(const std::vector<double>& wf, bool upsample, const int window)
-{
-  //Artificially double sampling rate if desired
-   int M, N;
-  if (upsample) {
-
-    M = 2 * wf.size();
-    N = wf.size();
-
-  } else {
-
-    M = wf.size();
-    N = wf.size();
-  }
-  std::vector<double> wf_re(M, 0.0);
-
-  auto it1 = wf_re.begin();
-  for (auto it2 = wf.begin(); it2 != wf.end(); ++it2) {
-    *(it1++) = *it2;
-    if (upsample) {
-      *(it1++) = *it2;
-    }
-  }
-
-  //Make signal analytic and centered about zero.
-  std::vector<double> wf_cen(M, 0.0);
-  cdouble r = cdouble(1.0, 0.0);
-  std::vector<double> wf_pi = dsp::hilbert_rot(wf_re,r);
-  std::transform( wf_re.begin(), wf_re.end(), wf_pi.begin(), wf_cen.begin(),
-                  [](double re, double pi) {return re - std::abs(re-pi);});
-
-  auto wf_im = dsp::hilbert(wf_cen);
-  std::vector<cdouble> v(M, cdouble(0.0,0.0));
-
-  for (int i = 0; i < wf_re.size(); ++i) {
-    v[i] = cdouble(wf_cen[i], wf_im[i]);
-    //  phase[i] = (1.0 * i) / M * M_PI;
-  }
-
-  return v;
-}
 
 std::vector<double> dsp::WvdFreqExt(const std::vector<double>& wf,  bool upsample, const int window)
 {
@@ -447,7 +404,6 @@ std::vector<double> dsp::WvdFreqExt(const std::vector<double>& wf,  bool upsampl
   arma::vec phase(M);
 
   auto wf_im = dsp::hilbert(wf_re);
-  // auto wf_re_cen = dsp::hilbert(wf_im);
 
   for (uint i = 0; i < M; ++i) {
     v[i] = arma::cx_double(wf_re[i], wf_im[i]);
@@ -493,14 +449,14 @@ std::vector<double> dsp::WvdFreqExt(const std::vector<double>& wf,  bool upsampl
     }
     
     //Now perform fit to Gaussian
-    std::string gaussian("[2]*exp(-(x-[0])^2/(2*[1]^2))");
+    std::string gaussian("[2]*exp(-(x-[0])^2/(2*[1]^2))+[3]");
     TGraph gr3 = TGraph(range, &freq[i_range], &peak[0]);
     TF1 fit_func = TF1("fit_func", gaussian.c_str(), freq[i_range],freq[f_range-1]);
     
     fit_func.SetParameter(0, freq[max_bin]);
     fit_func.SetParameter(1, 2);
     fit_func.SetParameter(2, peak.max());
-    //   fit_func.SetParameter(3, 0);
+    fit_func.SetParameter(3, 0);
     
     gr3.Fit(&fit_func, "R");
 

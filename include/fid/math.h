@@ -224,7 +224,6 @@ std::vector<double> envelope(const std::vector<double>& wf_re,
 
 
 arma::mat wvd(const std::vector<double>& wf, bool upsample=false);
- std::vector<cdouble> wvd_prep(const std::vector<double>& wf, bool upsample=false, const int window=0);
 std::vector<double> WvdFreqExt(const std::vector<double>& wf, bool upsample=false, const int window=0);
 arma::cx_vec acorrelation(const arma::cx_vec &v, const int idx,  const int window=0);
 

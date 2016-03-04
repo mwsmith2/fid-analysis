@@ -18,5 +18,6 @@ notes:
 #include "fid/fast_fid.h"
 #include "fid/fid_factory.h"
 #include "fid/math.h"
+#include "fid/wvd_fid.h"
 
 #endif
