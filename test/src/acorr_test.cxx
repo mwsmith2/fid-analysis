@@ -22,6 +22,7 @@ using std::endl;
 //--- other includes --------------------------------------------------------//
 #include <armadillo>
 #include "TMultiGraph.h"
+#include "TGraph.h"
 //--- project includes ------------------------------------------------------//
 #include "fid.h"
 using namespace fid;
@@ -36,9 +37,9 @@ int main(int argc, char** argv)
   // declare variables
   int fid_length = 5000;
   int window = 60;
-  double ti = 0;
+  double ti = -1.0;
   double dt = 0.001;
-  double ftruth = 24.0; 
+  double ftruth = 23.0; 
 
   vector<double> wf_re;
   vector<double> tm;
@@ -50,23 +51,27 @@ int main(int argc, char** argv)
 
   // Create Sample waveform.
   for (int i = 0; i < fid_length; i++){
-  tm.push_back(i * dt + ti);
+    tm.push_back(i * dt + ti);
   } 
   
-  FidFactory ff;
-  ff.SetLarmorFreq(ftruth + sim::mixdown_freq);
-  ff.IdealFid(wf_re, tm);
+  //  FidFactory ff;
+  // ff.SetLarmorFreq(ftruth + sim::mixdown_freq);
+  //ff.IdealFid(wf_re, tm);
 
-  /*  for (int i = 0; i < fid_length; ++i) {
-    wf_re.push_back(cos(45.101 * tm[i]*2*M_PI));
-    }*/
+  for (int i = 0; i < fid_length; i++) {
+    if (tm[i]<0 ){ 
+      wf_re.push_back(0.0);
+    } else {
+      wf_re.push_back(cos(45.101 * tm[i]*2*M_PI));
+    }
+  }
 
   Fid my_fid(wf_re, tm);
 
   // Extract Sinusoidal "FID" portion of the signal.
   unsigned int fid_begin = my_fid.i_wf();
-  wf_re.erase(wf_re.begin(), wf_re.begin() + fid_begin);
   int N = wf_re.size();
+  cout<< "fid begins at " <<fid_begin<<endl;
 
   // Produce FID centered around zero.
   std::vector<double> wf_cen(N, 0.0);
@@ -79,25 +84,26 @@ int main(int argc, char** argv)
   auto wf_im = dsp::hilbert(wf_cen);
   arma::cx_vec wf(wf_im.size());
 
-  for (int i = 0; i < wf_re.size(); ++i) {
+  for (int i = 0; i < wf_cen.size(); i++) {
     wf[i] = arma::cx_double(wf_cen[i], wf_im[i]);
   }
 
   //Compute auto-correlation function.
-  arma::cx_vec wf_rc = dsp::acorrelation(wf, 100, window);
+  arma::cx_vec wf_rc = dsp::acorrelation(wf, fid_begin+10 ,window);
 
   //Print out text files of auto-correlation function
   out.open("test_data/acorr_test_real.txt");
-  for (int i = 0; i < wf_rc.n_elem; ++i) {
-    out << wf_rc[i].real() << ",";
+  for (int i = 0; i < N; ++i) {
+    out << wf_cen[i] << ",";
   }
   out.close(); 
 
   out.open("test_data/acorr_test_imag.txt");
-  for (int i = 0; i < wf_rc.n_elem; ++i) {
-    out << wf_rc[i].imag() << ",";
+  for (int i = 0; i < N; ++i) {
+    out << wf_im[i] << ",";
   }
   out.close();
+  cout<<"made text files of modified fid"<<endl;
 
   // Compute the power spectrum of the waveform.
   auto fft_wf = dsp::psd(wf_re);
@@ -105,12 +111,12 @@ int main(int argc, char** argv)
   auto fft_acorr = dsp::fft(acorr);//returns vector of size N/2
 
   // Define vectors to draw on first part of canvas.
-  auto real = arma::conv_to<std::vector<double>>::from(arma::real(wf_rc));
-  auto imag = arma::conv_to<std::vector<double>>::from(arma::imag(wf_rc));
+  auto real = arma::conv_to<std::vector<double>>::from(arma::real(wf));
+  auto imag = arma::conv_to<std::vector<double>>::from(arma::imag(wf));
 
   TMultiGraph mg;
-  TGraph gr = TGraph(window, &tm[0], &real[0]);gr.SetLineColor(kBlue);
-  TGraph gi = TGraph(window, &tm[window], &real[N-window]);gi.SetLineColor(kRed);
+  TGraph gr = TGraph(100, &tm[fid_begin], &real[fid_begin]);gr.SetLineColor(kBlue);
+  TGraph gi = TGraph(100, &tm[fid_begin], &imag[fid_begin]);gi.SetLineColor(kRed);
   TCanvas c1; 
   c1.Divide(2,2);
   c1.cd(1);  
@@ -119,7 +125,8 @@ int main(int argc, char** argv)
 
   mg.Draw("ap");
 
-  
+  cout<< "made it past the first part of the canvas"<< endl;
+
   //Define vectors to draw on the second part of the canvas.
   c1.cd(2);
   auto fft_acf = arma::fft(wf_rc);
@@ -138,6 +145,8 @@ int main(int argc, char** argv)
   // p1->SetLogy();
 
   mg1.Draw("a");
+  
+  cout<<"made it past the second part of the cavas." << endl;
 
   //Define vectors to draw on the third part of the canvas.
   std::vector<double> fft_real;// (fid_length/2, 0.0);
@@ -162,12 +171,15 @@ int main(int argc, char** argv)
   c1.cd(3);
   mg2.Draw("ap");
  
+  cout<< "made it past the third part of the canvas"<<endl;
 
   //Now find centroid by Gaussian fit
   int max_bin = std::distance(real_fft.begin(),
                               std::max_element(real_fft.begin(), real_fft.end()));
   int i_range=0; int f_range = 0;
   int n = real_fft.size();
+  std::cout<<"peak bin is: " << max_bin<<std::endl;
+
   for (int i =1 ; i<n+1; i++) {
     if (real_fft[max_bin+i]>.1*real_fft[max_bin]) {
       f_range= max_bin + i+1;

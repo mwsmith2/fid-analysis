@@ -24,6 +24,7 @@ notes:
 #include <boost/algorithm/string.hpp>
 #include <armadillo>
 #include "TGraph.h"
+#include "TMultiGraph.h"
 #include "TF1.h"
 
 //--- project includes ------------------------------------------------------//
@@ -43,13 +44,21 @@ class WvdFid : public BaseFid {
   WvdFid(const std::vector<double>& wf, const bool upsample = false, const int window = 0);
   WvdFid(const std::vector<double>& wf, const std::vector<double>& tm,
          const bool upsample = false, const int window = 0);
- 
+
+  // accessors
+  const std::vector<double>& wvd_f() const {return wvd_f_; };
+  const std::vector<cdouble>& AnalyticWf() const {return  wf_analytic_;};
+
   // Member Functions
   double CalcFreq() {};// BaseFid virtual function inheritance override.
   // @Todo: Zero time frequency extraction
   // @Todo: WVD matrix extraction 
   // @Todo: Plotting functions
   // @Todo: Diagnostics
+  void MutltiPlot(const int pads = 0);
+  
+  // Plotting Functions
+  void SaveWvd(std::string filename, std::string title= "");
 
  private:
   

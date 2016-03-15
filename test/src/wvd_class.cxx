@@ -34,12 +34,12 @@ int main(int argc, char** argv)
 
   // declare variables
   int fid_length = 5000;
-  double ti = 0.0;
+  double ti = -0.5;
   double dt = 0.001;
-  double ftruth = 23.0;
+  double ftruth = 100.03;
 
-  bool upsample = true;
-  int window = 100;
+  bool upsample = false;
+  int window = 125;
   int N= fid_length;
 
   vector<double> wf;
@@ -54,15 +54,34 @@ int main(int argc, char** argv)
     tm.push_back(i * dt + ti);
   }
   wf.resize(N, 0.0);
-  FidFactory ff;
-  ff.SetLarmorFreq(ftruth + sim::mixdown_freq);
-  ff.IdealFid(wf, tm);
+  //  FidFactory ff;
+  //ff.SetLarmorFreq(ftruth + sim::mixdown_freq);
+  //ff.IdealFid(wf, tm);
 
-  /* for (int i = 0; i < wf.size(); ++i) {
-    wf[i] = sin(40 * tm[i]*2*M_PI);
-    } */
+  for (int i = 0; i < wf.size(); ++i) {
+    if (tm[i]>0) {
+      wf[i] = sin((40.1 * tm[i]+ .1*.2*sin(tm[i]/.2))*2*M_PI);// sinusoid with sinusoidal
+                                                              // frequency variation
+    }
+  }
   
   WvdFid mywvd(wf, tm, true, window); 
+
+  //Plot results
+  vector<double> wvd_f = mywvd.wvd_f();
+  int M = wvd_f.size();
+
+  uint fid_start = mywvd.i_wf();
+  
+  TMultiGraph mg; 
+  TGraph gr = TGraph(M-2*fid_start, &tm[fid_start+10], &wvd_f[fid_start+10]);gr.SetLineColor(kBlue);
+  TCanvas c1;
+  mg.Add(&gr, "cp");
+  mg.SetTitle("WVD Freq Extraction; time[ms]; freq[kHz]");
+  mg.Draw("ap");
+  
+  c1.Print("test_data/wvd_class_freq_ext.pdf");
+  // mywvd.SaveWvd("test_data/wvd_class_freq_ext.pdf", "WVD Freq Extraction");
 
   return 0;
 }

@@ -71,6 +71,9 @@ void WvdFid::WvdInit()
 
   // Initialize the BaseFid for analysis
   LoadParams();
+  CenterFid();
+  CalcNoise();
+  CalcMaxAmp();
   WvdCenter();
   AnalyticFid();
 
@@ -86,7 +89,6 @@ void WvdFid::WvdCenter()
   // hilbert transformation to produce centered fid.
   cdouble r = cdouble(1.0 , 0.0);
   std::vector<double> wf_temp = wf_;
-  std::cout<< "size of wf_ is "<< wf_.size()<< std::endl;
   std::vector<double> wf_pi = HilbertRot(wf_temp , r);
   std::transform( wf_.begin(), wf_.end(), wf_pi.begin(), wf_cen_.begin(),
                   [](double wf, double pi) {return wf - std::abs(wf - pi);});
@@ -99,8 +101,8 @@ void  WvdFid::AnalyticFid()
   FindFidRange();
   unsigned int fid_begin = i_wf_;
   wf_cen_.erase(wf_cen_.begin(), wf_cen_.begin() + fid_begin);
-
-  //Artificially double sampling rate if desired
+  
+   //Artificially double sampling rate if desired
   int M, N;
   if (upsample_) {
 
@@ -158,6 +160,7 @@ std::vector<cdouble> WvdFid::AutoCorr(int idx)
   int taumax = std::min({idx, std::abs(N/2-idx), window_});
   //make sure taumax is odd
   if ((taumax % 2 ==0) &(taumax !=0)) taumax -= 1;
+  std::cout<< "Correlation window range is : " << taumax<<std::endl;
 
   // Construct auto-correlation function that gives purely real fft.
   // Also optimized to produce symmetric fft peak.
@@ -190,11 +193,15 @@ void WvdFid::WvdFreqExt()
   wvd_f_.resize(N, 0.0);
 
   std::cout<< "size of wf_cen_ is " << wf_cen_.size()<<std::endl;
-  // Get frequency dimenstionality 
-  std::vector<double> freq = dsp::fftfreq(N, .001);
   
   // Now compute the Wigner-Ville Distribution
-  for (int idx =  window_; idx < N-window_; ++idx) {
+  // I need to determine a better way of determing the start point.
+  // 10 was chosen from quick crash tests.
+
+   // Get frequency dimenstionality 
+  std::vector<double> freq = dsp::fftfreq(N, .001);
+  
+  for (int idx = i_wf_ + 10; idx < N-10; ++idx) {
     // Compute AutoCorrelation function for each time instant, idx.
     arma::cx_vec auto_corr= arma::conv_to<arma::cx_vec>::from(AutoCorr(idx));
     
@@ -204,15 +211,16 @@ void WvdFid::WvdFreqExt()
     // Find Peak bin and range about peak to extract FFT frequency.
     arma::uword max_bin;
     double max_val = re_fft_acorr.max(max_bin);
-
+    std::cout<< "peak bin via armadillo is: "<<max_bin<<std::endl;
+   
     int i_range=0; int f_range = 0;
     int n = re_fft_acorr.size();
     for (int i =1 ; i<n+1; i++) {
-      if (re_fft_acorr[max_bin+i]>.15*re_fft_acorr[max_bin]) {
+      if (re_fft_acorr[max_bin+i]>.1*re_fft_acorr[max_bin]) {
         f_range= max_bin + i+1;
         n = f_range-i_range;
       }
-      if ((max_bin-i>0)&(re_fft_acorr[max_bin-i]>.15*re_fft_acorr[max_bin])) {
+      if ((max_bin-i>0)&(re_fft_acorr[max_bin-i]>.1*re_fft_acorr[max_bin])) {
         i_range = max_bin - i;
       }else if (i_range <0){
         i_range = 0;
@@ -253,4 +261,33 @@ void WvdFid::WvdFreqExt()
   }
 }
 
+void WvdFid::SaveWvd(std::string filename, std::string title)
+{
+   // If no title supplied give a reasonable default.
+  if (title == "") {
+
+    title = std::string("WVD; time [ms]; amplitude [a.u.]");
+
+  } else {
+
+    // In case they didn't append x/y labels.
+    title.append("; time [ms]; amplitude [a.u.]");
+  }
+  TCanvas c1;
+  c1.Print(filename.c_str());
+
+  TGraph gr = TGraph(wvd_f_.size(), &tm_[i_wf_], &wvd_f_[0]);
+
+  gr.SetTitle(title.c_str());
+  gr.Draw("cp");
+  
+}
+
+void WvdFid::MutltiPlot(const int pads)
+{
+  TCanvas c1; 
+  for (int i = 0 ; i< pads ; i++) {
+    
+  }
+}
 } // fid

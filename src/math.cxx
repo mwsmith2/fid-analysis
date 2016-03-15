@@ -329,13 +329,13 @@ std::vector<double> dsp::envelope(const std::vector<double>& wf_re, const std::v
 
   arma::cx_vec dsp::acorrelation(const arma::cx_vec &v, int idx , int window)
 {
-  int N = v.size();
+  int N = v.n_elem;
   std::cout<< "Size of v is "<< N << std::endl;
 
   //Define Window function, with odd length to ensure even/odd symmetry
-  arma::vec  win_func(window);
+  // arma::vec  win_func(window);
   arma::cx_vec conj_v = arma::conj(v);
-  win_func.ones();
+  // win_func.ones();
 
   arma::cx_vec acf(N);
   acf.zeros();
