@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
   // declare variables
   int fid_length = 5000;
-  int window = 88;
+  int window = 80;
   double ti = 0.0;
   double dt = 0.001;
   double ftruth = 23.0;

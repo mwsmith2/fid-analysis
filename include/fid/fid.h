@@ -33,6 +33,7 @@ notes:
 #include "fid/base_fid.h"
 #include "fid/params.h"
 #include "fid/math.h"
+#include "fid/wvd_fid.h"
 
 namespace fid {
 
