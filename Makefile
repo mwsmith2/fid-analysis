@@ -10,10 +10,6 @@ SONAME=libfid.so
 LIBNAME=$(SONAME).$(MAJOR).$(MINOR)
 PREFIX=/usr/local
 
-# Some optional flags
-# DEBUG = -g -pg
-OPTIMIZE = -O2
-
 # Figure out the architecture
 UNAME_S = $(shell uname -s)
 
@@ -29,8 +25,17 @@ endif
 ifeq ($(UNAME_S), Linux)
 	CXX = g++
 	CC  = gcc
-	FLAGS = -std=c++0x 
+	FLAGS = -std=c++0x
 	LDCONFIG = ldconfig -n -v $(PREFIX)/lib
+endif
+
+# Some optional compiler flags
+ifdef DEBUG
+	CC += -g -pg
+	CXX += -g -pg
+else
+	CC += -O3
+	CXX += -O3
 endif
 
 FLAGS += -Wall -fPIC $(DEBUG) $(OPTIMIZE) -Iinclude
