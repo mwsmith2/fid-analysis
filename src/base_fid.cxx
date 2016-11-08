@@ -24,7 +24,7 @@ void BaseFid::Init()
   if (freq_ < 0.0) {
     health_ = 0.0;
   }
-  
+
   // Else calculate a health based on signal to noise.
   if (max_amp_ < noise_ * snr_thresh_) {
     health_ *= max_amp_ / (noise_ * snr_thresh_);
@@ -54,7 +54,7 @@ void BaseFid::LoadTextData(std::string filename)
     in >> tm_temp >> wf_temp;
     tm_.push_back(tm_temp);
     wf_.push_back(wf_temp);
-  } 
+  }
 }
 
 
@@ -62,12 +62,12 @@ void BaseFid::LoadTextData(std::string filename)
 void BaseFid::LoadParams()
 {
   edge_width_ = params::edge_width;
-  edge_ignore_ = params::edge_ignore; 
-  start_amplitude_ = params::start_amplitude; 
-  low_pass_freq_ = params::low_pass_freq; 
+  edge_ignore_ = params::edge_ignore;
+  start_amplitude_ = params::start_amplitude;
+  low_pass_freq_ = params::low_pass_freq;
   fft_peak_width_ = params::fft_peak_width;
-  centroid_thresh_ = params::centroid_thresh; 
-  hyst_thresh_ = params::hyst_thresh; 
+  centroid_thresh_ = params::centroid_thresh;
+  hyst_thresh_ = params::hyst_thresh;
   snr_thresh_ = params::snr_thresh;
   len_thresh_ = params::len_thresh;
   freq_method_ = params::freq_method;
@@ -86,7 +86,7 @@ void BaseFid::CenterFid()
 
 
 void BaseFid::CalcNoise()
-{ 
+{
   // Grab a new handle to the noise window width for aesthetics.
   int i = edge_ignore_;
   int f = edge_width_ + i;
@@ -100,7 +100,7 @@ void BaseFid::CalcNoise()
 }
 
 
-void BaseFid::CalcMaxAmp() 
+void BaseFid::CalcMaxAmp()
 {
   auto mm = std::minmax_element(wf_.begin(), wf_.end());
 
@@ -127,9 +127,9 @@ void BaseFid::FindFidRange()
   while (!checks_out) {
 
     // Check if the point is above threshold.
-    auto it_i = std::find_if(it_1, wf_.end(), 
-      [thresh](double x) { 
-        return std::abs(x) > thresh; 
+    auto it_i = std::find_if(it_1, wf_.end(),
+      [thresh](double x) {
+        return std::abs(x) > thresh;
     });
 
     // Make sure the point is not with one of the vector's end.
@@ -173,7 +173,7 @@ void BaseFid::FindFidRange()
   while (!checks_out) {
 
     // Find the range around a peak.
-    auto it_i = std::find_if(it_2, wf_.end(), 
+    auto it_i = std::find_if(it_2, wf_.end(),
       [thresh](double x) {
         return std::abs(x) > 0.8 * thresh;
     });
@@ -201,7 +201,7 @@ void BaseFid::FindFidRange()
       if (checks_out) {
         f_wf_ = std::distance(wf_.begin(), it_f);
       }
-    
+
     } else {
 
       f_wf_ = std::distance(wf_.begin(), wf_.end());
@@ -217,16 +217,22 @@ void BaseFid::FindFidRange()
 
     i_wf_ = 0;
     f_wf_ = wf_.size() * 0.01;
-  } 
+  }
 }
 
 
 // Save the interanl TGraph.
 void BaseFid::SaveGraph(std::string filename, std::string title)
-{ 
+{
+  // Grab canvas focus and clear old images.
+  static TCanvas c1("c1", "FID Canvas");
+  c1.cd();
+  c1.Clear();
+
+  // Draw the graph and save as a file.
   gr_.SetTitle(title.c_str());
   gr_.Draw();
-  c1_.Print(filename.c_str());
+  c1.Print(filename.c_str());
 }
 
 
@@ -261,7 +267,7 @@ void BaseFid::SaveTimeFit(std::string filename, std::string title)
 
     // In case they didn't append x/y labels.
     title.append("; time [ms]; amplitude [a.u.]");
-  }  
+  }
 
   // Copy the current time fit graph.
   gr_ = gr_time_series_;
@@ -279,7 +285,7 @@ void BaseFid::SaveFreqFit(std::string filename, std::string title)
 
     // In case they didn't append x/y labels.
     title.append("; freq [kHz]; amplitude [a.u.]");
-  }  
+  }
 
   // Copy the current time fit graph.
   gr_ = gr_freq_series_;
@@ -296,7 +302,7 @@ void BaseFid::SaveTimeRes(std::string filename, std::string title)
 
     // In case they didn't append x/y labels.
     title.append("; time [ms]; amplitude [a.u.]");
-  }  
+  }
 
   // Copy the current time fit.
   gr_ = TGraph(res_.size());
@@ -306,7 +312,7 @@ void BaseFid::SaveTimeRes(std::string filename, std::string title)
     static double x, y;
 
     gr_time_series_.GetPoint(i, x, y);
-    gr_.SetPoint(i, x, res_[i]); 
+    gr_.SetPoint(i, x, res_[i]);
   }
 
   SaveGraph(filename, title);
@@ -323,7 +329,7 @@ void BaseFid::SaveFreqRes(std::string filename, std::string title)
 
     // In case they didn't append x/y labels.
     title.append("; freq [kHz]; amplitude [a.u.]");
-  }  
+  }
 
   // Copy the current time fit.
   gr_ = TGraph(res_.size());
@@ -333,7 +339,7 @@ void BaseFid::SaveFreqRes(std::string filename, std::string title)
     static double x, y;
 
     gr_freq_series_.GetPoint(i, x, y);
-    gr_.SetPoint(i, x, res_[i]); 
+    gr_.SetPoint(i, x, res_[i]);
   }
 
   SaveGraph(filename, title);
@@ -375,7 +381,7 @@ void BaseFid::DiagnosticInfo(std::ostream& out)
   out << " (" << tm_[f_wf_ - 1] << " ms)" << endl;
   out << "        health:     " << health_ << endl;
   out << std::string(80, '>') << endl << endl;
-  
+
   // Restore set flags.
   out.flags(flags);
 }
