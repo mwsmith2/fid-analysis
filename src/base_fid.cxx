@@ -4,6 +4,9 @@ namespace fid {
 
 void BaseFid::Init()
 {
+  // Prevent memory issues with the TF1s.
+  TF1::DefaultAddToGlobalList(false);
+
   // Initialize the health properly.
   health_ = 100.0;
 
