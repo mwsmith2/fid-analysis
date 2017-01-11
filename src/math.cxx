@@ -235,6 +235,7 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
   // Now unwrap the phase
   double thresh = params::max_phase_jump;
   double m = 0.0;
+  bool gave_warning = false;
 
   int k = 0; // to track the winding number
   for (auto it = phase.begin() + 1; it != phase.end(); ++it) {
@@ -248,8 +249,9 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
       
       if (-m > thresh) {
         
-        if (m + kTau > thresh) {
+        if ((m + kTau > thresh) && (!gave_warning)) {
           std::cout << "Warning: jump over threshold." << std::endl;
+          gave_warning = true;
           break;
         }
         
@@ -258,8 +260,9 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
         
       } else if (m > thresh) {
         
-        if (m - kTau < -thresh) {
+        if ((m - kTau < -thresh) && (!gave_warning)) {
           std::cout << "Warning: jump over threshold." << std::endl;
+          gave_warning = true;
           break;
         }
         
