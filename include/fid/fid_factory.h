@@ -103,7 +103,7 @@ class FidFactory
   const bool& addnoise() { return addnoise_; };
 
   // utility accessors
-  double freq() { return mixdown_freq_ - larmor_freq_; };
+  double freq() { return larmor_freq_ - mixdown_freq_; };
 
   void PrintDiagnosticInfo();
 
