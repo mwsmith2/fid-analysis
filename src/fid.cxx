@@ -164,7 +164,7 @@ void Fid::GuessFitParams()
 
   // find max index and set the fit window
   int max_idx = std::distance(psd_.begin(),
-    std::max_element(psd_.begin(), psd_.end()));
+    std::max_element(psd_.begin()+1, psd_.end()));
 
   i_fft_ = max_idx - fft_peak_width_;
   if (max_idx - fft_peak_width_ < 0) i_fft_ = 0;  
@@ -285,17 +285,17 @@ double Fid::CalcZeroCountFreq()
 double Fid::CalcCentroidFreq()
 {
   // Find the peak power
-  double thresh = *std::max_element(psd_.begin(), psd_.end());
+  double thresh = *std::max_element(psd_.begin()+1, psd_.end());
   thresh *= centroid_thresh_;
 
   // Find the indices for a window around the max
   int it_i = std::distance(psd_.begin(), 
-    std::find_if(psd_.begin(), psd_.end(), 
+    std::find_if(psd_.begin()+1, psd_.end(), 
       [thresh](double x) {return x > thresh;}));
 
   // reverse the iterators
   int it_f = -1 * std::distance(psd_.rend(),
-    std::find_if(psd_.rbegin(), psd_.rend(), 
+    std::find_if(psd_.rbegin(), psd_.rend()-1, 
       [thresh](double x) {return x > thresh;}));
 
   // Now compute the power weighted average

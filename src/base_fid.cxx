@@ -5,9 +5,9 @@ namespace fid {
 void BaseFid::Init()
 {
   // Prevent memory issues with the TF1s in root6.
-#ifdef __ROOTCLING__
+//#ifdef __ROOTCLING__
   TF1::DefaultAddToGlobalList(false);
-#endif
+//#endif
 
   // Initialize the health properly.
   health_ = 100.0;
