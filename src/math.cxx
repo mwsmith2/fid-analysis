@@ -53,6 +53,107 @@ std::vector<cdouble> dsp::fft(const std::vector<cdouble> &v)
   return fft_vec;
 }
 
+std::vector<cdouble> dsp::fft2(const std::vector<cdouble> &v)
+{
+  // Grab some useful constants.
+  int N = v.size();  
+  double Nroot = std::sqrt(N);
+
+  // Instantiate the result vector.
+  static std::vector<cdouble> wfm_vec;
+  static std::vector<cdouble> fft_vec;
+
+  fft_vec.resize(N);
+  wfm_vec = v;
+
+  // Plan and execute the fft (-1 == exponent).
+  fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
+  fftw_complex *wfm_ptr = reinterpret_cast<fftw_complex *>(&wfm_vec[0]);  
+  
+  // Instantiate the result vector.
+  //  std::vector<cdouble> fft_vec(N, cdouble(0.0, 0.0));
+  //  auto wfm_vec = v; // copy waveform since fftw destroys it
+
+  auto plan = fftw_plan_dft_1d(N, wfm_ptr, fft_ptr, -1, FFTW_WISDOM_ONLY);
+  if (plan == NULL) {
+    std::cout << "making plan" << std::endl;
+    plan = fftw_plan_dft_1d(N, wfm_ptr, fft_ptr, -1, FFTW_MEASURE);
+  }
+
+
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
+
+  for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
+    *it /= Nroot;
+  }
+
+  return fft_vec;
+}
+
+
+std::vector<cdouble> dsp::fft3(const std::vector<cdouble> &v)
+{
+  // Grab some useful constants.
+  int N = v.size();  
+  double Nroot = std::sqrt(N);
+
+  // Instantiate the result vector.
+  static std::vector<cdouble> wfm_vec;
+  static std::vector<cdouble> fft_vec;
+
+  fft_vec.resize(N);
+  wfm_vec = v;
+
+  // Plan and execute the fft (-1 == exponent).
+  fftw_complex *fft_ptr = reinterpret_cast<fftw_complex *>(&fft_vec[0]);
+  fftw_complex *wfm_ptr = reinterpret_cast<fftw_complex *>(&wfm_vec[0]);  
+
+  // Instantiate the result vector.
+  //  std::vector<cdouble> fft_vec(N, cdouble(0.0, 0.0));
+  //  auto wfm_vec = v; // copy waveform since fftw destroys it
+
+  auto plan = fftw_plan_dft_1d(N, wfm_ptr, fft_ptr, -1, FFTW_PATIENT);  
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
+
+  for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
+    *it /= Nroot;
+  }
+
+  return fft_vec;
+}
+
+
+std::vector<cdouble> dsp::fft4(const std::vector<cdouble> &v)
+{
+  // Grab some useful constants.
+  int N = v.size();  
+  double Nroot = std::sqrt(N);
+
+  // Instantiate the result vector.
+  static std::vector<cdouble> wfm_vec;
+  wfm_vec = v;
+
+  // Plan and execute the fft (-1 == exponent).
+  fftw_complex *wfm_ptr = reinterpret_cast<fftw_complex *>(&wfm_vec[0]);
+
+  // Instantiate the result vector.
+  //  std::vector<cdouble> fft_vec(N, cdouble(0.0, 0.0));
+  //  auto wfm_vec = v; // copy waveform since fftw destroys it
+
+  auto plan = fftw_plan_dft_1d(N, wfm_ptr, wfm_ptr, -1, FFTW_MEASURE);  
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
+
+  for (auto it = wfm_vec.begin(); it != wfm_vec.end(); ++it) {
+    *it /= Nroot;
+  }
+
+  return wfm_vec;
+}
+
+
 std::vector<cdouble> dsp::ifft(const std::vector<cdouble>& v)
 {
   // Grab some useful constants.
@@ -105,11 +206,11 @@ std::vector<cdouble> dsp::rfft(const std::vector<double> &v)
 }
 
 
-std::vector<double> dsp::irfft(const std::vector<cdouble>& fft)
+std::vector<double> dsp::irfft(const std::vector<cdouble>& fft, bool is_odd)
 {
   // Grab some useful constants.
   int n = fft.size();
-  int N = 2 * (n - 1);
+  int N = 2 * (n - 1) + 1 * is_odd;
   double Nroot = std::sqrt(N);
 
   // Instantiate the result vector.
@@ -136,13 +237,17 @@ std::vector<double> dsp::hilbert(const std::vector<double>& v)
 	// Return the call to the fft version.
 	auto fft_vec = dsp::rfft(v);
 
+  // Zero out the constant term.
+  fft_vec[0] = cdouble(0.0, 0.0);
+
   // Multiply in the -i.
-  for (auto it = fft_vec.begin(); it != fft_vec.end(); ++it) {
+  for (auto it = fft_vec.begin() + 1; it != fft_vec.end(); ++it) {
     *it = cdouble((*it).imag(), -(*it).real());
   }
 
+
   // Reverse the fft.
-  return irfft(fft_vec);
+  return irfft(fft_vec, v.size() % 2 == 1);
 }
 
 std::vector<double> dsp::psd(const std::vector<double>& v)
@@ -233,6 +338,7 @@ std::vector<double> dsp::phase(const std::vector<double>& wf_re,
                  [](double re, double im) { return std::atan2(im, re); });
   
   // Now unwrap the phase
+  double thresh = 0.5 * kTau;
   double m = 0.0;
   bool gave_warning = false;
 

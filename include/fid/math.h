@@ -199,14 +199,13 @@ std::vector<double> normalized_gradient(int npoints, int poln=1);
 
 namespace dsp
 {
-std::vector<cdouble> 
-fft(const std::vector<cdouble>& v);
-
-std::vector<cdouble> 
-ifft(const std::vector<cdouble>& v);
-
+std::vector<cdouble> fft(const std::vector<cdouble>& v);
+std::vector<cdouble> fft2(const std::vector<cdouble>& v);
+std::vector<cdouble> fft3(const std::vector<cdouble>& v);
+std::vector<cdouble> fft4(const std::vector<cdouble>& v);
+std::vector<cdouble> ifft(const std::vector<cdouble>& v);
 std::vector<cdouble> rfft(const std::vector<double>& v);
-std::vector<double> irfft(const std::vector<cdouble>& v);
+std::vector<double> irfft(const std::vector<cdouble>& v, bool is_odd);
 
 std::vector<double> hilbert(const std::vector<double>& v);
 std::vector<double> psd(const std::vector<double>& v);
