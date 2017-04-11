@@ -417,9 +417,14 @@ double Fid::CalcPhaseFreq(int poln)
   // Set the parameter guesses
   f_fit_.SetParameter(1, guess_[0] * kTau);
 
-  // Adjust to ignore the edges
-  int i = i_wf_ + edge_ignore_;
-  int f = f_wf_ - edge_ignore_;
+  int i = i_wf_;
+  int f = f_wf_;
+
+  // Adjust to ignore the edges if possible.
+  if (f - i > 2 * edge_ignore_) {
+    i += edge_ignore_;
+    f -= edge_ignore_;
+  }
 
   // Do the fit.
   gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
