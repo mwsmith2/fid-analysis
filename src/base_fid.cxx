@@ -5,7 +5,7 @@ namespace fid {
 void BaseFid::Init()
 {
   // Prevent memory issues with the TF1s in root6.
-#ifdef __ROOTCLING__
+#ifndef __ROOTCLING__
   TF1::DefaultAddToGlobalList(false);
 #endif
 
