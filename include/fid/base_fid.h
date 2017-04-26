@@ -60,6 +60,7 @@ class BaseFid {
   const double snr() const { return pow(max_amp_ / noise_, 2); };
   const bool isgood() const { return health_ > 0.0; };
   const ushort &health() const { return health_; };
+  const int freq_method() const { return freq_method_; };
 
   const unsigned int& i_wf() { return i_wf_; };
   const unsigned int& f_wf() { return f_wf_; };
