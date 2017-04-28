@@ -58,6 +58,7 @@ class BaseFid {
 
   const double fid_time() const { return tm_[f_wf_] - tm_[i_wf_]; };
   const double snr() const { return pow(max_amp_ / noise_, 2); };
+  const double amp() const { return max_amp_; };
   const bool isgood() const { return health_ > 0.0; };
   const ushort &health() const { return health_; };
   const int freq_method() const { return freq_method_; };
