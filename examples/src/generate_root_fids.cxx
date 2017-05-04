@@ -31,17 +31,13 @@ int main(int argc, char **argv)
   if (argc > 1) load_params(argv[1]);
 
   // some necessary parameters
-  std::vector<double> wf;
-  std::vector<double> tm;
-  wf.reserve(sim::num_samples);
-  tm.reserve(sim::num_samples);
+  std::vector<double> wf(0.0, sim::num_samples);
+  std::vector<double> tm = time_vector();
+
   double delta_b;
   double max_grad = 500; // in ppb
   int num_fids = 100;
   double freq_0 = sim::larmor_freq;
-
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
-  tm = construct_range(sim::start_time, final_time, sim::sample_time);
 
   // Set up the ROOT tree to hold the results
   TFile pf("sim_fids.root", "recreate");

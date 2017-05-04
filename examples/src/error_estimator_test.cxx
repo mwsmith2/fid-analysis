@@ -39,7 +39,7 @@ int main(int argc, char **argv)
   int rounds = 10;
 
   std::vector<double> wf;
-  std::vector<double> tm;
+  std::vector<double> tm = time_vector();
 
   // Ouput filestream.
   std::ofstream out;
@@ -55,10 +55,6 @@ int main(int argc, char **argv)
     out.open("data/error_estimator_data.csv");
   }
 
-  tm = construct_range(sim::start_time, 
-  					   sim::start_time + sim::num_samples*sim::sample_time,
-  					   sim::sample_time);
-
   // Create random number engine/distribution.
   std::default_random_engine gen;
   std::uniform_real_distribution<double> rand_flat_dist(35.0, 40.0);
@@ -73,13 +69,8 @@ int main(int argc, char **argv)
     ff.IdealFid(wf, tm);
 
     Fid myfid(wf, tm);
-    out << ff.freq() << " " << 0.0 << " ";
-    out << myfid.GetFreq("ZC") << " " << myfid.freq_err() << " ";
-    out << myfid.GetFreq("CN") << " " << myfid.freq_err() << " ";
-    out << myfid.GetFreq("AN") << " " << myfid.freq_err() << " ";
-    out << myfid.GetFreq("LZ") << " " << myfid.freq_err() << " ";
-    out << myfid.GetFreq("PH") << " " << myfid.freq_err() << " ";
-    out << myfid.GetFreq("SN") << " " << myfid.freq_err() << endl;;
+    out << ff.freq() << "," << 0.0 << ",";
+    myfid.WriteMethodCsv(out);
   }
 
   out.close();

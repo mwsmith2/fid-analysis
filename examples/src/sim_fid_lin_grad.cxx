@@ -36,9 +36,7 @@ int main(int argc, char **argv)
 
   // allocate some necessary parameters
   std::vector<double> wf;
-
-  double final_time = sim::start_time + sim::num_samples*sim::sample_time;
-  std::vector<double> tm = construct_range(sim::start_time, final_time, sim::sample_time);
+  std::vector<double> tm = time_vector();
 
   std::vector<double> grads = construct_range(grad_min, grad_max, dgrad);
   std::vector<double> grad_0;

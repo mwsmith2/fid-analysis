@@ -13,13 +13,22 @@ about: This header file holds the projects parameter namespace.  These
 
 \*---------------------------------------------------------------------------*/
 
+
+//--- other includes --------------------------------------------------------//
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include "TFile.h"
+
+//--- project includes ------------------------------------------------------//
+#include "fid/math.h"
+
+#define DEFAULT_FID_LN 10000
+
 
 namespace fid {
 
 // Enumerate the different methods of frequency extraction
-enum Method { ZC, CN, AN, LZ, EX, PH, SN,
+enum Method { ZC=0, CN=1, AN=2, LZ=3, EX=4, PH=5, SN=6,
               ZEROCOUNT,
               CENTROID,
               ANALYTICAL,
@@ -29,8 +38,26 @@ enum Method { ZC, CN, AN, LZ, EX, PH, SN,
               SINUSOID 
 };
 
-// constants
-const double kTau = 2 * M_PI;
+// A struct useful for saving simulation results
+struct fid_t {
+  Double_t wf[DEFAULT_FID_LN];
+  Double_t tm[DEFAULT_FID_LN];
+};
+
+// A struct useful for saving analysis results
+struct fid_freq_t {
+  Double_t freq[7];
+  Double_t ferr[7];
+  Double_t chi2[7];
+  Double_t snr;
+  Double_t len;
+  UShort_t health;
+};
+
+const char * const fid_str = "wf[10000]/D:tm[10000]/D";
+
+const char * const fid_freq_str =
+"freq[7]/D:ferr[7]/D:chi2[7]/D:snr/D:len/D:health/s";
 
 extern std::string logdir;
 
@@ -41,7 +68,6 @@ namespace params {
   extern double edge_ignore;     // samples to ignore when doing phase fits
   extern double start_amplitude; // threshold above noise to define start of FID
   extern double fft_peak_width;  // fit width used by spectral peak fits
-  extern double max_phase_jump;  // maximum change in phase unwrapping
   extern double low_pass_freq;   // low pass frequency used by FID
   extern double centroid_thresh; // threshold of values included in centroid
   extern double hyst_thresh;     // hysteris threshold used for zero counting
@@ -95,6 +121,8 @@ namespace grad {
 
 // header implementation of load_params
 void load_params(std::string conf_file);
+
+std::vector<double> time_vector();
 
 } // ::fid
 

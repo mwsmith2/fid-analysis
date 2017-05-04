@@ -58,8 +58,10 @@ class BaseFid {
 
   const double fid_time() const { return tm_[f_wf_] - tm_[i_wf_]; };
   const double snr() const { return pow(max_amp_ / noise_, 2); };
+  const double amp() const { return max_amp_; };
   const bool isgood() const { return health_ > 0.0; };
   const ushort &health() const { return health_; };
+  const int freq_method() const { return freq_method_; };
 
   const unsigned int& i_wf() { return i_wf_; };
   const unsigned int& f_wf() { return f_wf_; };
@@ -102,7 +104,6 @@ class BaseFid {
   double edge_width_;
   double edge_ignore_;
   double start_amplitude_;
-  double max_phase_jump_;
   double low_pass_freq_;
   double fft_peak_width_;
   double centroid_thresh_;

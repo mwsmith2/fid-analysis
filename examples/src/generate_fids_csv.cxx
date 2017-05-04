@@ -35,13 +35,11 @@ int main(int argc, char **argv)
 
   // some necessary parameters
   std::vector<double> wf;
-  std::vector<double> tm;
+  std::vector<double> tm = time_vector();
   std::vector<double> freqs;
   std::vector<double> snrs;
 
   // Set the ranges.
-  double final_time = sim::start_time + sim::num_samples * sim::sample_time;
-  tm = construct_range(sim::start_time, sim::sample_time, final_time);
   freqs = construct_range(23.0, 24.0, 0.1);
   snrs = construct_range(10000.0, 100000.0, 30000.0);
 

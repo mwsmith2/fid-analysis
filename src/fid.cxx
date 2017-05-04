@@ -417,9 +417,14 @@ double Fid::CalcPhaseFreq(int poln)
   // Set the parameter guesses
   f_fit_.SetParameter(1, guess_[0] * kTau);
 
-  // Adjust to ignore the edges
-  int i = i_wf_ + edge_ignore_;
-  int f = f_wf_ - edge_ignore_;
+  int i = i_wf_;
+  int f = f_wf_;
+
+  // Adjust to ignore the edges if possible.
+  if (f - i > 2 * edge_ignore_) {
+    i += edge_ignore_;
+    f -= edge_ignore_;
+  }
 
   // Do the fit.
   gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
@@ -621,6 +626,34 @@ void Fid::WritePhaseFreqCsv(std::ofstream& out)
   out << CalcPhaseDerivFreq(2) << ", " << chi2_ << ", ";
   out << CalcPhaseDerivFreq(3) << ", " << chi2_ << ", ";
   out << CalcSinusoidFreq() << ", " << chi2_ << std::endl;
+}
+
+// Copy data into the simple fid data structure.
+void Fid::CopyStruct(fid_t& f)
+{
+  std::copy(&wf_[0], &wf_[DEFAULT_FID_LN], f.wf);
+  std::copy(&tm_[0], &tm_[DEFAULT_FID_LN], f.tm);
+}
+
+void Fid::CopyStruct(fid_freq_t& f)
+{
+  for (int i = 0; i < 7; ++i) {
+    freq_method_ = static_cast<Method>(i);
+    GetFreq();
+    f.freq[i] = freq_;
+    f.ferr[i] = freq_err_;
+    f.chi2[i] = chi2_;
+  }
+
+  f.snr = pow(max_amp_ / noise_, 2);
+  f.len = tm_[f_wf_] - tm_[i_wf_];
+  f.health = health_;
+}
+
+void Fid::CopyStruct(fid_t& f, fid_freq_t& freq)
+{
+  CopyStruct(f);
+  CopyStruct(freq);
 }
 
 } // fid
