@@ -89,6 +89,27 @@ inline void cross(const std::vector<T>& u,
     res[2] = u[0] * v[1] - u[1] * v[0];
 }
 
+//Mean calculation based on whole vector
+template <typename T>
+inline double mean(const T& v) {
+  
+  double sum = 0.0;
+  for(int i = 0; i< v.size(); i++) sum += v[i];
+
+  return sum/(double)v.size();
+}
+
+//Mean calculation based on whole array
+template <typename T>
+inline double mean_arr(const T& v) {
+
+  double size = sizeof(v)/sizeof(v[0]);
+  double sum = 0.0;
+  for(int i = 0; i< size; i++) sum += v[i];
+
+  return sum/size;
+}
+
 // Standard deviation calculation based on whole vector.
 template <typename T>
 inline double stdev(const T& v) {
@@ -101,6 +122,22 @@ inline double stdev(const T& v) {
   double N = (double) std::distance(v.begin(), v.end());
 	return std::sqrt(x2/N - (x1/N) * (x1/N));
 }
+
+//Standard deviation calculation based on whole array
+template <typename T>
+  inline double stdev_arr(const T& a){
+  
+  double mean = mean_arr(a);
+  double size = sizeof(a)/sizeof(a[0]);
+  double sum = 0.0;
+
+  for(int i = 0;i < size; i++) sum += pow(a[i]-mean,2);
+
+  double var = sum/size;
+  double sd = sqrt(var);  
+
+  return sd;
+ } 
 
 // Standard deviation calculation based on start/stop iterators.
 template <typename T>
