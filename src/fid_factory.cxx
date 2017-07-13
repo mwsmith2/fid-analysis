@@ -8,10 +8,10 @@ FidFactory::FidFactory()
 
   // Set the start/stop times.
   ti_ = start_time_;
-  tf_ = ti_ + sample_time_ * num_samples_;
+  tf_ = ti_ + sample_time_ * (num_samples_ + padding_);
 
   // Calculate the decimation ratio.
-  sim_to_fid_ = (tf_ - ti_) / (integration_step_ * num_samples_) + 0.5; 
+  sim_to_fid_ = (tf_ - ti_) / (integration_step_ * (num_samples_ + padding_)) + 0.5; 
 
   // If zero, more less integration steps than sampling times were requested.
   if (sim_to_fid_ == 0) {
@@ -35,7 +35,7 @@ FidFactory::FidFactory()
   }
 
   // Set number of simulation samples.
-  sim_length_ = sim_to_fid_ * num_samples_;
+  sim_length_ = sim_to_fid_ * (num_samples_ + padding_);
   printer_idx_ = 0;
 
   // open the default root file
@@ -145,7 +145,7 @@ void FidFactory::SimulateFid(std::vector<double>& wf, std::vector<double>& tm)
                   bind(&FidFactory::Bloch, ref(*this), pl::_1, pl::_2, pl::_3), 
                   s_, 
                   ti_, 
-                  tf_, 
+                  tf_,
                   dt_, 
                   bind(&FidFactory::Printer, ref(*this), pl::_1, pl::_2));
 
@@ -266,8 +266,8 @@ std::vector<double> FidFactory::Bfield(const double& t)
   if (t < 0.0) return a;
 
   // If none of the above, return the time-dependent, pulsed field.
-  b[0] = pulse_freq_ * cos(kTau * mixdown_freq_ * t);
-  b[1] = pulse_freq_ * sin(kTau * mixdown_freq_ * t);
+  b[0] = kTau * pulse_freq_ * cos(kTau * mixdown_freq_ * t);
+  b[1] = kTau * pulse_freq_ * sin(kTau * mixdown_freq_ * t);
   return b;
 }
 
@@ -295,7 +295,7 @@ void FidFactory::Printer(std::vector<double> const &s , double t)
   if (t < ti_ + dt_) printer_idx_ = 0;
 
   // Record spin in the y-direction and mix down
-  spin_vec_[printer_idx_] = amplitude_ * s[1] * cos_cache_[printer_idx_]; 
+  spin_vec_[printer_idx_] = amplitude_ * s[1] * cos_cache_[printer_idx_];
 
   // Record the time and increment printer_idx_
   time_vec_[printer_idx_++] = t;
@@ -315,38 +315,62 @@ void FidFactory::Printer(std::vector<double> const &s , double t)
 std::vector<double> FidFactory::LowPassFilter(std::vector<double>& s)
 {
   // Allocate the filter and set the central frequency.
-  std::vector<double> filter;
+  int zero_padding = 0;
+  int N = sim_length_ + 2 * zero_padding;
   double freq_cut = lowpass_ratio_ * larmor_freq_;
 
-  // Define the filter if not defined.  Using 3rd order Butterworth filter.
-  if (filter.size() == 0) {
+  std::vector<double> tmp(N);
+  std::vector<double> filter(N / 2 + 1);
 
-    filter.resize(sim_length_);
-    int i = 0;
-    int j = sim_length_ - 1;
-    double temp;
+  // Define the filter using 3rd order Butterworth filter.
+  int i = 0;
+  int j = N - 1;
+  double temp;
 
-    // The filter is symmetric, so we can fill both sides in tandem.
-    while (i < sim_length_ / 2){
-      // scaling term
-      temp = pow(i / (dt_ * sim_length_ * freq_cut), 6);
-      filter[i] = pow(1.0 / (1.0 + temp), 0.5);
-      filter[j--] = filter[i++];
+  // The filter is symmetric, so we can fill both sides in tandem.
+  while (i < filter.size()){
+    // scaling term
+    temp = pow(i / (dt_ * N * freq_cut), 8);
+    filter[i++] = pow(1.0 / (1.0 + temp), 0.5);
+  }
+
+  // Copy the spin vector to a temporary vector.
+  for (int i = 0; i < N; ++i) {
+    if (i < zero_padding) {
+      tmp[i] = 0.0;
+    } else if (i > N - 2 * zero_padding) {
+      tmp[i] = 0.0;
+    } else {
+      tmp[i] = s[i - zero_padding];
     }
   }
 
+  auto fft = dsp::rfft(tmp);
+
+  for (int i = 0; i < fft.size(); ++i) {
+    fft[i] *= filter[i];
+  }
+
+  auto rv = dsp::irfft(fft, sim_length_ % 2 == 1);
+
   // Copy the vectors to Armadillo formats first.
-  arma::vec v1(&s[0], s.size(), false); 
-  arma::vec v2(&filter[0], filter.size(), false);
+  //arma::vec v1(&tmp[0], tmp.size(), false);
+  //arma::vec v2(&filter[0], filter.size(), false);
 
   // Now get the FFT
-  arma::cx_vec fft = arma::fft(v1);
+  // arma::cx_vec fft = arma::fft(v1);
 
   // Multiply the FFT and the filter element wise
-  fft = fft % v2;
+  // fft = fft % v2;
 
   // This confusing oneliner, get the inverse FFT and converts to a std::vector
-  return arma::conv_to<std::vector<double>>::from(arma::real(arma::ifft(fft)));
+  // auto rv = arma::conv_to<std::vector<double>>::from(arma::real(arma::ifft(fft)));
+
+  for (int i = 0; i < s.size(); ++i) {
+    s[i] = rv[i + zero_padding];
+  }
+
+  return s;
 }
 
 int FidFactory::GetTreeIndex(double grad_strength)

@@ -126,6 +126,7 @@ class FidFactory
   // Simulation parameters (loaded from fid::sim namespace).
   int seed_;
   int num_samples_;
+  const int padding_ = 100;
   double start_time_;
   double sample_time_;
   double integration_step_;
