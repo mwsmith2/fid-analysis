@@ -13,7 +13,7 @@ namespace params {
   double fft_peak_width = 20;
   double edge_width = 100;
   double edge_ignore = 50;
-  double start_amplitude = 0.37;
+  double start_amplitude = 0.46;
   double low_pass_freq = 2000.0;
   double centroid_thresh = 0.01;
   double hyst_thresh = 0.7;
@@ -46,8 +46,8 @@ namespace sim {
   double gamma_2 = 0.05;  
   double gamma_g = 1.0;  
 
-  double pulse_freq = 50.0;  
-  double pulse_time = 0.005; 
+  double pulse_freq = 125.0;  
+  double pulse_time = 0.002;
 
   bool addnoise = true;
   bool discrete = false;
