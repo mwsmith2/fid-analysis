@@ -232,6 +232,7 @@ double Fid::CalcZeroCountFreq()
   int nzeros = 0;
   bool pos = wf_[i_wf_] >= 0.0;
   bool hyst = false;
+  bool skip_first = true;
   
   auto mm = std::minmax_element(wf_.begin(), wf_.end()); // returns {&min, &max}
 
@@ -250,17 +251,27 @@ double Fid::CalcZeroCountFreq()
 
     // hysteresis check
     if (hyst){
-      hyst = std::abs(wf_[i]) > hyst_thresh_ * env_[i];
+      hyst = std::abs(wf_[i]) < hyst_thresh_ * env_[i];
       continue;
     }
 
     // check for a sign change
     if ((wf_[i] >= 0.0) != pos){
-      nzeros++;
-      f_zero = i;
-      if (i_zero == -1) i_zero = i;
-      pos = !pos;
-      hyst = true;
+
+      if (skip_first) {
+
+        skip_first = false;
+        pos = !pos;
+        hyst = true;
+
+      } else {
+
+        nzeros++;
+        f_zero = i;
+        if (i_zero == -1) i_zero = i;
+        pos = !pos;
+        hyst = true;
+      }
     }
   }
 
@@ -275,7 +286,7 @@ double Fid::CalcZeroCountFreq()
   frac = std::abs(wf_[f] / (wf_[f-1] - wf_[f]));
   double tf = frac * tm_[f-1] + (1.0 - frac) * tm_[f];
 
-  freq_ = 0.5 * (nzeros - 1) / (tf - ti);
+  freq_ = 0.5 * (nzeros - 1.0) / (tf - ti);
   // todo: Fix this into a better error estimate. 
   freq_err_ = freq_ * sqrt(2) * (tm_[1] - tm_[0]) / (tf - ti);
 
@@ -467,10 +478,10 @@ double Fid::CalcSinusoidFreq()
 
   // Guess parameters
   f_fit_.SetParameter(0, kTau * CalcZeroCountFreq());
-  f_fit_.SetParameter(1, 0.5);
-  f_fit_.SetParameter(2, 0.5);
-  f_fit_.SetParLimits(1, 0.0, 1.1);
-  f_fit_.SetParLimits(2, 0.0, 1.1);
+  f_fit_.SetParameter(1, 0.71);
+  f_fit_.SetParameter(2, 0.71);
+  f_fit_.SetParLimits(1, -1.1, 1.1);
+  f_fit_.SetParLimits(2, -1.1, 1.1);
 
   // Adjust to ignore the edges
   int i = i_wf_ + edge_ignore_;
@@ -480,8 +491,8 @@ double Fid::CalcSinusoidFreq()
   gr_time_series_.Fit(&f_fit_, "QMRSEX0", "C", tm_[i], tm_[f]);
 
   res_.resize(0);
-  for (unsigned int i = i_fft_; i < f_fft_ + 1; ++i){
-    res_.push_back(wf_[i] - f_fit_.Eval(tm_[i]));
+  for (unsigned int i = i_wf_; i < f_wf_ + 1; ++i){
+    res_.push_back(temp_[i] - f_fit_.Eval(tm_[i]));
   }
 
   freq_ = f_fit_.GetParameter(0) / kTau;
